@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vraj Clicker 2 - Global Edition</title>
+    <style>
+        :root { --primary: #6c5ce7; --bg: #1e272e; --text: #ffffff; --accent: #00d2d3; --gold: #f1c40f; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; overflow-x: hidden; }
+        .container { background: #2f3640; padding: 2rem; border-radius: 20px; text-align: center; width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative; }
+        .hidden { display: none; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 1rem; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; transition: 0.2s; font-size: 1rem; }
+        button:hover { filter: brightness(1.2); transform: scale(1.02); }
+        
+        #game-btn { 
+            width: 160px; height: 160px; border-radius: 50%; background: var(--accent); 
+            border: 8px solid #01a3a4; font-size: 1.5rem; margin: 20px auto; 
+            cursor: pointer; color: white; display: block; position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); outline: none;
+        }
+        #game-btn:active { transform: scale(0.95); }
+
+        .stats { font-size: 1.5rem; margin: 15px 0; color: var(--gold); font-weight: bold; }
+        .leaderboard { margin-top: 30px; background: #1e272e; padding: 15px; border-radius: 12px; border: 1px solid #444; }
+        table { width: 100%; font-size: 0.9rem; border-collapse: collapse; }
+        th { border-bottom: 2px solid #555; padding-bottom: 8px; }
+        td { padding: 8px; }
+        .top1 { color: var(--gold); font-weight: bold; background: rgba(241, 196, 15, 0.1); }
+
+        /* Floating Text Animation */
+        .floating-text {
+            position: fixed;
+            pointer-events: none;
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 1.5rem;
+            animation: floatUp 0.8s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vraj Clicker 2</h1>
+        
+        <div id="auth-ui">
+            <p>Enter your details to save your global rank!</p>
+            <input type="email" id="email" placeholder="Email (e.g. vraj@game.com)">
+            <input type="password" id="pass" placeholder="Password (6+ chars)">
+            <button id="login-btn">Login</button>
+            <button id="signup-btn" style="background:#4834d4">Create Account</button>
+        </div>
+
+        <div id="game-ui" class="hidden">
+            <h3 id="user-display">Loading...</h3>
+            <div class="stats">Clicks: <span id="score">0</span></div>
+            
+            <button id="game-btn">CLICK!</button>
+
+            <div style="margin: 20px 0;">
+                <p>Auto-Clickers: <span id="auto-count">0</span></p>
+                <button id="buy-auto" style="background: #27ae60">Buy Auto (+1/sec) <br> Cost: <span id="cost">10</span></button>
+            </div>
+            
+            <div class="leaderboard">
+                <h4>🏆 Global Leaderboard</h4>
+                <table>
+                    <thead><tr><th>Rank</th><th>Player</th><th>Score</th></tr></thead>
+                    <tbody id="lb-body"></tbody>
+                </table>
+            </div>
+            <button id="logout-btn" style="background:#eb4d4b; margin-top: 25px; padding: 8px; width: 50%; font-size: 0.8rem;">Logout</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, update, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Your specific Firebase credentials
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwg2ZSpQspAD-o19AZCOHcrl9VnYc_sdk",
+            authDomain: "vraj-clicker-2.firebaseapp.com",
+            projectId: "vraj-clicker-2",
+            storageBucket: "vraj-clicker-2.firebasestorage.app",
+            messagingSenderId: "162243172716",
+            appId: "1:162243172716:web:874a1f8be471a9f0d83b49",
+            measurementId: "G-SBJ4W7JRRL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let userData = { score: 0, autoClickers: 0, name: "" };
+
+        // --- ACCOUNT ACTIONS ---
+        document.getElementById('signup-btn').onclick = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            createUserWithEmailAndPassword(auth, email, pass)
+                .then((userCredential) => {
+                    set(ref(db, 'users/' + userCredential.user.uid), { 
+                        name: email.split('@')[0], 
+                        score: 0, 
+                        autoClickers: 0 
+                    });
+                }).catch(err => alert(err.message));
+        };
+
+        document.getElementById('login-btn').onclick = () => {
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value)
+                .catch(err => alert(err.message));
+        };
+
+        document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
+
+        // --- GAME ACTIONS ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-ui').classList.add('hidden');
+                document.getElementById('game-ui').classList.remove('hidden');
+                onValue(ref(db, 'users/' + user.uid), (snapshot) => {
+                    if(snapshot.exists()) {
+                        userData = snapshot.val();
+                        updateUI();
+                    }
+                });
+            }
+        });
+
+        document.getElementById('game-btn').onclick = (e) => {
+            userData.score += 1;
+            saveData();
+            createFloatingText(e.clientX, e.clientY, "+1");
+        };
+
+        document.getElementById('buy-auto').onclick = () => {
+            let cost = Math.floor(10 * Math.pow(1.5, userData.autoClickers));
+            if(userData.score >= cost) {
+                userData.score -= cost;
+                userData.autoClickers += 1;
+                saveData();
+            } else {
+                alert("Not enough clicks!");
+            }
+        };
+
+        function saveData() {
+            if(auth.currentUser) {
+                update(ref(db, 'users/' + auth.currentUser.uid), userData);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score').innerText = Math.floor(userData.score);
+            document.getElementById('auto-count').innerText = userData.autoClickers;
+            document.getElementById('cost').innerText = Math.floor(10 * Math.pow(1.5, userData.autoClickers));
+            document.getElementById('user-display').innerText = `Player: ${userData.name}`;
+        }
+
+        function createFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        // --- LEADERBOARD (GLOBAL) ---
+        const lbRef = query(ref(db, 'users'), orderByChild('score'), limitToLast(10));
+        onValue(lbRef, (snapshot) => {
+            const tbody = document.getElementById('lb-body');
+            tbody.innerHTML = "";
+            let players = [];
+            snapshot.forEach(child => { players.push(child.val()); });
+            players.reverse().forEach((p, i) => {
+                const row = `<tr class="${i==0?'top1':''}"><td>#${i+1}</td><td>${p.name}</td><td>${Math.floor(p.score)}</td></tr>`;
+                tbody.innerHTML += row;
+            });
+        });
+
+        // Auto-clicker Loop (Every second)
+        setInterval(() => {
+            if(auth.currentUser && userData.autoClickers > 0) {
+                userData.score += (userData.autoClickers * 1);
+                saveData();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
