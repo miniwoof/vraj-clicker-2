@@ -8,94 +8,121 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        body { font-family: 'Poppins', sans-serif; background: #070b14; color: #e2e8f0; margin: 0; height: 100vh; overflow: hidden; }
         
-        /* The Clicker Button */
-        .click-btn-container { transition: transform 0.05s active; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
-        .click-btn-container:active { transform: scale(0.95); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        
+        /* Layout Grid */
+        .game-grid { 
+            display: grid; 
+            grid-template-columns: 350px 1fr 350px; 
+            height: 100vh; 
+            gap: 1rem; 
+            padding: 1rem;
+        }
+
+        /* Scrollable Panels */
+        .scroll-panel { overflow-y: auto; height: 100%; scrollbar-width: thin; scrollbar-color: #3b82f6 transparent; }
+        .scroll-panel::-webkit-scrollbar { width: 4px; }
+        .scroll-panel::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+
+        .click-btn-container { transition: transform 0.05s active; cursor: pointer; user-select: none; }
+        .click-btn-container:active { transform: scale(0.92); }
         .click-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
+
+        .upgrade-card { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .upgrade-card:hover:not(.disabled) { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); }
+        .upgrade-card.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
 
         .hidden { display: none !important; }
         .no-select { -webkit-user-select: none; user-select: none; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .game-grid { grid-template-columns: 1fr; overflow-y: auto; height: auto; }
+            .scroll-panel { height: 400px; }
+            body { overflow-y: auto; }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="no-select">
 
-    <div id="auth-screen" class="flex-grow flex items-center justify-center p-4">
-        <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md">
-            <h1 class="text-4xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Vraj Clicker 2</h1>
-            
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md text-center">
+            <h1 class="text-4xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Vraj Clicker 2</h1>
             <div id="auth-tabs" class="flex mb-6 bg-gray-800/50 rounded-lg p-1">
-                <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 rounded-md font-semibold bg-blue-600 transition-all">Login</button>
-                <button onclick="switchTab('signup')" id="tab-signup" class="flex-1 py-2 rounded-md font-semibold text-gray-400 transition-all">Sign Up</button>
+                <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 rounded-md font-semibold bg-blue-600">Login</button>
+                <button onclick="switchTab('signup')" id="tab-signup" class="flex-1 py-2 rounded-md font-semibold text-gray-400">Sign Up</button>
             </div>
-
-            <div id="signup-form" class="hidden space-y-4">
-                <input type="text" id="su-username" placeholder="Username" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 outline-none focus:border-emerald-500">
-                <input type="email" id="su-email" placeholder="Email" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 outline-none focus:border-emerald-500">
-                <input type="password" id="su-password" placeholder="Password" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 outline-none focus:border-emerald-500">
-                <button onclick="handleSignup()" class="w-full bg-emerald-600 hover:bg-emerald-700 p-4 rounded-xl font-bold shadow-lg transition-all">Create Account</button>
-            </div>
-
             <div id="login-form" class="space-y-4">
-                <input type="email" id="li-email" placeholder="Email" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 outline-none focus:border-blue-500">
-                <input type="password" id="li-password" placeholder="Password" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 outline-none focus:border-blue-500">
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-xl font-bold shadow-lg transition-all">Enter Game</button>
-                <div class="text-center text-gray-500 text-sm py-2">OR</div>
-                <button onclick="handleGuest()" class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-xl font-bold transition-all">Play as Guest</button>
+                <input type="email" id="li-email" placeholder="Email" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 outline-none">
+                <input type="password" id="li-password" placeholder="Password" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 outline-none">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 p-4 rounded-xl font-bold hover:bg-blue-700 transition-all">Enter Game</button>
+                <button onclick="handleGuest()" class="w-full bg-gray-700 p-4 rounded-xl font-bold text-sm">Play as Guest</button>
             </div>
-
-            <div id="verify-notice" class="hidden text-center py-6">
-                <div class="text-5xl mb-4">📧</div>
-                <h2 class="text-xl font-bold text-yellow-400 mb-2">Check your Email</h2>
-                <p class="text-sm text-gray-400 mb-6">Click the link in your inbox to verify your account, then click below.</p>
-                <button onclick="checkVerification()" class="w-full bg-blue-600 p-3 rounded-xl font-bold mb-4">I've Verified My Email</button>
-                <button onclick="logoutAction()" class="text-red-400 text-xs">Cancel / Log Out</button>
+            <div id="signup-form" class="hidden space-y-4">
+                <input type="text" id="su-username" placeholder="Username" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 outline-none">
+                <input type="email" id="su-email" placeholder="Email" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 outline-none">
+                <input type="password" id="su-password" placeholder="Password" class="w-full p-4 rounded-xl bg-gray-900 border border-gray-700 outline-none">
+                <button onclick="handleSignup()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold">Create Account</button>
+            </div>
+            <div id="verify-notice" class="hidden py-6">
+                <h2 class="text-xl font-bold text-yellow-400">Verify Your Email</h2>
+                <p class="text-sm text-gray-400 my-4">Check your inbox for a link to start clicking!</p>
+                <button onclick="location.reload()" class="bg-blue-600 p-3 rounded-xl font-bold w-full">I've Verified</button>
             </div>
         </div>
     </div>
 
-    <div id="game-screen" class="hidden flex-grow flex flex-col no-select" oncontextmenu="return false;">
-        <div class="max-w-6xl mx-auto w-full p-4 grid grid-cols-1 md:grid-cols-3 gap-6 h-full items-center">
+    <div id="game-screen" class="hidden h-screen" oncontextmenu="return false;">
+        <div class="game-grid">
             
-            <div class="glass p-6 rounded-3xl h-[400px] flex flex-col order-2 md:order-1">
-                <h3 class="text-purple-400 font-bold mb-4 flex items-center">🏆 Leaderboard</h3>
-                <div id="leaderboard-list" class="flex-grow overflow-y-auto space-y-2 pr-2"></div>
+            <div class="glass rounded-3xl flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-white/10 bg-white/5">
+                    <h3 class="font-bold text-blue-400 flex items-center gap-2">🏪 Vraj Shop</h3>
+                </div>
+                <div id="shop-list" class="scroll-panel p-4 space-y-3">
+                    </div>
             </div>
 
-            <div class="flex flex-col items-center justify-center order-1 md:order-2 py-8">
-                <div class="text-center mb-8">
-                    <h2 id="score" class="text-7xl font-black text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">0</h2>
-                    <p class="text-gray-500 uppercase font-bold tracking-widest">Vraj Points</p>
+            <div class="flex flex-col items-center justify-between py-8 text-center">
+                <div class="space-y-2">
+                    <h2 id="score" class="text-7xl font-black text-blue-400 drop-shadow-lg">0</h2>
+                    <p id="vps-display" class="text-emerald-400 font-bold tracking-[0.2em] text-sm">0 VPS</p>
                 </div>
-                
-                <div onclick="clickVraj()" class="click-btn-container w-64 h-64 rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-2xl">
-                    <div class="w-full h-full rounded-full overflow-hidden border-4 border-[#0f172a]">
-                        <img src="image_0.png" alt="Click Me" class="click-img">
+
+                <div onclick="clickVraj()" class="click-btn-container w-80 h-80 rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-2xl">
+                    <div class="w-full h-full rounded-full overflow-hidden border-8 border-[#070b14]">
+                        <img src="image_0.png" class="click-img">
                     </div>
                 </div>
 
-                <div class="mt-8 px-6 py-2 bg-gray-900/80 rounded-full border border-gray-700 text-sm">
-                    Logged in as: <span id="user-display" class="text-blue-300 font-bold">...</span>
+                <div class="w-full max-w-xs space-y-4">
+                    <div class="glass p-3 rounded-2xl text-xs text-gray-400">
+                        Player: <span id="user-display" class="text-blue-300 font-bold">...</span>
+                    </div>
+                    <button onclick="logoutAction()" class="text-red-500/40 hover:text-red-500 text-xs font-bold transition-all underline decoration-dotted">Logout</button>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-3xl h-[400px] flex flex-col order-3">
-                <h3 class="text-emerald-400 font-bold mb-4">💬 Global Chat</h3>
-                <div id="chat-box" class="flex-grow overflow-y-auto mb-4 space-y-2 pr-2 flex flex-col-reverse"></div>
-                <form id="chat-form" class="flex gap-2">
-                    <input type="text" id="chat-input" placeholder="Say something..." class="flex-grow bg-gray-900 border border-gray-700 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
-                    <button class="bg-emerald-600 px-4 rounded-lg font-bold">Send</button>
-                </form>
-            </div>
-        </div>
+            <div class="flex flex-col gap-4 overflow-hidden h-full">
+                <div class="glass rounded-3xl flex-1 flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/10 bg-white/5">
+                        <h3 class="font-bold text-purple-400">🏆 Leaderboard</h3>
+                    </div>
+                    <div id="leaderboard-list" class="scroll-panel p-4 space-y-2"></div>
+                </div>
 
-        <div class="p-6 text-center">
-            <button onclick="logoutAction()" class="text-red-500/50 hover:text-red-500 font-bold text-sm transition-all underline decoration-dotted">Are you sure you would like to logout?</button>
+                <div class="glass rounded-3xl flex-1 flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/10 bg-white/5 text-emerald-400 font-bold">💬 Chat</div>
+                    <div id="chat-box" class="scroll-panel p-4 flex flex-col-reverse text-sm"></div>
+                    <form id="chat-form" class="p-3 bg-white/5 border-t border-white/10 flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Type..." class="flex-grow bg-gray-900/50 border border-gray-700 p-2 rounded-lg text-xs outline-none">
+                        <button class="bg-emerald-600 px-3 py-2 rounded-lg text-xs font-bold">Send</button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -105,167 +132,207 @@
         import { getFirestore, doc, setDoc, getDoc, addDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-             apiKey: "AIzaSyDwg2ZSpQspAD-o19AZCOHcrl9VnYc_sdk",
-             authDomain: "vraj-clicker-2.firebaseapp.com",
-             projectId: "vraj-clicker-2",
-             storageBucket: "vraj-clicker-2.firebasestorage.app",
-             messagingSenderId: "162243172716",
-             appId: "1:162243172716:web:874a1f8be471a9f0d83b49",
-             measurementId: "G-SBJ4W7JRRL"
+            apiKey: "AIzaSyDwg2ZSpQspAD-o19AZCOHcrl9VnYc_sdk",
+            authDomain: "vraj-clicker-2.firebaseapp.com",
+            projectId: "vraj-clicker-2",
+            storageBucket: "vraj-clicker-2.firebasestorage.app",
+            messagingSenderId: "162243172716",
+            appId: "1:162243172716:web:874a1f8be471a9f0d83b49",
+            measurementId: "G-SBJ4W7JRRL"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Sound Engine
+        const clickSound = new Audio('click.mp3');
+        function playSfx() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
+
+        // Game State
+        let score = 0;
+        let vps = 0;
         let currentUser = null;
         let currentUsername = "Guest";
-        let score = 0;
-        let saveInterval = null;
 
-        // --- Auth UI Logic ---
-        window.switchTab = (tab) => {
-            document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
-            document.getElementById('signup-form').classList.toggle('hidden', tab !== 'signup');
-            document.getElementById('tab-login').classList.toggle('bg-blue-600', tab === 'login');
-            document.getElementById('tab-signup').classList.toggle('bg-blue-600', tab === 'signup');
+        // Upgrades Array (Cheapest to Most Expensive)
+        const upgrades = [
+            { id: 1, name: "Vraj Finger", cost: 15, power: 0.1, emoji: "☝️" },
+            { id: 2, name: "Vraj Seed", cost: 40, power: 0.2, emoji: "🌱" },
+            { id: 3, name: "Vraj Cursor", cost: 50, power: 0.5, emoji: "🖱️" },
+            { id: 4, name: "Vraj Nanobots", cost: 75, power: 0.3, emoji: "🐜" },
+            { id: 5, name: "Auto-Vraj", cost: 100, power: 1, emoji: "🤖" },
+            { id: 6, name: "Vraj Magnet", cost: 125, power: 0.8, emoji: "🧲" },
+            { id: 7, name: "Vraj Juice", cost: 250, power: 2, emoji: "🧃" },
+            { id: 8, name: "Vraj Keyboard", cost: 300, power: 2.5, emoji: "⌨️" },
+            { id: 9, name: "Vraj Potion", cost: 400, power: 3, emoji: "🧪" },
+            { id: 10, name: "Vraj Coffee", cost: 500, power: 4, emoji: "☕" },
+            { id: 11, name: "Vraj Gear", cost: 600, power: 5, emoji: "🔩" },
+            { id: 12, name: "Vraj Botnet", cost: 1100, power: 8, emoji: "🌐" },
+            { id: 13, name: "Vraj Battery", cost: 1500, power: 10, emoji: "🔋" },
+            { id: 14, name: "Vraj Totem", cost: 2000, power: 14, emoji: "🗿" },
+            { id: 15, name: "Vraj Circuit", cost: 3000, power: 12, emoji: "📟" },
+            { id: 16, name: "Vraj Server", cost: 5000, power: 15, emoji: "🖥️" },
+            { id: 17, name: "Vraj Drone", cost: 8000, power: 30, emoji: "🚁" },
+            { id: 18, name: "Vraj Relic", cost: 10000, power: 70, emoji: "🏺" },
+            { id: 19, name: "Vraj Factory", cost: 12000, power: 47, emoji: "🏭" },
+            { id: 20, name: "Vraj Antenna", cost: 15000, power: 55, emoji: "📡" },
+            { id: 21, name: "Vraj Satellite", cost: 25000, power: 80, emoji: "🛰️" },
+            { id: 22, name: "Vraj Engine", cost: 40000, power: 150, emoji: "⚙️" },
+            { id: 23, name: "Vraj Temple", cost: 60000, power: 400, emoji: "🏛️" },
+            { id: 24, name: "Vraj Supercomputer", cost: 85000, power: 350, emoji: "💻" },
+            { id: 25, name: "Vraj AI", cost: 100000, power: 200, emoji: "🧠" },
+            { id: 26, name: "Vraj Mine", cost: 130000, power: 260, emoji: "⛏️" },
+            { id: 27, name: "Vraj Reactor", cost: 200000, power: 600, emoji: "☢️" },
+            { id: 28, name: "Vraj Monolith", cost: 300000, power: 2200, emoji: "🕋" },
+            { id: 29, name: "Vraj Quantum Chip", cost: 450000, power: 1800, emoji: "💎" },
+            { id: 30, name: "Vraj Rocket", cost: 500000, power: 1000, emoji: "🚀" },
+            { id: 31, name: "Vraj Laser", cost: 1000000, power: 3000, emoji: "🔦" },
+            { id: 32, name: "Vraj Ship", cost: 1400000, power: 1400, emoji: "🚢" },
+            { id: 33, name: "Vraj Pyramid", cost: 1500000, power: 11000, emoji: "🧱" },
+            { id: 34, name: "Vraj Dyson Sphere", cost: 2200000, power: 9000, emoji: "🟡" },
+            { id: 35, name: "Vraj Moon Base", cost: 2500000, power: 5000, emoji: "🌙" },
+            { id: 36, name: "Vraj Shield", cost: 5000000, power: 12000, emoji: "🛡️" },
+            { id: 37, name: "Vraj Citadel", cost: 7000000, power: 50000, emoji: "🏰" },
+            { id: 38, name: "Vraj Sun Beam", cost: 10000000, power: 20000, emoji: "☀️" },
+            { id: 39, name: "Vraj Warp Drive", cost: 11000000, power: 45000, emoji: "⚡" },
+            { id: 40, name: "Vraj Lab", cost: 20000000, power: 7800, emoji: "🧪" },
+            { id: 41, name: "Vraj Telescope", cost: 25000000, power: 60000, emoji: "🔭" },
+            { id: 42, name: "Vraj Star", cost: 40000000, power: 300000, emoji: "⭐" },
+            { id: 43, name: "Vraj Black Hole", cost: 50000000, power: 100000, emoji: "🕳️" },
+            { id: 44, name: "Vraj Multiverse", cost: 55000000, power: 200000, emoji: "🌌" },
+            { id: 45, name: "Vraj Nebula", cost: 100000000, power: 250000, emoji: "☁️" },
+            { id: 46, name: "Vraj Singularity", cost: 250000000, power: 1000000, emoji: "👁️" },
+            { id: 47, name: "Vraj Portal", cost: 330000000, power: 44000, emoji: "🌀" },
+            { id: 48, name: "Vraj Infinity", cost: 1000000000, power: 5000000, emoji: "♾️" },
+            { id: 49, name: "Vraj Time Machine", cost: 5100000000, power: 260000, emoji: "⏳" },
+            { id: 50, name: "Vraj Galaxy", cost: 75000000000, power: 1600000, emoji: "🌌" }
+        ];
+
+        // --- Game Logic ---
+        window.clickVraj = () => { score += 1; playSfx(); updateUI(); };
+
+        window.buyUpgrade = (id) => {
+            const upg = upgrades.find(u => u.id === id);
+            if (score >= upg.cost) {
+                score -= upg.cost;
+                vps += upg.power;
+                upg.cost = Math.ceil(upg.cost * 1.15);
+                document.getElementById(`cost-${id}`).innerText = upg.cost.toLocaleString();
+                updateUI();
+                playSfx();
+            }
+        };
+
+        function updateUI() {
+            document.getElementById('score').innerText = Math.floor(score).toLocaleString();
+            document.getElementById('vps-display').innerText = vps.toFixed(1) + " VPS";
+            upgrades.forEach(u => {
+                const el = document.getElementById(`upg-${u.id}`);
+                if (el) el.classList.toggle('disabled', score < u.cost);
+            });
+        }
+
+        // Init Shop Items
+        const shop = document.getElementById('shop-list');
+        upgrades.forEach(u => {
+            shop.innerHTML += `
+                <div id="upg-${u.id}" onclick="buyUpgrade(${u.id})" class="upgrade-card glass p-4 rounded-2xl flex justify-between items-center disabled">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${u.emoji}</span>
+                        <div>
+                            <p class="font-bold text-sm text-white">${u.name}</p>
+                            <p class="text-[10px] text-emerald-400">+${u.power} VPS</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-blue-300" id="cost-${u.id}">${u.cost.toLocaleString()}</p>
+                        <p class="text-[9px] text-gray-600">pts</p>
+                    </div>
+                </div>`;
+        });
+
+        setInterval(() => { if (vps > 0) { score += (vps / 10); updateUI(); } }, 100);
+
+        // --- Auth Logic ---
+        window.switchTab = (t) => {
+            document.getElementById('login-form').classList.toggle('hidden', t !== 'login');
+            document.getElementById('signup-form').classList.toggle('hidden', t !== 'signup');
+            document.getElementById('tab-login').classList.toggle('bg-blue-600', t === 'login');
+            document.getElementById('tab-signup').classList.toggle('bg-blue-600', t === 'signup');
         };
 
         window.handleSignup = async () => {
-            const user = document.getElementById('su-username').value.trim();
-            const email = document.getElementById('su-email').value;
-            const pass = document.getElementById('su-password').value;
-            if(!user) return alert("Enter a username");
+            const u = document.getElementById('su-username').value;
+            const e = document.getElementById('su-email').value;
+            const p = document.getElementById('su-password').value;
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", cred.user.uid), { username: user });
-                await sendEmailVerification(cred.user);
-                alert("Verification email sent! Check your inbox.");
-            } catch (e) { alert(e.message); }
+                const c = await createUserWithEmailAndPassword(auth, e, p);
+                await setDoc(doc(db, "users", c.user.uid), { username: u });
+                await sendEmailVerification(c.user);
+                alert("Verify email!");
+            } catch (err) { alert(err.message); }
         };
 
         window.handleLogin = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('li-email').value, document.getElementById('li-password').value); }
-            catch (e) { alert(e.message); }
+            catch (err) { alert(err.message); }
         };
 
-        window.handleGuest = async () => { await signInAnonymously(auth); };
+        window.handleGuest = () => signInAnonymously(auth);
+        window.logoutAction = () => { if(confirm("Logout?")) signOut(auth); };
 
-        window.logoutAction = () => {
-            if(confirm("Are you sure you would like to logout?")) {
-                saveScore();
-                signOut(auth);
-            }
-        };
-
-        window.checkVerification = () => {
-            auth.currentUser.reload().then(() => {
-                if(auth.currentUser.emailVerified) {
-                    location.reload(); 
-                } else {
-                    alert("Still not verified! Check your email.");
-                }
-            });
-        };
-
-        // --- Game Mechanics ---
-        window.clickVraj = () => {
-            score++;
-            document.getElementById('score').innerText = score;
-        };
-
-        async function saveScore() {
-            if(!currentUser || currentUser.isAnonymous || !currentUser.emailVerified) return;
-            await setDoc(doc(db, "leaderboard", currentUser.uid), {
-                score: score,
-                username: currentUsername,
-                lastUpdated: serverTimestamp()
-            }, { merge: true });
-        }
-
-        // --- App State Observer ---
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
-            const authScreen = document.getElementById('auth-screen');
-            const gameScreen = document.getElementById('game-screen');
-            const verifyNotice = document.getElementById('verify-notice');
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            const authTabs = document.getElementById('auth-tabs');
-
             if (user) {
                 if (!user.isAnonymous && !user.emailVerified) {
-                    // Show verify screen only
-                    authScreen.classList.remove('hidden');
-                    gameScreen.classList.add('hidden');
-                    verifyNotice.classList.remove('hidden');
-                    loginForm.classList.add('hidden');
-                    signupForm.classList.add('hidden');
-                    authTabs.classList.add('hidden');
+                    document.getElementById('auth-tabs').classList.add('hidden');
+                    document.getElementById('login-form').classList.add('hidden');
+                    document.getElementById('verify-notice').classList.remove('hidden');
                 } else {
-                    // User is good to play
-                    authScreen.classList.add('hidden');
-                    gameScreen.classList.remove('hidden');
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    document.getElementById('game-screen').classList.remove('hidden');
                     
                     if(user.isAnonymous) {
                         currentUsername = "Guest_" + user.uid.substring(0,4);
                     } else {
-                        const uSnap = await getDoc(doc(db, "users", user.uid));
-                        currentUsername = uSnap.exists() ? uSnap.data().username : "User";
-                        
-                        // Load previous score
-                        const sSnap = await getDoc(doc(db, "leaderboard", user.uid));
-                        if(sSnap.exists()) {
-                            score = sSnap.data().score || 0;
-                            document.getElementById('score').innerText = score;
-                        }
-                        // Start Auto-Save
-                        if(saveInterval) clearInterval(saveInterval);
-                        saveInterval = setInterval(saveScore, 10000);
+                        const snap = await getDoc(doc(db, "users", user.uid));
+                        currentUsername = snap.exists() ? snap.data().username : "Vraj";
+                        const save = await getDoc(doc(db, "leaderboard", user.uid));
+                        if(save.exists()){ score = save.data().score || 0; vps = save.data().vps || 0; }
                     }
                     document.getElementById('user-display').innerText = currentUsername;
-                    setupRealtimeData();
+                    
+                    setInterval(() => {
+                        if(currentUser && !currentUser.isAnonymous) {
+                            setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, username: currentUsername }, { merge: true });
+                        }
+                    }, 10000);
+
+                    onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10)), (s) => {
+                        document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => `
+                            <div class="flex justify-between p-2 rounded bg-white/5 border border-white/5 text-xs">
+                                <span>#${i+1} ${d.data().username}</span>
+                                <span class="text-blue-400 font-bold">${Math.floor(d.data().score).toLocaleString()}</span>
+                            </div>`).join('');
+                    });
+                    onSnapshot(query(collection(db, "globalChat"), orderBy("timestamp", "desc"), limit(20)), (s) => {
+                        document.getElementById('chat-box').innerHTML = s.docs.map(d => `
+                            <div class="mb-1"><span class="text-emerald-400 font-bold">${d.data().username}:</span> ${d.data().text}</div>
+                        `).join('');
+                    });
                 }
             } else {
-                // Not logged in - Reset View
-                authScreen.classList.remove('hidden');
-                gameScreen.classList.add('hidden');
-                verifyNotice.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                authTabs.classList.remove('hidden');
-                score = 0;
-                document.getElementById('score').innerText = 0;
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
             }
         });
-
-        function setupRealtimeData() {
-            // Leaderboard
-            onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10)), (s) => {
-                document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => `
-                    <div class="flex justify-between p-3 rounded-xl bg-gray-800/40 border border-gray-700/50 text-sm">
-                        <span><span class="text-gray-500 mr-2">#${i+1}</span>${d.data().username}</span>
-                        <span class="font-bold text-blue-400">${d.data().score}</span>
-                    </div>`).join('');
-            });
-            // Chat
-            onSnapshot(query(collection(db, "globalChat"), orderBy("timestamp", "desc"), limit(25)), (s) => {
-                document.getElementById('chat-box').innerHTML = s.docs.map(d => `
-                    <div class="bg-gray-800/20 p-2 rounded-lg text-sm">
-                        <span class="text-emerald-400 font-bold">${d.data().username}:</span> 
-                        <span class="text-gray-300">${d.data().text}</span>
-                    </div>`).join('');
-            });
-        }
 
         document.getElementById('chat-form').onsubmit = async (e) => {
             e.preventDefault();
             const input = document.getElementById('chat-input');
-            if(!input.value.trim() || !currentUser) return;
-            await addDoc(collection(db, "globalChat"), {
-                text: input.value,
-                username: currentUsername,
-                timestamp: serverTimestamp()
-            });
+            if(!input.value.trim()) return;
+            await addDoc(collection(db, "globalChat"), { text: input.value, username: currentUsername, timestamp: serverTimestamp() });
             input.value = "";
         };
     </script>
