@@ -2,1033 +2,372 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vraj Clicker 2 | Pro Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vraj Clicker 2 Project</title>
+    <link rel="icon" type="image/png" href="image_0.png">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #7c3aed;
-            --accent: #22d3ee;
-            --gold: #fbbf24;
-            --bg: #020617;
-            --glass: rgba(15, 23, 42, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --success: #10b981;
-            --danger: #ef4444;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0f172a; color: e2e8f0; }
+        
+        /* Glassmorphism style */
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* Clicker button mechanics */
+        .click-btn-container { transition: transform 0.05s active; cursor: pointer; }
+        .click-btn-container:active { transform: scale(0.97); }
+        .click-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
 
-        * { 
-            user-select: none; -webkit-user-select: none; 
-            box-sizing: border-box;
-            scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg);
-            color: #f8fafc;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
-        }
-
+        /* Utility classes */
         .hidden { display: none !important; }
-
-        /* PARTICLE SYSTEM */
-        .particle {
-            position: absolute;
-            pointer-events: none;
-            font-weight: bold;
-            font-size: 1.5rem;
-            animation: float-up 1s ease-out forwards;
-            z-index: 9999;
-        }
-
-        @keyframes float-up {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(34, 211, 238, 0.6); }
-        }
-
-        /* AUTH SCREENS */
-        .auth-screen {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 3rem;
-            border-radius: 32px;
-            text-align: center;
-            width: 400px;
-            border: 1px solid var(--border);
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        input {
-            width: 100%; padding: 16px; margin: 10px 0; border-radius: 14px;
-            border: 1px solid var(--border); background: rgba(0,0,0,0.3);
-            color: white; font-size: 1rem; font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, var(--primary), #4f46e5);
-            color: white; border: none; padding: 16px; border-radius: 14px;
-            cursor: pointer; font-weight: 700; width: 100%; margin-top: 15px;
-            text-transform: uppercase; letter-spacing: 1px;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3); }
-        .btn:active { transform: translateY(0); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        /* GAME LAYOUT */
-        #screen-game {
-            display: grid;
-            grid-template-columns: 350px 1fr 350px;
-            width: 100vw; height: 100vh;
-            gap: 15px; padding: 15px;
-        }
-
-        .panel {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            display: flex; flex-direction: column;
-            overflow: hidden; padding: 20px;
-        }
-
-        .scroll-area { overflow-y: auto; flex-grow: 1; margin-top: 10px; padding-right: 8px; }
-
-        /* CENTER AREA */
-        .center-area {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative;
-        }
-
-        #score-display {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 4rem; font-weight: 900; color: var(--gold);
-            text-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
-            margin: 0;
-        }
-
-        #main-clicker {
-            width: 320px; height: 320px; border-radius: 50%;
-            border: 12px solid rgba(255, 255, 255, 0.05);
-            background: url('https://i.imgur.com/Gp6z61M.png') center/cover no-repeat;
-            cursor: pointer; position: relative;
-            box-shadow: 0 0 80px rgba(34, 211, 238, 0.2);
-            margin: 30px 0;
-            animation: glow 2s infinite;
-            transition: transform 0.05s, border-color 0.1s;
-        }
-        #main-clicker:hover { border-color: var(--accent); transform: scale(1.02); }
-        #main-clicker:active { transform: scale(0.96); }
-
-        /* MULTIPLIER BADGE */
-        .multiplier-badge {
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            background: linear-gradient(135deg, var(--gold), #f59e0b);
-            color: #000;
-            padding: 12px 20px;
-            border-radius: 20px;
-            font-weight: 900;
-            font-size: 1.2rem;
-            box-shadow: 0 5px 20px rgba(251, 191, 36, 0.5);
-            animation: pulse 1.5s infinite;
-        }
-
-        /* STORE CARDS */
-        .item-card {
-            background: rgba(255,255,255,0.03); 
-            padding: 15px; 
-            border-radius: 16px;
-            margin-bottom: 12px; 
-            cursor: pointer; 
-            border: 1px solid var(--border);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            transition: all 0.15s ease;
-        }
-        .item-card:hover { 
-            background: rgba(255,255,255,0.08); 
-            border-color: var(--accent); 
-            transform: translateX(5px); 
-        }
-        .item-card.locked { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-        }
-        .item-card.locked:hover {
-            transform: none;
-            background: rgba(255,255,255,0.03);
-            border-color: var(--border);
-        }
-
-        /* PRESTIGE SHOP */
-        .prestige-item {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(79, 70, 229, 0.1));
-            border: 2px solid var(--primary);
-        }
-        .prestige-item:hover { 
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(79, 70, 229, 0.2)); 
-        }
-        .prestige-item.locked:hover {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(79, 70, 229, 0.1));
-        }
-
-        /* STATS GRID */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .stat-box {
-            background: rgba(255,255,255,0.03);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-top: 4px;
-        }
-
-        /* SETTINGS MODAL */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-
-        .modal-content {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 2rem;
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .setting-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .toggle {
-            width: 60px;
-            height: 30px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            position: relative;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            transition: background 0.2s;
-        }
-
-        .toggle.active {
-            background: var(--success);
-        }
-
-        .toggle-slider {
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.2s;
-        }
-
-        .toggle.active .toggle-slider {
-            transform: translateX(30px);
-        }
-
-        /* VOLUME SLIDER */
-        input[type="range"] {
-            width: 150px;
-            margin: 0;
-        }
-
-        /* TAB SYSTEM */
-        .tab-nav { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        .tab-btn { 
-            flex: 1; 
-            padding: 10px; 
-            border-radius: 10px; 
-            border: 1px solid var(--border); 
-            background: transparent; 
-            color: white; 
-            cursor: pointer; 
-            font-weight: 600; 
-            min-width: 80px;
-            transition: all 0.15s;
-        }
-        .tab-btn.active { background: var(--primary); border-color: var(--primary); }
-        .tab-btn:hover { background: rgba(124, 58, 237, 0.3); }
-        .tab-btn.active:hover { background: var(--primary); }
-
-        /* LEADERBOARD */
-        .lb-row { display: flex; justify-content: space-between; padding: 12px; border-radius: 12px; margin-bottom: 5px; background: rgba(255,255,255,0.02); font-size: 0.95rem; }
-        .rank-1 { background: linear-gradient(90deg, rgba(251, 191, 36, 0.15), transparent); border: 1px solid var(--gold); }
-        .rank-2 { background: linear-gradient(90deg, rgba(192, 192, 192, 0.15), transparent); border: 1px solid #c0c0c0; }
-        .rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), transparent); border: 1px solid #cd7f32; }
-
-        /* CHAT */
-        #chat-container { height: 250px; display: flex; flex-direction: column; margin-top: 20px; }
-        #chat-box { flex-grow: 1; background: rgba(0,0,0,0.2); border-radius: 15px; padding: 12px; overflow-y: auto; font-size: 0.9rem; margin-bottom: 10px; }
-        .chat-msg { margin-bottom: 6px; line-height: 1.4; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
-        .chat-user { color: var(--accent); font-weight: 700; margin-right: 5px; }
-
-        /* TOP BAR */
-        .top-bar {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .icon-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.5rem;
-            transition: all 0.15s;
-        }
-
-        .icon-btn:hover {
-            background: rgba(255,255,255,0.1);
-            transform: scale(1.1);
-        }
-
-        /* NOTIFICATION */
-        .notification {
-            position: fixed;
-            top: 100px;
-            right: 30px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 20px 25px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 10001;
-            animation: slideIn 0.3s ease-out;
-            min-width: 300px;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .notif-title {
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 5px;
-            font-size: 1.1rem;
-        }
-
-        /* PROGRESS BAR */
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
+        /* Disable selection and right click in game area */
+        .no-select { -webkit-user-select: none; -ms-user-select: none; user-select: none; }
+        
+        /* Custom Scrollbar for chat */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); rounded: 4px; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Top Bar -->
-    <div class="top-bar hidden" id="top-bar">
-        <div class="icon-btn" onclick="toggleSettings()" title="Settings">⚙️</div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 style="margin-top: 0; color: var(--gold);">⚙️ SETTINGS</h2>
-
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 600;">Sound Effects</div>
-                    <div style="font-size: 0.85rem; opacity: 0.7;">Click sounds & notifications</div>
-                </div>
-                <div class="toggle active" id="sfx-toggle" onclick="toggleSFX()">
-                    <div class="toggle-slider"></div>
-                </div>
-            </div>
-
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 600;">Particles</div>
-                    <div style="font-size: 0.85rem; opacity: 0.7;">Visual effects on click</div>
-                </div>
-                <div class="toggle active" id="particles-toggle" onclick="toggleParticles()">
-                    <div class="toggle-slider"></div>
-                </div>
-            </div>
-
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 600;">SFX Volume</div>
-                </div>
-                <input type="range" min="0" max="100" value="50" id="sfx-volume" oninput="setSFXVolume(this.value)">
-            </div>
-
-            <button class="btn" onclick="toggleSettings()" style="margin-top: 20px;">CLOSE</button>
-        </div>
-    </div>
-
-    <div id="screen-auth-wrap">
-        <div id="screen-menu" class="auth-screen">
-            <h1 style="font-family:'Montserrat'; font-weight:900; margin-top:0;">VRAJ CLICKER 2</h1>
-            <p style="opacity: 0.8; margin-bottom: 30px;">Enhanced Pro Edition</p>
-            <button class="btn" onclick="showAuth('screen-login')">Login</button>
-            <button class="btn" onclick="showAuth('screen-signup')" style="background:var(--accent); color:#000;">Sign Up</button>
-        </div>
+    <div id="main-content" class="flex-grow flex items-center justify-center p-4">
         
-        <div id="screen-login" class="auth-screen hidden">
-            <h2>WELCOME BACK</h2>
-            <input type="email" id="l-email" placeholder="Email Address">
-            <input type="password" id="l-pass" placeholder="Password">
-            <button class="btn" id="do-login">Enter Game</button>
-            <button class="btn" onclick="showAuth('screen-menu')" style="background:none; border:1px solid var(--border)">Back</button>
+        <div id="auth-container" class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h1 class="text-4xl font-extrabold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Vraj Clicker 2</h1>
+            
+            <div id="auth-tabs" class="flex mb-6 bg-gray-800/50 rounded-lg p-1">
+                <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 rounded-md font-semibold bg-blue-600 transition-all">Login</button>
+                <button onclick="switchTab('signup')" id="tab-signup" class="flex-1 py-2 rounded-md font-semibold text-gray-400 hover:text-white transition-all">Sign Up</button>
+            </div>
+
+            <div id="signup-form" class="hidden space-y-4">
+                <input type="text" id="su-username" placeholder="Choose a Username" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                <input type="email" id="su-email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                <input type="password" id="su-password" placeholder="Password (6+ chars)" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                <button onclick="handleSignup()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 p-4 rounded-xl font-bold text-lg shadow-lg">Create Account</button>
+            </div>
+
+             <div id="login-form" class="space-y-4">
+                <input type="email" id="li-email" placeholder="Email Address" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                <input type="password" id="li-password" placeholder="Password" class="w-full p-4 rounded-xl bg-gray-900/50 border border-gray-700 focus:border-blue-500 outline-none">
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 p-4 rounded-xl font-bold text-lg shadow-lg">Enter Game</button>
+                
+                <div class="relative flex py-3 items-center">
+                    <div class="flex-grow border-t border-gray-700"></div><span class="flex-shrink mx-4 text-gray-500">or</span><div class="flex-grow border-t border-gray-700"></div>
+                </div>
+                <button onclick="handleGuest()" class="w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-xl font-bold">Play as Guest</button>
+            </div>
+
+            <div id="verify-notice" class="hidden text-center py-8">
+                 <div class="text-6xl mb-4">📧</div>
+                <h2 class="text-xl font-bold text-yellow-400 mb-2">Verify your Email</h2>
+                <p class="mb-6 text-gray-300">We sent a link to your inbox. Please verify it to play.</p>
+                <button onclick="location.reload()" class="text-blue-400 underline hover:text-blue-300">I've verified, refresh!</button>
+                <br><br>
+                <button onclick="logoutConfirm()" class="text-red-400 text-sm">Go back (Logout)</button>
+            </div>
         </div>
 
-        <div id="screen-signup" class="auth-screen hidden">
-            <h2>START JOURNEY</h2>
-            <input type="text" id="s-user" placeholder="Create Username">
-            <input type="email" id="s-email" placeholder="Email Address">
-            <input type="password" id="s-pass" placeholder="Password">
-            <button class="btn" id="do-signup">Create & Play</button>
-            <button class="btn" onclick="showAuth('screen-menu')" style="background:none; border:1px solid var(--border)">Back</button>
+        <div id="game-container" class="hidden w-full max-w-6xl flex flex-col md:flex-row gap-6 p-4 no-select" oncontextmenu="return false;">
+            
+            <div class="glass p-8 rounded-3xl flex-1 text-center flex flex-col items-center justify-center min-h-[400px]">
+                 <div class="mb-6">
+                    <h2 class="text-6xl font-extrabold text-blue-400 leading-tight" id="score">0</h2>
+                    <p class="text-gray-500 uppercase tracking-widest font-semibold">Vraj Points</p>
+                </div>
+                
+                <div onclick="clickVraj()" class="click-btn-container w-56 h-56 rounded-full p-1 bg-gradient-to-tr from-blue-500 to-purple-600 shadow-[0_0_60px_rgba(59,130,246,0.3)]">
+                    <div class="w-full h-full rounded-full overflow-hidden border-4 border-[#0f172a]">
+                         <img src="image_0.png" alt="Click Vraj" class="click-img">
+                    </div>
+                </div>
+
+                <div class="mt-8 text-sm text-gray-400 bg-gray-900/50 py-2 px-4 rounded-full">
+                    Playing as: <span id="user-display" class="font-bold text-blue-300">Loading...</span>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col gap-6 h-[500px] md:h-auto">
+                
+                <div class="glass p-4 rounded-3xl flex-1 overflow-hidden flex flex-col">
+                    <h3 class="text-xl font-bold text-center mb-2 text-purple-300">🏆 Top Clickers</h3>
+                     <div class="overflow-y-auto flex-grow pr-2" id="leaderboard-list">
+                        <p class="text-center text-gray-500 animate-pulse">Loading scores...</p>
+                        </div>
+                </div>
+
+                <div class="glass p-4 rounded-3xl flex-1 overflow-hidden flex flex-col">
+                    <h3 class="text-xl font-bold text-center mb-2 text-emerald-300">💬 Global Chat</h3>
+                    <div id="chat-box" class="flex-grow overflow-y-auto mb-2 p-2 bg-gray-900/30 rounded-xl flex flex-col-reverse space-y-reverse space-y-2">
+                        </div>
+                    <form id="chat-form" class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Say something..." autocomplete="off" class="flex-grow p-2 rounded-lg bg-gray-900/50 border border-gray-700 focus:border-emerald-500 outline-none text-sm">
+                        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 px-4 rounded-lg font-bold">Send</button>
+                    </form>
+                </div>
+
+            </div>
         </div>
     </div>
 
-    <div id="screen-game" class="hidden">
-        <div class="panel">
-            <div class="tab-nav">
-                <button class="tab-btn active" id="tab-btn-store" onclick="setTab('store')">STORE</button>
-                <button class="tab-btn" id="tab-btn-prestige" onclick="setTab('prestige')">PRESTIGE</button>
-                <button class="tab-btn" id="tab-btn-achs" onclick="setTab('achs')">ACHIEVEMENTS</button>
-            </div>
-            <div id="store-list" class="scroll-area"></div>
-            <div id="prestige-list" class="scroll-area hidden"></div>
-            <div id="achs-list" class="scroll-area hidden"></div>
-        </div>
-
-        <div class="center-area">
-            <div id="score-display">0</div>
-            <div id="cps-display" style="color:var(--accent); font-weight:600; font-size:1.2rem;">0.0 PER SECOND</div>
-            <div id="main-clicker" style="position: relative;">
-                <div class="multiplier-badge" id="mult-badge">x1</div>
-            </div>
-            <button class="btn" id="pres-btn" onclick="prestige()" style="width:250px; background: linear-gradient(135deg, var(--gold), #f59e0b); color: #000;" disabled>
-                🏆 PRESTIGE (1M CLICKS)
-            </button>
-            
-            <div class="stats-grid" style="width: 100%; max-width: 500px; margin-top: 20px;">
-                <div class="stat-box">
-                    <div class="stat-label">Total Clicks</div>
-                    <div class="stat-value" id="total-clicks">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Prestige Level</div>
-                    <div class="stat-value" id="prestige-level">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Achievements</div>
-                    <div class="stat-value" id="ach-count">0/100</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Play Time</div>
-                    <div class="stat-value" id="play-time">0m</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h3 style="margin:0 0 10px 0; color:var(--gold); font-size:1rem; letter-spacing:1px;">🏆 LEADERBOARD</h3>
-            <div id="lb-body" class="scroll-area" style="max-height: 40%;"></div>
-            
-            <div id="chat-container">
-                <h3 style="margin:0 0 10px 0; color:var(--accent); font-size:1rem;">💬 GLOBAL CHAT</h3>
-                <div id="chat-box"></div>
-                <input type="text" id="chat-input" placeholder="Say something...">
-            </div>
-            <button onclick="logout()" style="margin-top:auto; background:none; border:1px solid #ef4444; color:#ef4444; padding:10px; border-radius:12px; cursor:pointer;">Logout</button>
-        </div>
+    <div id="game-footer" class="hidden p-4 text-center glass fixed bottom-0 w-full z-10">
+        <button onclick="logoutConfirm()" class="bg-red-900/50 hover:bg-red-800/80 text-red-300 px-6 py-2 rounded-full text-sm font-bold transition-all border border-red-800/50">Exit Game (Logout)</button>
     </div>
+
 
     <script type="module">
+        // Import necessary Firebase modules (Auth AND Firestore now)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, update, onValue, query, orderByChild, limitToLast, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, addDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // --- Configuration ---
         const firebaseConfig = {
-            apiKey: "AIzaSyDwg2ZSpQspAD-o19AZCOHcrl9VnYc_sdk",
-            authDomain: "vraj-clicker-2.firebaseapp.com",
-            projectId: "vraj-clicker-2",
-            storageBucket: "vraj-clicker-2.firebasestorage.app",
-            messagingSenderId: "162243172716",
-            appId: "1:162243172716:web:874a1f8be471a9f0d83b49"
+             apiKey: "AIzaSyDwg2ZSpQspAD-o19AZCOHcrl9VnYc_sdk",
+             authDomain: "vraj-clicker-2.firebaseapp.com",
+             projectId: "vraj-clicker-2",
+             storageBucket: "vraj-clicker-2.firebasestorage.app",
+             messagingSenderId: "162243172716",
+             appId: "1:162243172716:web:874a1f8be471a9f0d83b49",
+             measurementId: "G-SBJ4W7JRRL"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
+        const db = getFirestore(app);
 
-        let userData = { 
-            score: 0, highscore: 0, cps: 0, prestige: 0, name: "", 
-            counts: {}, achievements: [], prestigeUpgrades: {},
-            totalClicks: 0, startTime: Date.now()
-        };
+        // Global State Variables
+        let currentUser = null;
+        let currentUsername = "Guest";
+        let score = 0;
+        let scoreSaveTimer = null;
 
-        let settings = {
-            sfxEnabled: true,
-            particlesEnabled: true,
-            sfxVolume: 0.5
-        };
+        // ================= AUTHENTICATION LOGIC =================
 
-        let uiNeedsUpdate = false;
-        let saveQueued = false;
-
-        // AUDIO SYSTEM
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playClick() {
-            if (!settings.sfxEnabled) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.frequency.value = 800 + Math.random() * 200;
-            gain.gain.value = settings.sfxVolume * 0.1;
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            osc.stop(audioContext.currentTime + 0.1);
+        // Tab switcher for UI
+        window.switchTab = (tab) => {
+            document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('signup-form').classList.toggle('hidden', tab !== 'signup');
+            document.getElementById('tab-login').classList.toggle('bg-blue-600', tab === 'login');
+            document.getElementById('tab-login').classList.toggle('text-gray-400', tab !== 'login');
+            document.getElementById('tab-signup').classList.toggle('bg-blue-600', tab === 'signup');
+            document.getElementById('tab-signup').classList.toggle('text-gray-400', tab !== 'signup');
         }
 
-        function playPurchase() {
-            if (!settings.sfxEnabled) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.type = 'triangle';
-            osc.frequency.value = 600;
-            gain.gain.value = settings.sfxVolume * 0.15;
-            osc.start();
-            osc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.2);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-            osc.stop(audioContext.currentTime + 0.2);
-        }
+        // Handle Sign Up (Create Auth User + Firestore User Profile)
+        window.handleSignup = async () => {
+            const username = document.getElementById('su-username').value.trim();
+            const email = document.getElementById('su-email').value;
+            const pass = document.getElementById('su-password').value;
 
-        function playAchievement() {
-            if (!settings.sfxEnabled) return;
-            [440, 554, 659, 880].forEach((freq, i) => {
-                setTimeout(() => {
-                    const osc = audioContext.createOscillator();
-                    const gain = audioContext.createGain();
-                    osc.connect(gain);
-                    gain.connect(audioContext.destination);
-                    osc.frequency.value = freq;
-                    gain.gain.value = settings.sfxVolume * 0.1;
-                    osc.start();
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                    osc.stop(audioContext.currentTime + 0.3);
-                }, i * 100);
-            });
-        }
+            if(!username || username.length < 3) return alert("Username must be 3+ chars");
 
-        // PARTICLE SYSTEM
-        function createParticle(x, y, value) {
-            if (!settings.particlesEnabled) return;
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.textContent = '+' + Math.floor(value).toLocaleString();
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
-            particle.style.color = value > 100 ? '#fbbf24' : '#22d3ee';
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 1000);
-        }
+            try {
+                // 1. Create Auth User
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
 
-        // NOTIFICATION SYSTEM
-        function showNotification(title, message) {
-            const notif = document.createElement('div');
-            notif.className = 'notification';
-            notif.innerHTML = `<div class="notif-title">${title}</div><div>${message}</div>`;
-            document.body.appendChild(notif);
-            setTimeout(() => notif.remove(), 3000);
-        }
-
-        // GAME DATA
-        const emojis = ["🍼","🧸","🏫","🎒","🎮","📺","📱","💻","🚀","🛸","🛰️","🪐","🌌","🧬","🧪","⚡","🔥","💎","🏆","👑","🦄","🐉","🌟","⭐","✨","🎯","🎪","🎨","🎭","🎬","🎸","🎹","🎺","🎻","🥁","🎲","🎰","🎳","🎯","🏀","⚽","🏈","⚾","🎾","🏐","🏉","🎱","🏓","🏸","🏒","🏑","🥊","🥋","🥅","⛳","🏹","🎣","🥇","🥈","🥉","🏅","🎖️","🏆","🥌","🛷","🎿","⛷️","🏂","🏋️","🤺","🤸","🤼","🤽","🤾","🧗","🧘","🏇","🧜","🧚","🧞","🧙","🧛","🧟","🦸","🦹","🧑","👨","👩","👶","🧒","👦","👧","🧔"];
-        const names = ["Infant","Toddler","Preschooler","Scholar","Gamer","Creator","Streamer","Manager","Executive","CEO","Android","Matrix","Nebula","Warp","Interstellar","God-Tier","Eternal","Singularity","Supreme","Infinite","Cosmic","Quantum","Omega","Alpha","Sigma","Delta","Gamma","Stellar","Celestial","Divine","Mythic","Legendary","Epic","Rare","Ultimate","Prime","Elite","Master","Grandmaster","Champion","Titan","Colossus","Behemoth","Leviathan","Kraken","Phoenix","Dragon","Hydra","Cerberus","Chimera","Basilisk","Griffin","Pegasus","Unicorn","Manticore","Sphinx","Minotaur","Centaur","Cyclops","Giant","Golem","Elemental","Spirit","Phantom","Wraith","Specter","Demon","Angel","Archangel","Seraph","Cherub","Deity","Immortal","Eternal","Transcendent","Omnipotent","Omniscient","Omnipresent","Absolute","Infinite","Boundless","Limitless","Endless","Timeless","Ageless","Deathless","Invincible","Unstoppable"];
-        
-        const storeItems = [];
-        for(let i=0; i<100; i++) {
-            storeItems.push({ 
-                id: 'u'+i, 
-                emoji: emojis[i % emojis.length], 
-                name: names[i % names.length] + " Vraj", 
-                cost: Math.floor(15 * Math.pow(1.3, i)), 
-                power: (i+1) * Math.pow(1.2, i/3) 
-            });
-        }
-
-        const prestigeUpgrades = [
-            { id: 'p1', name: 'Double Tap', desc: 'Each click is worth 2x', cost: 1, effect: 'clickMult', value: 2 },
-            { id: 'p2', name: 'Efficient Workers', desc: '+25% production', cost: 2, effect: 'cpsMult', value: 1.25 },
-            { id: 'p3', name: 'Bulk Discount', desc: '-10% upgrade costs', cost: 3, effect: 'costReduction', value: 0.9 },
-            { id: 'p4', name: 'Triple Power', desc: 'Clicks worth 3x (stacks)', cost: 5, effect: 'clickMult', value: 3 },
-            { id: 'p5', name: 'Super Production', desc: '+50% production', cost: 7, effect: 'cpsMult', value: 1.5 },
-            { id: 'p6', name: 'Critical Clicks', desc: '10% chance for 10x click', cost: 10, effect: 'critical', value: 0.1 },
-            { id: 'p7', name: 'Mega Discount', desc: '-25% upgrade costs', cost: 15, effect: 'costReduction', value: 0.75 },
-            { id: 'p8', name: 'Auto Clicker', desc: '1 auto click per second', cost: 20, effect: 'autoClick', value: 1 },
-            { id: 'p9', name: 'Golden Touch', desc: 'All production +100%', cost: 30, effect: 'cpsMult', value: 2 },
-            { id: 'p10', name: 'Legendary Power', desc: 'Clicks worth 5x', cost: 50, effect: 'clickMult', value: 5 }
-        ];
-
-        const achievements = [
-            { id: 'a1', goal: 100, name: 'First Steps', emoji: '👶' },
-            { id: 'a2', goal: 1000, name: 'Getting Started', emoji: '🎯' },
-            { id: 'a3', goal: 10000, name: 'Clicking Champion', emoji: '🏅' },
-            { id: 'a4', goal: 50000, name: 'Dedicated Clicker', emoji: '💪' },
-            { id: 'a5', goal: 100000, name: 'Click Master', emoji: '🎖️' },
-            { id: 'a6', goal: 500000, name: 'Click Overlord', emoji: '👑' },
-            { id: 'a7', goal: 1000000, name: 'Million Club', emoji: '💎' },
-            { id: 'a8', goal: 5000000, name: 'Click Deity', emoji: '⚡' },
-            { id: 'a9', goal: 10000000, name: 'Ascended One', emoji: '✨' },
-            { id: 'a10', goal: 50000000, name: 'Infinite Power', emoji: '🌟' }
-        ];
-
-        for(let i = 10; i < 100; i++) {
-            achievements.push({ 
-                id: 'a'+(i+1), 
-                goal: Math.pow(i+1, 4) * 100, 
-                name: `Level ${i+1} Mastery`,
-                emoji: emojis[i % emojis.length]
-            });
-        }
-
-        window.showAuth = (id) => {
-            document.querySelectorAll('.auth-screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        };
-
-        document.getElementById('do-signup').onclick = () => {
-            const u = document.getElementById('s-user').value, 
-                  e = document.getElementById('s-email').value, 
-                  p = document.getElementById('s-pass').value;
-            
-            if(!u || !e || !p) { alert("Please fill all fields"); return; }
-            
-            createUserWithEmailAndPassword(auth, e, p).then(res => {
-                sendEmailVerification(res.user);
-                set(ref(db, 'users/' + res.user.uid), { 
-                    name: u, score: 0, highscore: 0, cps: 0, prestige: 0, 
-                    counts: {}, achievements: [], prestigeUpgrades: {},
-                    totalClicks: 0, startTime: Date.now()
+                // 2. Create Firestore Profile (to store username)
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email,
+                    createdAt: serverTimestamp()
                 });
-                alert("Account created! Check your email to verify.");
-            }).catch(err => alert(err.message));
+
+                // 3. Send Verification
+                await sendEmailVerification(user);
+                alert("Account created! Please check your email to verify.");
+                window.location.reload(); // Reload to show verification screen
+
+            } catch (e) { alert(e.message); }
         };
 
-        document.getElementById('do-login').onclick = () => {
-            signInWithEmailAndPassword(auth, 
-                document.getElementById('l-email').value, 
-                document.getElementById('l-pass').value
-            ).catch(e => alert("Login Failed: " + e.message));
+        window.handleLogin = async () => {
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('li-email').value, document.getElementById('li-password').value);
+            } catch (e) { alert(e.message); }
         };
 
-        onAuthStateChanged(auth, user => {
-            if(user && user.emailVerified) {
-                document.getElementById('screen-auth-wrap').classList.add('hidden');
-                document.getElementById('screen-game').classList.remove('hidden');
-                document.getElementById('top-bar').classList.remove('hidden');
-                
-                onValue(ref(db, 'users/' + user.uid), s => { 
-                    if(s.exists()){ 
-                        userData = {...userData, ...s.val()};
-                        if(!userData.prestigeUpgrades) userData.prestigeUpgrades = {};
-                        if(!userData.totalClicks) userData.totalClicks = 0;
-                        if(!userData.startTime) userData.startTime = Date.now();
-                        uiNeedsUpdate = true;
+        window.handleGuest = async () => {
+            try { await signInAnonymously(auth); } catch (e) { alert(e.message); }
+        };
+
+        // New Logout with confirmation
+        window.logoutConfirm = () => {
+            if(confirm("Are you sure you would like to logout? Progress isn't saved automatically yet!")) {
+                 // Try to save score one last time before quitting if logged in
+                 if(currentUser && !currentUser.isAnonymous) saveScoreToFirestore();
+                 signOut(auth);
+            }
+        }
+
+
+        // ================= GAME LOGIC =================
+
+        // The Click Action
+        window.clickVraj = () => {
+            score++;
+            document.getElementById('score').innerText = score;
+            // Debounced saving: Save to Firestore every 5 seconds if clicking continuously
+            if(currentUser && !currentUser.isAnonymous && !scoreSaveTimer) {
+                 scoreSaveTimer = setTimeout(() => {
+                    saveScoreToFirestore();
+                    scoreSaveTimer = null;
+                 }, 5000);
+            }
+        };
+
+        // Save score to Firestore (Leaderboard)
+        async function saveScoreToFirestore() {
+            if(!currentUser || currentUser.isAnonymous) return;
+            try {
+                const userRef = doc(db, "leaderboard", currentUser.uid);
+                // merge: true makes sure we don't overwrite existing data, just update the score
+                await setDoc(userRef, {
+                    score: score,
+                    username: currentUsername
+                }, { merge: true });
+                console.log("Score saved automatically.");
+            } catch (e) { console.error("Error saving score:", e); }
+        }
+
+        // Load initial score (optional - currently starts at 0 every session)
+        async function loadInitialData(uid) {
+            const docRef = doc(db, "leaderboard", uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                // Uncomment below if you want score to persist across sessions
+                // score = docSnap.data().score || 0; 
+                // document.getElementById('score').innerText = score;
+            }
+        }
+
+
+        // ================= CHAT & LEADERBOARD LISTENERS =================
+
+        // Setup Real-time Listeners (runs when logged in)
+        function setupGameListeners(user) {
+            // --- 1. Leaderboard Listener ---
+            const leaderboardQuery = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+            onSnapshot(leaderboardQuery, (snapshot) => {
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = ""; // Clear current list
+                let rank = 1;
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const isMe = doc.id === user.uid ? "bg-blue-900/30 border-blue-500/50" : "bg-gray-800/30 border-transparent";
+                    list.innerHTML += `
+                        <div class="flex justify-between items-center p-2 mb-1 rounded-lg border ${isMe} text-sm">
+                            <div><span class="font-bold text-purple-400 mr-2">#${rank}</span> ${data.username}</div>
+                            <div class="font-bold text-blue-300">${data.score}</div>
+                        </div>
+                    `;
+                    rank++;
+                });
+                if(snapshot.empty) list.innerHTML = "<p class='text-center text-gray-500'>No scores yet.</p>";
+            });
+
+             // --- 2. Chat Listener ---
+            const chatQuery = query(collection(db, "globalChat"), orderBy("timestamp", "desc"), limit(30));
+            onSnapshot(chatQuery, (snapshot) => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = ""; // Clear chat box
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    // Ensure it's a valid message
+                    if(msg.text && msg.username) {
+                        chatBox.innerHTML += `
+                        <div class="bg-gray-800/50 p-2 rounded-lg text-sm break-words">
+                            <span class="font-bold text-emerald-400">${msg.username}:</span> <span class="text-gray-200">${msg.text}</span>
+                        </div>`;
                     }
                 });
-            } else { 
-                document.getElementById('screen-auth-wrap').classList.remove('hidden');
-                document.getElementById('screen-game').classList.add('hidden');
-                document.getElementById('top-bar').classList.add('hidden');
-                showAuth('screen-menu'); 
-            }
-        });
-
-        document.getElementById('main-clicker').onclick = (e) => {
-            let clickValue = 1 + (userData.cps * 0.15);
-            clickValue *= Math.pow(2, userData.prestige);
-            
-            let clickMult = 1;
-            let hasCritical = false;
-            Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
-                const upgrade = prestigeUpgrades.find(p => p.id === pid);
-                if(upgrade && upgrade.effect === 'clickMult') clickMult *= upgrade.value;
-                if(upgrade && upgrade.effect === 'critical') hasCritical = true;
-            });
-            clickValue *= clickMult;
-            
-            if(hasCritical && Math.random() < 0.1) {
-                clickValue *= 10;
-                createParticle(e.clientX, e.clientY, clickValue);
-                showNotification('💥 CRITICAL HIT!', `+${Math.floor(clickValue).toLocaleString()}`);
-            }
-            
-            userData.score += clickValue;
-            userData.totalClicks += 1;
-            if(userData.score > (userData.highscore || 0)) userData.highscore = userData.score;
-            
-            playClick();
-            createParticle(e.clientX, e.clientY, clickValue);
-            checkAchs();
-            queueSave();
-            uiNeedsUpdate = true;
-        };
-
-        function checkAchs() {
-            achievements.forEach(a => { 
-                if(userData.score >= a.goal && !userData.achievements.includes(a.id)) {
-                    userData.achievements.push(a.id);
-                    playAchievement();
-                    showNotification('🏆 ACHIEVEMENT UNLOCKED!', a.name);
-                }
             });
         }
 
-        window.buy = (id) => {
-            const item = storeItems.find(i => i.id === id);
-            const count = userData.counts[id] || 0;
-            let cost = Math.floor(item.cost * Math.pow(1.15, count));
+        // Send Chat Message
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if(!text || !currentUser) return;
             
-            let costMult = 1;
-            Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
-                const upgrade = prestigeUpgrades.find(p => p.id === pid);
-                if(upgrade && upgrade.effect === 'costReduction') costMult *= upgrade.value;
-            });
-            cost = Math.floor(cost * costMult);
-            
-            if(userData.score >= cost) {
-                userData.score -= cost;
-                userData.counts[id] = count + 1;
-                
-                let totalCPS = 0;
-                let cpsMult = 1;
-                Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
-                    const upgrade = prestigeUpgrades.find(p => p.id === pid);
-                    if(upgrade && upgrade.effect === 'cpsMult') cpsMult *= upgrade.value;
+            try {
+                await addDoc(collection(db, "globalChat"), {
+                    text: text,
+                    username: currentUsername,
+                    uid: currentUser.uid,
+                    timestamp: serverTimestamp()
                 });
-                
-                storeItems.forEach(si => totalCPS += (si.power * (userData.counts[si.id] || 0)));
-                userData.cps = totalCPS * cpsMult;
-                
-                playPurchase();
-                queueSave();
-                uiNeedsUpdate = true;
-            }
-        };
+                input.value = ""; // Clear input
+            } catch(e) { console.error("Chat error:", e); }
+        });
 
-        window.buyPrestigeUpgrade = (id) => {
-            const upgrade = prestigeUpgrades.find(p => p.id === id);
-            if(!upgrade) return;
-            
-            if(userData.prestige >= upgrade.cost && !userData.prestigeUpgrades[id]) {
-                userData.prestige -= upgrade.cost;
-                userData.prestigeUpgrades[id] = true;
-                playPurchase();
-                showNotification('⭐ UPGRADE ACQUIRED!', upgrade.name);
-                queueSave();
-                uiNeedsUpdate = true;
-            }
-        };
 
-        window.setTab = (t) => {
-            document.getElementById('store-list').classList.toggle('hidden', t !== 'store');
-            document.getElementById('prestige-list').classList.toggle('hidden', t !== 'prestige');
-            document.getElementById('achs-list').classList.toggle('hidden', t !== 'achs');
-            document.getElementById('tab-btn-store').classList.toggle('active', t === 'store');
-            document.getElementById('tab-btn-prestige').classList.toggle('active', t === 'prestige');
-            document.getElementById('tab-btn-achs').classList.toggle('active', t === 'achs');
-            uiNeedsUpdate = true;
-        };
+        // ================= MAIN AUTH STATE OBSERVER =================
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const authContainer = document.getElementById('auth-container');
+            const gameContainer = document.getElementById('game-container');
+            const gameFooter = document.getElementById('game-footer');
+            const verifyNotice = document.getElementById('verify-notice');
+            const authTabs = document.getElementById('auth-tabs');
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
 
-        window.prestige = () => {
-            if(userData.score >= 1000000) {
-                const prestigeGain = Math.floor(userData.score / 1000000);
-                userData.prestige += prestigeGain;
-                userData.score = 0;
-                userData.cps = 0;
-                userData.counts = {};
-                playAchievement();
-                showNotification('🏆 PRESTIGE!', `+${prestigeGain} Prestige Points`);
-                queueSave();
-                uiNeedsUpdate = true;
-            }
-        };
+            // Reset state on login status change
+            score = 0;
+            document.getElementById('score').innerText = 0;
 
-        function queueSave() {
-            if(!saveQueued) {
-                saveQueued = true;
-                setTimeout(() => {
-                    if(auth.currentUser) {
-                        update(ref(db, 'users/' + auth.currentUser.uid), userData);
+            if (user) {
+                // Logged in. Check verification.
+                if (!user.isAnonymous && !user.emailVerified) {
+                    // Show Verification Screen
+                    authContainer.classList.remove('hidden');
+                    gameContainer.classList.add('hidden');
+                    gameFooter.classList.add('hidden');
+                    authTabs.classList.add('hidden');
+                    loginForm.classList.add('hidden');
+                    signupForm.classList.add('hidden');
+                    verifyNotice.classList.remove('hidden');
+                } else {
+                    // GAMETIME: User Verified OR Guest
+                    authContainer.classList.add('hidden');
+                    gameContainer.classList.remove('hidden');
+                    gameFooter.classList.remove('hidden');
+
+                    // Determine Username
+                    if(user.isAnonymous) {
+                        currentUsername = "Guest_" + user.uid.substring(0,5);
+                    } else {
+                        // Fetch username from Firestore profile
+                        const userSnap = await getDoc(doc(db, "users", user.uid));
+                        if(userSnap.exists()) {
+                            currentUsername = userSnap.data().username;
+                        } else {
+                            currentUsername = user.email.split('@')[0]; // Fallback
+                        }
+                        // Optionally load previous score
+                        // loadInitialData(user.uid);
                     }
-                    saveQueued = false;
-                }, 500);
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('score-display').innerText = Math.floor(userData.score).toLocaleString();
-            document.getElementById('cps-display').innerText = `${userData.cps.toFixed(1)} PER SECOND`;
-            document.getElementById('pres-btn').disabled = userData.score < 1000000;
-            
-            const mult = Math.pow(2, userData.prestige);
-            document.getElementById('mult-badge').innerText = `x${mult}`;
-            document.getElementById('prestige-level').innerText = userData.prestige || 0;
-            document.getElementById('total-clicks').innerText = (userData.totalClicks || 0).toLocaleString();
-            document.getElementById('ach-count').innerText = `${userData.achievements.length}/100`;
-            
-            const playTime = Math.floor((Date.now() - (userData.startTime || Date.now())) / 60000);
-            document.getElementById('play-time').innerText = playTime < 60 ? `${playTime}m` : `${Math.floor(playTime/60)}h ${playTime%60}m`;
-            
-            const sl = document.getElementById('store-list'); 
-            if(!sl.classList.contains('hidden')) {
-                sl.innerHTML = "";
-                storeItems.slice(0, Math.max(5, Object.keys(userData.counts).length + 3)).forEach(item => {
-                    const count = userData.counts[item.id] || 0;
-                    let cost = Math.floor(item.cost * Math.pow(1.15, count));
+                    document.getElementById('user-display').innerText = currentUsername;
                     
-                    let costMult = 1;
-                    Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
-                        const upgrade = prestigeUpgrades.find(p => p.id === pid);
-                        if(upgrade && upgrade.effect === 'costReduction') costMult *= upgrade.value;
-                    });
-                    cost = Math.floor(cost * costMult);
-                    
-                    const canAfford = userData.score >= cost;
-                    sl.innerHTML += `<div class="item-card ${!canAfford?'locked':''}" onclick="buy('${item.id}')">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <span style="font-size:1.8rem;">${item.emoji}</span>
-                            <div>
-                                <b style="color:var(--accent);">${item.name}</b><br>
-                                <small style="color:var(--gold);">${cost.toLocaleString()} clicks</small>
-                                <div style="font-size:0.75rem; opacity:0.7;">+${item.power.toFixed(1)}/sec</div>
-                            </div>
-                        </div>
-                        <div style="font-weight:bold; opacity:0.6;">x${count}</div>
-                    </div>`;
-                });
-            }
-
-            const pl = document.getElementById('prestige-list');
-            if(!pl.classList.contains('hidden')) {
-                pl.innerHTML = "";
-                prestigeUpgrades.forEach(upgrade => {
-                    const owned = userData.prestigeUpgrades && userData.prestigeUpgrades[upgrade.id];
-                    const canAfford = userData.prestige >= upgrade.cost && !owned;
-                    pl.innerHTML += `<div class="item-card prestige-item ${!canAfford&&!owned?'locked':''}" onclick="buyPrestigeUpgrade('${upgrade.id}')">
-                        <div>
-                            <b style="color:${owned?'var(--success)':'var(--gold)'};">${owned?'✅ ':''} ${upgrade.name}</b><br>
-                            <small style="opacity:0.8;">${upgrade.desc}</small><br>
-                            <small style="color:var(--primary); font-weight:600;">${upgrade.cost} Prestige Points</small>
-                        </div>
-                        <div>${owned?'OWNED':'🔒'}</div>
-                    </div>`;
-                });
-            }
-
-            const al = document.getElementById('achs-list');
-            if(!al.classList.contains('hidden')) {
-                al.innerHTML = "";
-                achievements.forEach(a => {
-                    const got = userData.achievements.includes(a.id);
-                    const progress = Math.min(100, (userData.score / a.goal) * 100);
-                    al.innerHTML += `<div class="item-card" style="opacity:${got?1:0.5}; cursor: default;">
-                        <div style="flex-grow:1;">
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-                                <span style="font-size:1.5rem;">${a.emoji}</span>
-                                <b>${a.name}</b>
-                                <span style="margin-left:auto;">${got?'✅':'🔒'}</span>
-                            </div>
-                            <small>${a.goal.toLocaleString()} Clicks</small>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width:${progress}%"></div>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-            }
-        }
-
-        onValue(query(ref(db, 'users'), orderByChild('highscore'), limitToLast(20)), s => {
-            const b = document.getElementById('lb-body'); 
-            b.innerHTML = "";
-            let players = [];
-            s.forEach(c => players.push(c.val()));
-            players.reverse().forEach((u, i) => { 
-                let rankClass = '';
-                if(i === 0) rankClass = 'rank-1';
-                else if(i === 1) rankClass = 'rank-2';
-                else if(i === 2) rankClass = 'rank-3';
-                
-                b.innerHTML += `<div class="lb-row ${rankClass}">
-                    <span>#${i+1} ${u.name}</span>
-                    <span>${Math.floor(u.highscore || 0).toLocaleString()}</span>
-                </div>`; 
-            });
-        });
-
-        document.getElementById('chat-input').onkeydown = (e) => {
-            if(e.key === 'Enter' && e.target.value.trim() !== "") {
-                push(ref(db, 'chat'), { 
-                    user: userData.name, 
-                    msg: e.target.value.slice(0, 100), 
-                    time: serverTimestamp() 
-                });
-                e.target.value = "";
-            }
-        };
-        
-        onValue(query(ref(db, 'chat'), limitToLast(20)), s => {
-            const cb = document.getElementById('chat-box'); 
-            cb.innerHTML = "";
-            s.forEach(c => { 
-                const d = c.val(); 
-                cb.innerHTML += `<div class="chat-msg"><span class="chat-user">${d.user}:</span> ${d.msg}</div>`; 
-            });
-            cb.scrollTop = cb.scrollHeight;
-        });
-
-        window.toggleSettings = () => {
-            document.getElementById('settings-modal').classList.toggle('hidden');
-        };
-
-        window.toggleSFX = () => {
-            settings.sfxEnabled = !settings.sfxEnabled;
-            document.getElementById('sfx-toggle').classList.toggle('active', settings.sfxEnabled);
-        };
-
-        window.toggleParticles = () => {
-            settings.particlesEnabled = !settings.particlesEnabled;
-            document.getElementById('particles-toggle').classList.toggle('active', settings.particlesEnabled);
-        };
-
-        window.setSFXVolume = (val) => {
-            settings.sfxVolume = val / 100;
-        };
-
-        window.logout = () => signOut(auth).then(() => location.reload());
-
-        setInterval(() => { 
-            if(auth.currentUser?.emailVerified && userData.cps > 0) {
-                userData.score += (userData.cps * 0.1);
-                if(userData.score > (userData.highscore||0)) userData.highscore = userData.score;
-                
-                let autoClicks = 0;
-                Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
-                    const upgrade = prestigeUpgrades.find(p => p.id === pid);
-                    if(upgrade && upgrade.effect === 'autoClick') autoClicks += upgrade.value;
-                });
-                
-                if(autoClicks > 0) {
-                    let clickValue = (1 + (userData.cps * 0.15)) * Math.pow(2, userData.prestige);
-                    let clickMult = 1;
-                    Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
-                        const upgrade = prestigeUpgrades.find(p => p.id === pid);
-                        if(upgrade && upgrade.effect === 'clickMult') clickMult *= upgrade.value;
-                    });
-                    userData.score += (clickValue * clickMult * autoClicks);
+                    // Start Listeners
+                    setupGameListeners(user);
                 }
-                
-                queueSave();
-                uiNeedsUpdate = true;
+            } else {
+                // LOGGED OUT STATE
+                authContainer.classList.remove('hidden');
+                gameContainer.classList.add('hidden');
+                gameFooter.classList.add('hidden');
+                authTabs.classList.remove('hidden');
+                verifyNotice.classList.add('hidden');
+                // Reset to login tab view
+                switchTab('login'); 
             }
-        }, 1000);
-
-        setInterval(() => {
-            if(auth.currentUser?.emailVerified && uiNeedsUpdate) {
-                updateUI();
-                uiNeedsUpdate = false;
-            }
-        }, 50);
+        });
     </script>
 </body>
 </html>
