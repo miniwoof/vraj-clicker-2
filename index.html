@@ -24,18 +24,25 @@
         .no-select { -webkit-user-select: none; user-select: none; }
         .bulk-btn.active { background: #3b82f6; color: white; }
 
-        /* Floating Text Animation */
-        .float-text {
-            position: absolute; color: #60a5fa; font-weight: 800; pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards; z-index: 100;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
+        .float-text { position: absolute; color: #60a5fa; font-weight: 800; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 100; }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+
+        /* Golden Vraj */
+        .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 50; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; }
+        @keyframes goldenFly { 0% { left: -100px; top: 20%; } 100% { left: 110vw; top: 60%; } }
     </style>
 </head>
 <body class="no-select">
+
+    <div id="multiplier-display" class="fixed top-4 left-4 z-[60] hidden">
+        <div class="glass p-3 rounded-2xl border-yellow-500/50 border flex items-center gap-3">
+            <span class="text-2xl">🌟</span>
+            <div>
+                <p class="text-xs font-bold text-yellow-400">2X MULTIPLIER</p>
+                <p id="mult-timer" class="text-lg font-black text-white">03:00</p>
+            </div>
+        </div>
+    </div>
 
     <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
         <div class="glass p-8 rounded-3xl shadow-2xl w-full max-w-md text-center">
@@ -81,6 +88,7 @@
                 <div>
                     <h2 id="score" class="text-7xl font-black text-blue-400 drop-shadow-lg">0</h2>
                     <p id="vps-display" class="text-emerald-400 font-bold tracking-widest text-sm">0 VPS</p>
+                    <p id="ppc-display" class="text-blue-300 font-bold text-[10px] mt-1">1 Points Per Click</p>
                 </div>
 
                 <div id="clicker-container" onclick="clickVraj(event)" class="click-btn-container w-80 h-80 rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-2xl">
@@ -132,61 +140,59 @@
         const clickSound = new Audio('click.mp3');
         function playSfx() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
 
-        let score = 0, vps = 0, bulkAmount = 1;
+        let score = 0, vps = 0, ppc = 1, bulkAmount = 1;
+        let multiplier = 1, multTimeRemaining = 0;
         let currentUser = null, currentUsername = "Guest";
 
         const upgradeData = [
-  { name: "Vraj Finger",      baseCost: 10,         basePower: 0.2,      emoji: "☝️" },
-  { name: "Vraj Sprout",      baseCost: 20,         basePower: 0.4,      emoji: "🌱" },
-  { name: "Vraj Cursor",      baseCost: 50,         basePower: 1,        emoji: "🖱️" },
-  { name: "Vraj Nanobots",    baseCost: 80,         basePower: 2,        emoji: "🤏" },
-  { name: "Vraj Drone",       baseCost: 120,        basePower: 4,        emoji: "🚁" },
-  { name: "Vraj Magnet",      baseCost: 210,        basePower: 6,        emoji: "🧲" },
-  { name: "Vraj Juice",       baseCost: 336,        basePower: 10,       emoji: "🧃" },
-  { name: "Vraj Keyboard",    baseCost: 538,        basePower: 15,       emoji: "⌨️" },
-  { name: "Vraj Potion",      baseCost: 861,        basePower: 30,       emoji: "🧪" },
-  { name: "Vraj Coffee",      baseCost: 1378,       basePower: 50,       emoji: "☕" },
-  { name: "Vraj Gear",        baseCost: 2205,       basePower: 100,      emoji: "⚙️" },
-  { name: "Vraj Botnet",      baseCost: 3528,       basePower: 120,      emoji: "🌐" },
-
-  { name: "Vraj Tuner",       baseCost: 5645,       basePower: 150,      emoji: "🎚️" },
-  { name: "Vraj Garden",      baseCost: 9032,       basePower: 170,      emoji: "🌿" },
-  { name: "Vraj Typist",      baseCost: 14451,      basePower: 200,      emoji: "💻" },
-  { name: "Vraj Swarm",       baseCost: 23122,      basePower: 250,      emoji: "🐝" },
-  { name: "Vraj Automaton",   baseCost: 36995,      basePower: 280,      emoji: "🤖" },
-  { name: "Vraj Attractor",   baseCost: 59192,      basePower: 296,      emoji: "🧲" },
-  { name: "Vraj Smoothie",    baseCost: 94707,      basePower: 474,      emoji: "🥤" },
-  { name: "Vraj Console",     baseCost: 151531,     basePower: 758,      emoji: "🕹️" },
-  { name: "Vraj Lab",         baseCost: 242450,     basePower: 1212,     emoji: "⚗️" },
-  { name: "Vraj Brewery",     baseCost: 387920,     basePower: 1940,     emoji: "🍺" },
-  { name: "Vraj Workshop",    baseCost: 620672,     basePower: 3103,     emoji: "🛠️" },
-  { name: "Vraj Network",     baseCost: 993075,     basePower: 4965,     emoji: "📡" },
-
-  { name: "Vraj Reactor",     baseCost: 1588920,    basePower: 7945,     emoji: "⚛️" },
-  { name: "Vraj Meadow",      baseCost: 2542272,    basePower: 12711,    emoji: "🌾" },
-  { name: "Vraj Terminal",    baseCost: 4067635,    basePower: 20338,    emoji: "🖥️" },
-  { name: "Vraj Hive",        baseCost: 6508216,    basePower: 32541,    emoji: "🐜" },
-  { name: "Vraj Factory",     baseCost: 10413146,   basePower: 52066,    emoji: "🏭" },
-  { name: "Vraj Collider",    baseCost: 16661034,   basePower: 83305,    emoji: "🔬" },
-  { name: "Vraj Extract",     baseCost: 26657654,   basePower: 133288,   emoji: "🧉" },
-  { name: "Vraj Deck",        baseCost: 42652246,   basePower: 213261,   emoji: "🎮" },
-  { name: "Vraj Chemworks",   baseCost: 68243594,   basePower: 341218,   emoji: "🧫" },
-  { name: "Vraj Distillery",  baseCost: 109189750,  basePower: 545949,   emoji: "🥃" },
-  { name: "Vraj Assembly",    baseCost: 174703600,  basePower: 873518,   emoji: "🤝" },
-  { name: "Vraj Mainframe",   baseCost: 279525760,  basePower: 1397629,  emoji: "💽" },
-
-  { name: "Vraj Singularity", baseCost: 447241216,  basePower: 2236206,  emoji: "🌀" },
-  { name: "Vraj Forest",      baseCost: 715585946,  basePower: 3577930,  emoji: "🌲" },
-  { name: "Vraj Supercomp",   baseCost: 1144937514, basePower: 5724688,  emoji: "💾" },
-  { name: "Vraj Colony",      baseCost: 1831900022, basePower: 9159501,  emoji: "🐜" },
-  { name: "Vraj Megaplant",   baseCost: 2931040035, basePower: 14655200, emoji: "🏗️" },
-  { name: "Vraj Accelerator", baseCost: 4689664056, basePower: 23448320, emoji: "🚀" },
-  { name: "Vraj Serum",       baseCost: 7503462490, basePower: 37517312, emoji: "💉" },
-  { name: "Vraj Interface",   baseCost: 12005539984,basePower: 60027700, emoji: "🧩" },
-  { name: "Vraj Genome",      baseCost: 19208863974,basePower: 96044320, emoji: "🧬" },
-  { name: "Vraj Roast",       baseCost: 30734182358,basePower: 153670912,emoji: "🌰" },
-  { name: "Vraj Forge",       baseCost: 49174691773,basePower: 245873459,emoji: "🗜️" },
-  { name: "Vraj Datasphere",  baseCost: 78679506837,basePower: 393397534,emoji: "🌐" }
+            { name: "Vraj Finger", baseCost: 10, basePower: 0.2, emoji: "☝️" },
+            { name: "Vraj Sprout", baseCost: 20, basePower: 0.4, emoji: "🌱" },
+            { name: "Vraj Cursor", baseCost: 50, basePower: 1, emoji: "🖱️" },
+            { name: "Vraj Nanobots", baseCost: 80, basePower: 2, emoji: "🤏" },
+            { name: "Vraj Drone", baseCost: 120, basePower: 4, emoji: "🚁" },
+            { name: "Vraj Magnet", baseCost: 210, basePower: 6, emoji: "🧲" },
+            { name: "Vraj Juice", baseCost: 336, basePower: 10, emoji: "🧃" },
+            { name: "Vraj Keyboard", baseCost: 538, basePower: 15, emoji: "⌨️" },
+            { name: "Vraj Potion", baseCost: 861, basePower: 30, emoji: "🧪" },
+            { name: "Vraj Coffee", baseCost: 1378, basePower: 50, emoji: "☕" },
+            { name: "Vraj Gear", baseCost: 2205, basePower: 100, emoji: "⚙️" },
+            { name: "Vraj Botnet", baseCost: 3528, basePower: 120, emoji: "🌐" },
+            { name: "Vraj Tuner", baseCost: 5645, basePower: 150, emoji: "🎚️" },
+            { name: "Vraj Garden", baseCost: 9032, basePower: 170, emoji: "🌿" },
+            { name: "Vraj Typist", baseCost: 14451, basePower: 200, emoji: "💻" },
+            { name: "Vraj Epstien", baseCost: 23122, basePower: 250, emoji: "👶👨🏼‍🦳" },
+            { name: "Vraj Automaton", baseCost: 36995, basePower: 280, emoji: "🤖" },
+            { name: "Vraj Attractor", baseCost: 59192, basePower: 296, emoji: "🧲" },
+            { name: "Vraj Smoothie", baseCost: 94707, basePower: 474, emoji: "🥤" },
+            { name: "Vraj Console", baseCost: 151531, basePower: 758, emoji: "🕹️" },
+            { name: "Vraj Lab", baseCost: 242450, basePower: 1212, emoji: "⚗️" },
+            { name: "Vraj Brewery", baseCost: 387920, basePower: 1940, emoji: "🍺" },
+            { name: "Vraj Workshop", baseCost: 620672, basePower: 3103, emoji: "🛠️" },
+            { name: "Vraj Network", baseCost: 993075, basePower: 4965, emoji: "📡" },
+            { name: "Vraj Reactor", baseCost: 1588920, basePower: 7945, emoji: "⚛️" },
+            { name: "Vraj Meadow", baseCost: 2542272, basePower: 12711, emoji: "🌾" },
+            { name: "Vraj Terminal", baseCost: 4067635, basePower: 20338, emoji: "🖥️" },
+            { name: "Vraj Hive", baseCost: 6508216, basePower: 32541, emoji: "🐜" },
+            { name: "Vraj Factory", baseCost: 10413146, basePower: 52066, emoji: "🏭" },
+            { name: "Vraj Collider", baseCost: 16661034, basePower: 83305, emoji: "🔬" },
+            { name: "Vraj Extract", baseCost: 26657654, basePower: 133288, emoji: "🧉" },
+            { name: "Vraj Deck", baseCost: 42652246, basePower: 213261, emoji: "🎮" },
+            { name: "Vraj Chemworks", baseCost: 68243594, basePower: 341218, emoji: "🧫" },
+            { name: "Vraj Distillery", baseCost: 109189750, basePower: 545949, emoji: "🥃" },
+            { name: "Vraj Assembly", baseCost: 174703600, basePower: 873518, emoji: "🤝" },
+            { name: "Vraj Mainframe", baseCost: 279525760, basePower: 1397629, emoji: "💽" },
+            { name: "Vraj Singularity", baseCost: 447241216, basePower: 2236206, emoji: "🌀" },
+            { name: "Vraj Forest", baseCost: 715585946, basePower: 3577930, emoji: "🌲" },
+            { name: "Vraj Supercomp", baseCost: 1144937514, basePower: 5724688, emoji: "💾" },
+            { name: "Vraj Colony", baseCost: 1831900022, basePower: 9159501, emoji: "🐜" },
+            { name: "Vraj Megaplant", baseCost: 2931040035, basePower: 14655200, emoji: "🏗️" },
+            { name: "Vraj Accelerator", baseCost: 4689664056, basePower: 23448320, emoji: "🚀" },
+            { name: "Vraj Serum", baseCost: 7503462490, basePower: 37517312, emoji: "💉" },
+            { name: "Vraj Interface", baseCost: 12005539984, basePower: 60027700, emoji: "🧩" },
+            { name: "Vraj Genome", baseCost: 19208863974, basePower: 96044320, emoji: "🧬" },
+            { name: "Vraj Roast", baseCost: 30734182358, basePower: 153670912, emoji: "🌰" },
+            { name: "Vraj Forge", baseCost: 49174691773, basePower: 245873459, emoji: "🗜️" },
+            { name: "Vraj Datasphere", baseCost: 78679506837, basePower: 393397534, emoji: "🌐" }
         ];
 
         const upgrades = [];
@@ -197,7 +203,9 @@
                 basePower: Math.floor(upgrades[i-1].power * 7), 
                 emoji: "🌌" 
             };
-            upgrades.push({ id: i+1, name: base.name, cost: base.baseCost, power: base.basePower, emoji: base.emoji });
+            // Every second upgrade is a PPC upgrade
+            const isClickUpgrade = (i + 1) % 2 === 0;
+            upgrades.push({ id: i+1, name: base.name, cost: base.baseCost, power: base.basePower, emoji: base.emoji, owned: 0, isClickUpgrade });
         }
 
         window.setBulk = (amt) => {
@@ -218,33 +226,76 @@
             const cost = getBulkCost(upg.cost, bulkAmount);
             if (score >= cost) {
                 score -= cost;
-                vps += (upg.power * bulkAmount);
+                if (upg.isClickUpgrade) {
+                    ppc += (upg.power * bulkAmount);
+                } else {
+                    vps += (upg.power * bulkAmount);
+                }
+                upg.owned += bulkAmount;
                 for(let i=0; i<bulkAmount; i++) { upg.cost = Math.ceil(upg.cost * 1.15); }
                 updateUI(); playSfx();
             }
         };
 
         window.clickVraj = (e) => {
-            score += 1; playSfx(); updateUI();
-            const rect = document.getElementById('clicker-container').getBoundingClientRect();
+            const gain = ppc * multiplier;
+            score += gain; playSfx(); updateUI();
             const text = document.createElement('div');
             text.className = 'float-text';
-            text.innerText = '+1';
+            text.innerText = '+' + gain.toLocaleString();
             text.style.left = (e.clientX - 10) + 'px';
             text.style.top = (e.clientY - 20) + 'px';
             document.body.appendChild(text);
             setTimeout(() => text.remove(), 800);
         };
 
+        function spawnGoldenVraj() {
+            if (document.querySelector('.golden-vraj')) return;
+            const golden = document.createElement('img');
+            golden.src = 'image_0.png';
+            golden.className = 'golden-vraj';
+            golden.onclick = (e) => {
+                e.stopPropagation();
+                activateMultiplier();
+                golden.remove();
+            };
+            document.body.appendChild(golden);
+            setTimeout(() => golden.remove(), 10000);
+        }
+
+        function activateMultiplier() {
+            multiplier = 2;
+            multTimeRemaining = 180; // 3 minutes
+            document.getElementById('multiplier-display').classList.remove('hidden');
+        }
+
+        setInterval(() => {
+            if (multTimeRemaining > 0) {
+                multTimeRemaining--;
+                const mins = Math.floor(multTimeRemaining / 60);
+                const secs = multTimeRemaining % 60;
+                document.getElementById('mult-timer').innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+                if (multTimeRemaining === 0) {
+                    multiplier = 1;
+                    document.getElementById('multiplier-display').classList.add('hidden');
+                }
+            }
+            if (Math.random() < 0.005) spawnGoldenVraj();
+        }, 1000);
+
         function updateUI() {
             document.getElementById('score').innerText = Math.floor(score).toLocaleString();
-            document.getElementById('vps-display').innerText = vps.toFixed(1).toLocaleString() + " VPS";
+            document.getElementById('vps-display').innerText = (vps * multiplier).toFixed(1).toLocaleString() + " VPS";
+            document.getElementById('ppc-display').innerText = (ppc * multiplier).toLocaleString() + " Points Per Click";
             upgrades.forEach(u => {
                 const el = document.getElementById(`upg-${u.id}`);
                 const bCost = getBulkCost(u.cost, bulkAmount);
                 if (el) {
                     el.classList.toggle('disabled', score < bCost);
                     document.getElementById(`cost-${u.id}`).innerText = bCost.toLocaleString();
+                    document.getElementById(`owned-${u.id}`).innerText = u.owned.toLocaleString();
+                    const typeLabel = u.isClickUpgrade ? "PPC" : "VPS";
+                    document.getElementById(`power-label-${u.id}`).innerText = `+${u.power.toLocaleString()} ${typeLabel}`;
                 }
             });
         }
@@ -255,16 +306,19 @@
                 <div id="upg-${u.id}" onclick="buyUpgrade(${u.id})" class="upgrade-card glass p-4 rounded-2xl flex justify-between items-center disabled">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">${u.emoji}</span>
-                        <div><p class="font-bold text-sm text-white">${u.name}</p><p class="text-[10px] text-emerald-400">+${u.power.toLocaleString()} VPS</p></div>
+                        <div>
+                            <p class="font-bold text-sm text-white">${u.name}</p>
+                            <p class="text-[10px] text-emerald-400" id="power-label-${u.id}"></p>
+                        </div>
                     </div>
                     <div class="text-right">
                         <p class="text-xs font-bold text-blue-300" id="cost-${u.id}">${u.cost.toLocaleString()}</p>
-                        <p class="text-[9px] text-gray-600">pts</p>
+                        <p class="text-[9px] text-gray-400">Owned: <span id="owned-${u.id}">0</span></p>
                     </div>
                 </div>`;
         });
 
-        setInterval(() => { if (vps > 0) { score += (vps / 10); updateUI(); } }, 100);
+        setInterval(() => { if (vps > 0) { score += ((vps * multiplier) / 10); updateUI(); } }, 100);
 
         window.switchTab = (t) => {
             document.getElementById('login-form').classList.toggle('hidden', t !== 'login');
@@ -294,10 +348,14 @@
                     if(user.isAnonymous) { currentUsername = "Guest_" + user.uid.substring(0,4); } 
                     else {
                         const snap = await getDoc(doc(db, "users", user.uid)); currentUsername = snap.exists() ? snap.data().username : "Vraj";
-                        const save = await getDoc(doc(db, "leaderboard", user.uid)); if(save.exists()){ score = save.data().score || 0; vps = save.data().vps || 0; }
+                        const save = await getDoc(doc(db, "leaderboard", user.uid)); if(save.exists()){ 
+                            score = save.data().score || 0; 
+                            vps = save.data().vps || 0;
+                            ppc = save.data().ppc || 1;
+                        }
                     }
                     document.getElementById('user-display').innerText = currentUsername;
-                    setInterval(() => { if(currentUser && !currentUser.isAnonymous) setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, username: currentUsername }, { merge: true }); }, 10000);
+                    setInterval(() => { if(currentUser && !currentUser.isAnonymous) setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, username: currentUsername }, { merge: true }); }, 10000);
                     onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10)), (s) => {
                         document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => `<div class="flex justify-between p-2 rounded bg-white/5 text-xs"><span>#${i+1} ${d.data().username}</span><span class="text-blue-400 font-bold">${Math.floor(d.data().score).toLocaleString()}</span></div>`).join('');
                     });
