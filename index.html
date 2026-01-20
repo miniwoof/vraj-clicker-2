@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vraj Clicker 2 | Pro</title>
+    <title>Vraj Clicker 2 | Pro Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,15 +13,16 @@
             --bg: #020617;
             --glass: rgba(15, 23, 42, 0.8);
             --border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
         * { 
             user-select: none; -webkit-user-select: none; 
-            box-sizing: border-box; transition: all 0.2s ease;
+            box-sizing: border-box;
             scrollbar-width: thin; scrollbar-color: var(--primary) transparent;
         }
 
-        /* CUSTOM SCROLLBARS */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
@@ -39,7 +40,32 @@
 
         .hidden { display: none !important; }
 
-        /* --- AUTH --- */
+        /* PARTICLE SYSTEM */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            font-weight: bold;
+            font-size: 1.5rem;
+            animation: float-up 1s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes float-up {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(34, 211, 238, 0.6); }
+        }
+
+        /* AUTH SCREENS */
         .auth-screen {
             background: var(--glass);
             backdrop-filter: blur(20px);
@@ -56,6 +82,12 @@
             width: 100%; padding: 16px; margin: 10px 0; border-radius: 14px;
             border: 1px solid var(--border); background: rgba(0,0,0,0.3);
             color: white; font-size: 1rem; font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         .btn {
@@ -63,10 +95,13 @@
             color: white; border: none; padding: 16px; border-radius: 14px;
             cursor: pointer; font-weight: 700; width: 100%; margin-top: 15px;
             text-transform: uppercase; letter-spacing: 1px;
+            transition: transform 0.1s, box-shadow 0.1s;
         }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        /* --- GAME ENGINE LAYOUT --- */
+        /* GAME LAYOUT */
         #screen-game {
             display: grid;
             grid-template-columns: 350px 1fr 350px;
@@ -85,7 +120,7 @@
 
         .scroll-area { overflow-y: auto; flex-grow: 1; margin-top: 10px; padding-right: 8px; }
 
-        /* --- CENTER AREA --- */
+        /* CENTER AREA */
         .center-area {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             position: relative;
@@ -101,42 +136,320 @@
         #main-clicker {
             width: 320px; height: 320px; border-radius: 50%;
             border: 12px solid rgba(255, 255, 255, 0.05);
-            background: url('https://i.imgur.com/GscT2bX.png') center/cover no-repeat;
+            background: url('https://i.imgur.com/Gp6z61M.png') center/cover no-repeat;
             cursor: pointer; position: relative;
             box-shadow: 0 0 80px rgba(34, 211, 238, 0.2);
             margin: 30px 0;
+            animation: glow 2s infinite;
+            transition: transform 0.05s, border-color 0.1s;
         }
         #main-clicker:hover { border-color: var(--accent); transform: scale(1.02); }
-        #main-clicker:active { transform: scale(0.94); }
+        #main-clicker:active { transform: scale(0.96); }
 
-        /* --- STORE CARDS --- */
-        .item-card {
-            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px;
-            margin-bottom: 12px; cursor: pointer; border: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
+        /* MULTIPLIER BADGE */
+        .multiplier-badge {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            background: linear-gradient(135deg, var(--gold), #f59e0b);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 20px rgba(251, 191, 36, 0.5);
+            animation: pulse 1.5s infinite;
         }
-        .item-card:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
 
-        /* --- GLOBAL CHAT --- */
+        /* STORE CARDS */
+        .item-card {
+            background: rgba(255,255,255,0.03); 
+            padding: 15px; 
+            border-radius: 16px;
+            margin-bottom: 12px; 
+            cursor: pointer; 
+            border: 1px solid var(--border);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            transition: all 0.15s ease;
+        }
+        .item-card:hover { 
+            background: rgba(255,255,255,0.08); 
+            border-color: var(--accent); 
+            transform: translateX(5px); 
+        }
+        .item-card.locked { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+        .item-card.locked:hover {
+            transform: none;
+            background: rgba(255,255,255,0.03);
+            border-color: var(--border);
+        }
+
+        /* PRESTIGE SHOP */
+        .prestige-item {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(79, 70, 229, 0.1));
+            border: 2px solid var(--primary);
+        }
+        .prestige-item:hover { 
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(79, 70, 229, 0.2)); 
+        }
+        .prestige-item.locked:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(79, 70, 229, 0.1));
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        /* SETTINGS MODAL */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toggle {
+            width: 60px;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .toggle.active {
+            background: var(--success);
+        }
+
+        .toggle-slider {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .toggle.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        /* VOLUME SLIDER */
+        input[type="range"] {
+            width: 150px;
+            margin: 0;
+        }
+
+        /* TAB SYSTEM */
+        .tab-nav { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn { 
+            flex: 1; 
+            padding: 10px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border); 
+            background: transparent; 
+            color: white; 
+            cursor: pointer; 
+            font-weight: 600; 
+            min-width: 80px;
+            transition: all 0.15s;
+        }
+        .tab-btn.active { background: var(--primary); border-color: var(--primary); }
+        .tab-btn:hover { background: rgba(124, 58, 237, 0.3); }
+        .tab-btn.active:hover { background: var(--primary); }
+
+        /* LEADERBOARD */
+        .lb-row { display: flex; justify-content: space-between; padding: 12px; border-radius: 12px; margin-bottom: 5px; background: rgba(255,255,255,0.02); font-size: 0.95rem; }
+        .rank-1 { background: linear-gradient(90deg, rgba(251, 191, 36, 0.15), transparent); border: 1px solid var(--gold); }
+        .rank-2 { background: linear-gradient(90deg, rgba(192, 192, 192, 0.15), transparent); border: 1px solid #c0c0c0; }
+        .rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), transparent); border: 1px solid #cd7f32; }
+
+        /* CHAT */
         #chat-container { height: 250px; display: flex; flex-direction: column; margin-top: 20px; }
         #chat-box { flex-grow: 1; background: rgba(0,0,0,0.2); border-radius: 15px; padding: 12px; overflow-y: auto; font-size: 0.9rem; margin-bottom: 10px; }
         .chat-msg { margin-bottom: 6px; line-height: 1.4; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
         .chat-user { color: var(--accent); font-weight: 700; margin-right: 5px; }
 
-        /* --- TAB SYSTEM --- */
-        .tab-nav { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: white; cursor: pointer; font-weight: 600; }
-        .tab-btn.active { background: var(--primary); border-color: var(--primary); }
+        /* TOP BAR */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
 
-        .lb-row { display: flex; justify-content: space-between; padding: 12px; border-radius: 12px; margin-bottom: 5px; background: rgba(255,255,255,0.02); font-size: 0.95rem; }
-        .rank-1 { background: linear-gradient(90deg, rgba(251, 191, 36, 0.15), transparent); border: 1px solid var(--gold); }
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.15s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.1);
+        }
+
+        /* NOTIFICATION */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            padding: 20px 25px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 10001;
+            animation: slideIn 0.3s ease-out;
+            min-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notif-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
+    <!-- Top Bar -->
+    <div class="top-bar hidden" id="top-bar">
+        <div class="icon-btn" onclick="toggleSettings()" title="Settings">⚙️</div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="margin-top: 0; color: var(--gold);">⚙️ SETTINGS</h2>
+
+            <div class="setting-row">
+                <div>
+                    <div style="font-weight: 600;">Sound Effects</div>
+                    <div style="font-size: 0.85rem; opacity: 0.7;">Click sounds & notifications</div>
+                </div>
+                <div class="toggle active" id="sfx-toggle" onclick="toggleSFX()">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div style="font-weight: 600;">Particles</div>
+                    <div style="font-size: 0.85rem; opacity: 0.7;">Visual effects on click</div>
+                </div>
+                <div class="toggle active" id="particles-toggle" onclick="toggleParticles()">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div style="font-weight: 600;">SFX Volume</div>
+                </div>
+                <input type="range" min="0" max="100" value="50" id="sfx-volume" oninput="setSFXVolume(this.value)">
+            </div>
+
+            <button class="btn" onclick="toggleSettings()" style="margin-top: 20px;">CLOSE</button>
+        </div>
+    </div>
+
     <div id="screen-auth-wrap">
         <div id="screen-menu" class="auth-screen">
             <h1 style="font-family:'Montserrat'; font-weight:900; margin-top:0;">VRAJ CLICKER 2</h1>
+            <p style="opacity: 0.8; margin-bottom: 30px;">Enhanced Pro Edition</p>
             <button class="btn" onclick="showAuth('screen-login')">Login</button>
             <button class="btn" onclick="showAuth('screen-signup')" style="background:var(--accent); color:#000;">Sign Up</button>
         </div>
@@ -163,25 +476,50 @@
         <div class="panel">
             <div class="tab-nav">
                 <button class="tab-btn active" id="tab-btn-store" onclick="setTab('store')">STORE</button>
+                <button class="tab-btn" id="tab-btn-prestige" onclick="setTab('prestige')">PRESTIGE</button>
                 <button class="tab-btn" id="tab-btn-achs" onclick="setTab('achs')">ACHIEVEMENTS</button>
             </div>
             <div id="store-list" class="scroll-area"></div>
+            <div id="prestige-list" class="scroll-area hidden"></div>
             <div id="achs-list" class="scroll-area hidden"></div>
         </div>
 
         <div class="center-area">
             <div id="score-display">0</div>
             <div id="cps-display" style="color:var(--accent); font-weight:600; font-size:1.2rem;">0.0 PER SECOND</div>
-            <div id="main-clicker"></div>
-            <button class="btn" id="pres-btn" onclick="prestige()" style="width:250px;" disabled>PRESTIGE (1M CLICKS)</button>
+            <div id="main-clicker" style="position: relative;">
+                <div class="multiplier-badge" id="mult-badge">x1</div>
+            </div>
+            <button class="btn" id="pres-btn" onclick="prestige()" style="width:250px; background: linear-gradient(135deg, var(--gold), #f59e0b); color: #000;" disabled>
+                🏆 PRESTIGE (1M CLICKS)
+            </button>
+            
+            <div class="stats-grid" style="width: 100%; max-width: 500px; margin-top: 20px;">
+                <div class="stat-box">
+                    <div class="stat-label">Total Clicks</div>
+                    <div class="stat-value" id="total-clicks">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Prestige Level</div>
+                    <div class="stat-value" id="prestige-level">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Achievements</div>
+                    <div class="stat-value" id="ach-count">0/100</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Play Time</div>
+                    <div class="stat-value" id="play-time">0m</div>
+                </div>
+            </div>
         </div>
 
         <div class="panel">
-            <h3 style="margin:0 0 10px 0; color:var(--gold); font-size:1rem; letter-spacing:1px;">ALL-TIME BEST</h3>
+            <h3 style="margin:0 0 10px 0; color:var(--gold); font-size:1rem; letter-spacing:1px;">🏆 LEADERBOARD</h3>
             <div id="lb-body" class="scroll-area" style="max-height: 40%;"></div>
             
             <div id="chat-container">
-                <h3 style="margin:0 0 10px 0; color:var(--accent); font-size:1rem;">GLOBAL CHAT</h3>
+                <h3 style="margin:0 0 10px 0; color:var(--accent); font-size:1rem;">💬 GLOBAL CHAT</h3>
                 <div id="chat-box"></div>
                 <input type="text" id="chat-input" placeholder="Say something...">
             </div>
@@ -207,15 +545,140 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        let userData = { score: 0, highscore: 0, cps: 0, prestige: 0, name: "", counts: {}, achievements: [] };
+        let userData = { 
+            score: 0, highscore: 0, cps: 0, prestige: 0, name: "", 
+            counts: {}, achievements: [], prestigeUpgrades: {},
+            totalClicks: 0, startTime: Date.now()
+        };
 
-        const emojis = ["🍼","🧸","🏫","🎒","🎮","📺","📱","💻","🚀","🛸","🛰️","🪐","🌌","🧬","🧪","⚡","🔥","💎","🏆","👑"];
-        const names = ["Infant","Toddler","Preschooler","Scholar","Gamer","Creator","Streamer","Manager","Executive","CEO","Android","Matrix","Nebula","Warp","Interstellar","God-Tier","Eternal","Singularity","Supreme","Infinite"];
+        let settings = {
+            sfxEnabled: true,
+            particlesEnabled: true,
+            sfxVolume: 0.5
+        };
+
+        let uiNeedsUpdate = false;
+        let saveQueued = false;
+
+        // AUDIO SYSTEM
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playClick() {
+            if (!settings.sfxEnabled) return;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.value = 800 + Math.random() * 200;
+            gain.gain.value = settings.sfxVolume * 0.1;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            osc.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playPurchase() {
+            if (!settings.sfxEnabled) return;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.type = 'triangle';
+            osc.frequency.value = 600;
+            gain.gain.value = settings.sfxVolume * 0.15;
+            osc.start();
+            osc.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            osc.stop(audioContext.currentTime + 0.2);
+        }
+
+        function playAchievement() {
+            if (!settings.sfxEnabled) return;
+            [440, 554, 659, 880].forEach((freq, i) => {
+                setTimeout(() => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.frequency.value = freq;
+                    gain.gain.value = settings.sfxVolume * 0.1;
+                    osc.start();
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    osc.stop(audioContext.currentTime + 0.3);
+                }, i * 100);
+            });
+        }
+
+        // PARTICLE SYSTEM
+        function createParticle(x, y, value) {
+            if (!settings.particlesEnabled) return;
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.textContent = '+' + Math.floor(value).toLocaleString();
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.color = value > 100 ? '#fbbf24' : '#22d3ee';
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 1000);
+        }
+
+        // NOTIFICATION SYSTEM
+        function showNotification(title, message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.innerHTML = `<div class="notif-title">${title}</div><div>${message}</div>`;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        // GAME DATA
+        const emojis = ["🍼","🧸","🏫","🎒","🎮","📺","📱","💻","🚀","🛸","🛰️","🪐","🌌","🧬","🧪","⚡","🔥","💎","🏆","👑","🦄","🐉","🌟","⭐","✨","🎯","🎪","🎨","🎭","🎬","🎸","🎹","🎺","🎻","🥁","🎲","🎰","🎳","🎯","🏀","⚽","🏈","⚾","🎾","🏐","🏉","🎱","🏓","🏸","🏒","🏑","🥊","🥋","🥅","⛳","🏹","🎣","🥇","🥈","🥉","🏅","🎖️","🏆","🥌","🛷","🎿","⛷️","🏂","🏋️","🤺","🤸","🤼","🤽","🤾","🧗","🧘","🏇","🧜","🧚","🧞","🧙","🧛","🧟","🦸","🦹","🧑","👨","👩","👶","🧒","👦","👧","🧔"];
+        const names = ["Infant","Toddler","Preschooler","Scholar","Gamer","Creator","Streamer","Manager","Executive","CEO","Android","Matrix","Nebula","Warp","Interstellar","God-Tier","Eternal","Singularity","Supreme","Infinite","Cosmic","Quantum","Omega","Alpha","Sigma","Delta","Gamma","Stellar","Celestial","Divine","Mythic","Legendary","Epic","Rare","Ultimate","Prime","Elite","Master","Grandmaster","Champion","Titan","Colossus","Behemoth","Leviathan","Kraken","Phoenix","Dragon","Hydra","Cerberus","Chimera","Basilisk","Griffin","Pegasus","Unicorn","Manticore","Sphinx","Minotaur","Centaur","Cyclops","Giant","Golem","Elemental","Spirit","Phantom","Wraith","Specter","Demon","Angel","Archangel","Seraph","Cherub","Deity","Immortal","Eternal","Transcendent","Omnipotent","Omniscient","Omnipresent","Absolute","Infinite","Boundless","Limitless","Endless","Timeless","Ageless","Deathless","Invincible","Unstoppable"];
+        
         const storeItems = [];
         for(let i=0; i<100; i++) {
-            storeItems.push({ id: 'u'+i, emoji: emojis[i % emojis.length], name: names[i % names.length] + " Vraj", cost: Math.floor(15 * Math.pow(1.3, i)), power: (i+1) * Math.pow(1.2, i/3) });
+            storeItems.push({ 
+                id: 'u'+i, 
+                emoji: emojis[i % emojis.length], 
+                name: names[i % names.length] + " Vraj", 
+                cost: Math.floor(15 * Math.pow(1.3, i)), 
+                power: (i+1) * Math.pow(1.2, i/3) 
+            });
         }
-        const achs = Array.from({length: 100}, (_, i) => ({ id: 'a'+i, goal: Math.pow(i+1, 4) * 100, name: `Mastery Level ${i+1}` }));
+
+        const prestigeUpgrades = [
+            { id: 'p1', name: 'Double Tap', desc: 'Each click is worth 2x', cost: 1, effect: 'clickMult', value: 2 },
+            { id: 'p2', name: 'Efficient Workers', desc: '+25% production', cost: 2, effect: 'cpsMult', value: 1.25 },
+            { id: 'p3', name: 'Bulk Discount', desc: '-10% upgrade costs', cost: 3, effect: 'costReduction', value: 0.9 },
+            { id: 'p4', name: 'Triple Power', desc: 'Clicks worth 3x (stacks)', cost: 5, effect: 'clickMult', value: 3 },
+            { id: 'p5', name: 'Super Production', desc: '+50% production', cost: 7, effect: 'cpsMult', value: 1.5 },
+            { id: 'p6', name: 'Critical Clicks', desc: '10% chance for 10x click', cost: 10, effect: 'critical', value: 0.1 },
+            { id: 'p7', name: 'Mega Discount', desc: '-25% upgrade costs', cost: 15, effect: 'costReduction', value: 0.75 },
+            { id: 'p8', name: 'Auto Clicker', desc: '1 auto click per second', cost: 20, effect: 'autoClick', value: 1 },
+            { id: 'p9', name: 'Golden Touch', desc: 'All production +100%', cost: 30, effect: 'cpsMult', value: 2 },
+            { id: 'p10', name: 'Legendary Power', desc: 'Clicks worth 5x', cost: 50, effect: 'clickMult', value: 5 }
+        ];
+
+        const achievements = [
+            { id: 'a1', goal: 100, name: 'First Steps', emoji: '👶' },
+            { id: 'a2', goal: 1000, name: 'Getting Started', emoji: '🎯' },
+            { id: 'a3', goal: 10000, name: 'Clicking Champion', emoji: '🏅' },
+            { id: 'a4', goal: 50000, name: 'Dedicated Clicker', emoji: '💪' },
+            { id: 'a5', goal: 100000, name: 'Click Master', emoji: '🎖️' },
+            { id: 'a6', goal: 500000, name: 'Click Overlord', emoji: '👑' },
+            { id: 'a7', goal: 1000000, name: 'Million Club', emoji: '💎' },
+            { id: 'a8', goal: 5000000, name: 'Click Deity', emoji: '⚡' },
+            { id: 'a9', goal: 10000000, name: 'Ascended One', emoji: '✨' },
+            { id: 'a10', goal: 50000000, name: 'Infinite Power', emoji: '🌟' }
+        ];
+
+        for(let i = 10; i < 100; i++) {
+            achievements.push({ 
+                id: 'a'+(i+1), 
+                goal: Math.pow(i+1, 4) * 100, 
+                name: `Level ${i+1} Mastery`,
+                emoji: emojis[i % emojis.length]
+            });
+        }
 
         window.showAuth = (id) => {
             document.querySelectorAll('.auth-screen').forEach(s => s.classList.add('hidden'));
@@ -223,117 +686,349 @@
         };
 
         document.getElementById('do-signup').onclick = () => {
-            const u = document.getElementById('s-user').value, e = document.getElementById('s-email').value, p = document.getElementById('s-pass').value;
+            const u = document.getElementById('s-user').value, 
+                  e = document.getElementById('s-email').value, 
+                  p = document.getElementById('s-pass').value;
+            
+            if(!u || !e || !p) { alert("Please fill all fields"); return; }
+            
             createUserWithEmailAndPassword(auth, e, p).then(res => {
                 sendEmailVerification(res.user);
-                set(ref(db, 'users/' + res.user.uid), { name: u, score: 0, highscore: 0, cps: 0, prestige: 0, counts: {}, achievements: [] });
-                alert("Account created! Verify your email to play.");
+                set(ref(db, 'users/' + res.user.uid), { 
+                    name: u, score: 0, highscore: 0, cps: 0, prestige: 0, 
+                    counts: {}, achievements: [], prestigeUpgrades: {},
+                    totalClicks: 0, startTime: Date.now()
+                });
+                alert("Account created! Check your email to verify.");
             }).catch(err => alert(err.message));
         };
 
         document.getElementById('do-login').onclick = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('l-email').value, document.getElementById('l-pass').value).catch(e => alert("Login Failed: Check email verification."));
+            signInWithEmailAndPassword(auth, 
+                document.getElementById('l-email').value, 
+                document.getElementById('l-pass').value
+            ).catch(e => alert("Login Failed: " + e.message));
         };
 
         onAuthStateChanged(auth, user => {
             if(user && user.emailVerified) {
                 document.getElementById('screen-auth-wrap').classList.add('hidden');
                 document.getElementById('screen-game').classList.remove('hidden');
+                document.getElementById('top-bar').classList.remove('hidden');
+                
                 onValue(ref(db, 'users/' + user.uid), s => { 
-                    if(s.exists()){ userData = s.val(); updateUI(); }
+                    if(s.exists()){ 
+                        userData = {...userData, ...s.val()};
+                        if(!userData.prestigeUpgrades) userData.prestigeUpgrades = {};
+                        if(!userData.totalClicks) userData.totalClicks = 0;
+                        if(!userData.startTime) userData.startTime = Date.now();
+                        uiNeedsUpdate = true;
+                    }
                 });
-            } else { showAuth('screen-menu'); }
+            } else { 
+                document.getElementById('screen-auth-wrap').classList.remove('hidden');
+                document.getElementById('screen-game').classList.add('hidden');
+                document.getElementById('top-bar').classList.add('hidden');
+                showAuth('screen-menu'); 
+            }
         });
 
-        document.getElementById('main-clicker').onclick = () => {
-            userData.score += (1 + (userData.cps * 0.15)) * Math.pow(2, userData.prestige);
+        document.getElementById('main-clicker').onclick = (e) => {
+            let clickValue = 1 + (userData.cps * 0.15);
+            clickValue *= Math.pow(2, userData.prestige);
+            
+            let clickMult = 1;
+            let hasCritical = false;
+            Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
+                const upgrade = prestigeUpgrades.find(p => p.id === pid);
+                if(upgrade && upgrade.effect === 'clickMult') clickMult *= upgrade.value;
+                if(upgrade && upgrade.effect === 'critical') hasCritical = true;
+            });
+            clickValue *= clickMult;
+            
+            if(hasCritical && Math.random() < 0.1) {
+                clickValue *= 10;
+                createParticle(e.clientX, e.clientY, clickValue);
+                showNotification('💥 CRITICAL HIT!', `+${Math.floor(clickValue).toLocaleString()}`);
+            }
+            
+            userData.score += clickValue;
+            userData.totalClicks += 1;
             if(userData.score > (userData.highscore || 0)) userData.highscore = userData.score;
-            checkAchs(); save();
+            
+            playClick();
+            createParticle(e.clientX, e.clientY, clickValue);
+            checkAchs();
+            queueSave();
+            uiNeedsUpdate = true;
         };
 
         function checkAchs() {
-            achs.forEach(a => { if(userData.score >= a.goal && !userData.achievements.includes(a.id)) userData.achievements.push(a.id); });
+            achievements.forEach(a => { 
+                if(userData.score >= a.goal && !userData.achievements.includes(a.id)) {
+                    userData.achievements.push(a.id);
+                    playAchievement();
+                    showNotification('🏆 ACHIEVEMENT UNLOCKED!', a.name);
+                }
+            });
         }
 
         window.buy = (id) => {
             const item = storeItems.find(i => i.id === id);
             const count = userData.counts[id] || 0;
-            const cost = Math.floor(item.cost * Math.pow(1.15, count));
+            let cost = Math.floor(item.cost * Math.pow(1.15, count));
+            
+            let costMult = 1;
+            Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
+                const upgrade = prestigeUpgrades.find(p => p.id === pid);
+                if(upgrade && upgrade.effect === 'costReduction') costMult *= upgrade.value;
+            });
+            cost = Math.floor(cost * costMult);
+            
             if(userData.score >= cost) {
                 userData.score -= cost;
                 userData.counts[id] = count + 1;
-                let t = 0; storeItems.forEach(si => t += (si.power * (userData.counts[si.id] || 0)));
-                userData.cps = t;
-                save();
+                
+                let totalCPS = 0;
+                let cpsMult = 1;
+                Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
+                    const upgrade = prestigeUpgrades.find(p => p.id === pid);
+                    if(upgrade && upgrade.effect === 'cpsMult') cpsMult *= upgrade.value;
+                });
+                
+                storeItems.forEach(si => totalCPS += (si.power * (userData.counts[si.id] || 0)));
+                userData.cps = totalCPS * cpsMult;
+                
+                playPurchase();
+                queueSave();
+                uiNeedsUpdate = true;
+            }
+        };
+
+        window.buyPrestigeUpgrade = (id) => {
+            const upgrade = prestigeUpgrades.find(p => p.id === id);
+            if(!upgrade) return;
+            
+            if(userData.prestige >= upgrade.cost && !userData.prestigeUpgrades[id]) {
+                userData.prestige -= upgrade.cost;
+                userData.prestigeUpgrades[id] = true;
+                playPurchase();
+                showNotification('⭐ UPGRADE ACQUIRED!', upgrade.name);
+                queueSave();
+                uiNeedsUpdate = true;
             }
         };
 
         window.setTab = (t) => {
             document.getElementById('store-list').classList.toggle('hidden', t !== 'store');
+            document.getElementById('prestige-list').classList.toggle('hidden', t !== 'prestige');
             document.getElementById('achs-list').classList.toggle('hidden', t !== 'achs');
             document.getElementById('tab-btn-store').classList.toggle('active', t === 'store');
+            document.getElementById('tab-btn-prestige').classList.toggle('active', t === 'prestige');
             document.getElementById('tab-btn-achs').classList.toggle('active', t === 'achs');
+            uiNeedsUpdate = true;
         };
 
         window.prestige = () => {
             if(userData.score >= 1000000) {
-                userData.prestige += 1; userData.score = 0; userData.cps = 0; userData.counts = {};
-                save(); alert("Ascended! Permanent 2x boost active.");
+                const prestigeGain = Math.floor(userData.score / 1000000);
+                userData.prestige += prestigeGain;
+                userData.score = 0;
+                userData.cps = 0;
+                userData.counts = {};
+                playAchievement();
+                showNotification('🏆 PRESTIGE!', `+${prestigeGain} Prestige Points`);
+                queueSave();
+                uiNeedsUpdate = true;
             }
         };
 
-        function save() { if(auth.currentUser) update(ref(db, 'users/' + auth.currentUser.uid), userData); }
+        function queueSave() {
+            if(!saveQueued) {
+                saveQueued = true;
+                setTimeout(() => {
+                    if(auth.currentUser) {
+                        update(ref(db, 'users/' + auth.currentUser.uid), userData);
+                    }
+                    saveQueued = false;
+                }, 500);
+            }
+        }
 
         function updateUI() {
             document.getElementById('score-display').innerText = Math.floor(userData.score).toLocaleString();
             document.getElementById('cps-display').innerText = `${userData.cps.toFixed(1)} PER SECOND`;
             document.getElementById('pres-btn').disabled = userData.score < 1000000;
             
-            const sl = document.getElementById('store-list'); sl.innerHTML = "";
-            storeItems.slice(0, Object.keys(userData.counts).length + 4).forEach(item => {
-                const count = userData.counts[item.id] || 0;
-                const cost = Math.floor(item.cost * Math.pow(1.15, count));
-                sl.innerHTML += `<div class="item-card" onclick="buy('${item.id}')">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <span style="font-size:1.8rem;">${item.emoji}</span>
-                        <div><b style="color:var(--accent);">${item.name}</b><br><small style="color:var(--gold);">${cost.toLocaleString()} clicks</small></div>
-                    </div>
-                    <div style="font-weight:bold; opacity:0.6;">x${count}</div>
-                </div>`;
-            });
+            const mult = Math.pow(2, userData.prestige);
+            document.getElementById('mult-badge').innerText = `x${mult}`;
+            document.getElementById('prestige-level').innerText = userData.prestige || 0;
+            document.getElementById('total-clicks').innerText = (userData.totalClicks || 0).toLocaleString();
+            document.getElementById('ach-count').innerText = `${userData.achievements.length}/100`;
+            
+            const playTime = Math.floor((Date.now() - (userData.startTime || Date.now())) / 60000);
+            document.getElementById('play-time').innerText = playTime < 60 ? `${playTime}m` : `${Math.floor(playTime/60)}h ${playTime%60}m`;
+            
+            const sl = document.getElementById('store-list'); 
+            if(!sl.classList.contains('hidden')) {
+                sl.innerHTML = "";
+                storeItems.slice(0, Math.max(5, Object.keys(userData.counts).length + 3)).forEach(item => {
+                    const count = userData.counts[item.id] || 0;
+                    let cost = Math.floor(item.cost * Math.pow(1.15, count));
+                    
+                    let costMult = 1;
+                    Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
+                        const upgrade = prestigeUpgrades.find(p => p.id === pid);
+                        if(upgrade && upgrade.effect === 'costReduction') costMult *= upgrade.value;
+                    });
+                    cost = Math.floor(cost * costMult);
+                    
+                    const canAfford = userData.score >= cost;
+                    sl.innerHTML += `<div class="item-card ${!canAfford?'locked':''}" onclick="buy('${item.id}')">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:1.8rem;">${item.emoji}</span>
+                            <div>
+                                <b style="color:var(--accent);">${item.name}</b><br>
+                                <small style="color:var(--gold);">${cost.toLocaleString()} clicks</small>
+                                <div style="font-size:0.75rem; opacity:0.7;">+${item.power.toFixed(1)}/sec</div>
+                            </div>
+                        </div>
+                        <div style="font-weight:bold; opacity:0.6;">x${count}</div>
+                    </div>`;
+                });
+            }
 
-            const al = document.getElementById('achs-list'); al.innerHTML = "";
-            achs.forEach(a => {
-                const got = userData.achievements.includes(a.id);
-                al.innerHTML += `<div class="item-card ${got?'':'locked'}" style="opacity:${got?1:0.3}">
-                    <div><b>🏆 ${a.name}</b><br><small>${a.goal.toLocaleString()} Clicks</small></div>
-                    <div>${got?'✅':'🔒'}</div>
-                </div>`;
-            });
+            const pl = document.getElementById('prestige-list');
+            if(!pl.classList.contains('hidden')) {
+                pl.innerHTML = "";
+                prestigeUpgrades.forEach(upgrade => {
+                    const owned = userData.prestigeUpgrades && userData.prestigeUpgrades[upgrade.id];
+                    const canAfford = userData.prestige >= upgrade.cost && !owned;
+                    pl.innerHTML += `<div class="item-card prestige-item ${!canAfford&&!owned?'locked':''}" onclick="buyPrestigeUpgrade('${upgrade.id}')">
+                        <div>
+                            <b style="color:${owned?'var(--success)':'var(--gold)'};">${owned?'✅ ':''} ${upgrade.name}</b><br>
+                            <small style="opacity:0.8;">${upgrade.desc}</small><br>
+                            <small style="color:var(--primary); font-weight:600;">${upgrade.cost} Prestige Points</small>
+                        </div>
+                        <div>${owned?'OWNED':'🔒'}</div>
+                    </div>`;
+                });
+            }
+
+            const al = document.getElementById('achs-list');
+            if(!al.classList.contains('hidden')) {
+                al.innerHTML = "";
+                achievements.forEach(a => {
+                    const got = userData.achievements.includes(a.id);
+                    const progress = Math.min(100, (userData.score / a.goal) * 100);
+                    al.innerHTML += `<div class="item-card" style="opacity:${got?1:0.5}; cursor: default;">
+                        <div style="flex-grow:1;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
+                                <span style="font-size:1.5rem;">${a.emoji}</span>
+                                <b>${a.name}</b>
+                                <span style="margin-left:auto;">${got?'✅':'🔒'}</span>
+                            </div>
+                            <small>${a.goal.toLocaleString()} Clicks</small>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:${progress}%"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
         }
 
         onValue(query(ref(db, 'users'), orderByChild('highscore'), limitToLast(20)), s => {
-            const b = document.getElementById('lb-body'); b.innerHTML = "";
-            let p = []; s.forEach(c => p.push(c.val()));
-            p.reverse().forEach((u, i) => { 
-                b.innerHTML += `<div class="lb-row ${i==0?'rank-1':''}"><span>#${i+1} ${u.name}</span><span>${Math.floor(u.highscore || 0).toLocaleString()}</span></div>`; 
+            const b = document.getElementById('lb-body'); 
+            b.innerHTML = "";
+            let players = [];
+            s.forEach(c => players.push(c.val()));
+            players.reverse().forEach((u, i) => { 
+                let rankClass = '';
+                if(i === 0) rankClass = 'rank-1';
+                else if(i === 1) rankClass = 'rank-2';
+                else if(i === 2) rankClass = 'rank-3';
+                
+                b.innerHTML += `<div class="lb-row ${rankClass}">
+                    <span>#${i+1} ${u.name}</span>
+                    <span>${Math.floor(u.highscore || 0).toLocaleString()}</span>
+                </div>`; 
             });
         });
 
         document.getElementById('chat-input').onkeydown = (e) => {
             if(e.key === 'Enter' && e.target.value.trim() !== "") {
-                push(ref(db, 'chat'), { user: userData.name, msg: e.target.value, time: serverTimestamp() });
+                push(ref(db, 'chat'), { 
+                    user: userData.name, 
+                    msg: e.target.value.slice(0, 100), 
+                    time: serverTimestamp() 
+                });
                 e.target.value = "";
             }
         };
+        
         onValue(query(ref(db, 'chat'), limitToLast(20)), s => {
-            const cb = document.getElementById('chat-box'); cb.innerHTML = "";
-            s.forEach(c => { const d = c.val(); cb.innerHTML += `<div class="chat-msg"><span class="chat-user">${d.user}:</span> ${d.msg}</div>`; });
+            const cb = document.getElementById('chat-box'); 
+            cb.innerHTML = "";
+            s.forEach(c => { 
+                const d = c.val(); 
+                cb.innerHTML += `<div class="chat-msg"><span class="chat-user">${d.user}:</span> ${d.msg}</div>`; 
+            });
             cb.scrollTop = cb.scrollHeight;
         });
 
+        window.toggleSettings = () => {
+            document.getElementById('settings-modal').classList.toggle('hidden');
+        };
+
+        window.toggleSFX = () => {
+            settings.sfxEnabled = !settings.sfxEnabled;
+            document.getElementById('sfx-toggle').classList.toggle('active', settings.sfxEnabled);
+        };
+
+        window.toggleParticles = () => {
+            settings.particlesEnabled = !settings.particlesEnabled;
+            document.getElementById('particles-toggle').classList.toggle('active', settings.particlesEnabled);
+        };
+
+        window.setSFXVolume = (val) => {
+            settings.sfxVolume = val / 100;
+        };
+
         window.logout = () => signOut(auth).then(() => location.reload());
-        setInterval(() => { if(auth.currentUser?.emailVerified && userData.cps > 0){ userData.score += (userData.cps * 0.1); if(userData.score > (userData.highscore||0)) userData.highscore = userData.score; save(); }}, 1000);
+
+        setInterval(() => { 
+            if(auth.currentUser?.emailVerified && userData.cps > 0) {
+                userData.score += (userData.cps * 0.1);
+                if(userData.score > (userData.highscore||0)) userData.highscore = userData.score;
+                
+                let autoClicks = 0;
+                Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
+                    const upgrade = prestigeUpgrades.find(p => p.id === pid);
+                    if(upgrade && upgrade.effect === 'autoClick') autoClicks += upgrade.value;
+                });
+                
+                if(autoClicks > 0) {
+                    let clickValue = (1 + (userData.cps * 0.15)) * Math.pow(2, userData.prestige);
+                    let clickMult = 1;
+                    Object.keys(userData.prestigeUpgrades || {}).forEach(pid => {
+                        const upgrade = prestigeUpgrades.find(p => p.id === pid);
+                        if(upgrade && upgrade.effect === 'clickMult') clickMult *= upgrade.value;
+                    });
+                    userData.score += (clickValue * clickMult * autoClicks);
+                }
+                
+                queueSave();
+                uiNeedsUpdate = true;
+            }
+        }, 1000);
+
+        setInterval(() => {
+            if(auth.currentUser?.emailVerified && uiNeedsUpdate) {
+                updateUI();
+                uiNeedsUpdate = false;
+            }
+        }, 50);
     </script>
 </body>
 </html>
