@@ -21,38 +21,46 @@
 
         /* Theme Definitions */
         body.theme-light { --bg-main: #f8fafc; --text-main: #1e293b; --accent: #2563eb; --glass: rgba(255, 255, 255, 0.7); --border: rgba(0, 0, 0, 0.1); --panel-bg: rgba(241, 245, 249, 0.9); }
-        body.theme-midnight { --bg-main: #020617; --text-main: #94a3b8; --accent: #1e1b4b; --glass: rgba(255, 255, 255, 0.01); --border: rgba(255, 255, 255, 0.05); }
-        body.theme-red { --bg-main: #1a0505; --text-main: #fecaca; --accent: #dc2626; }
-        body.theme-orange { --bg-main: #1c0f05; --text-main: #fed7aa; --accent: #ea580c; }
-        body.theme-yellow { --bg-main: #1a1605; --text-main: #fef08a; --accent: #ca8a04; }
-        body.theme-green { --bg-main: #051a05; --text-main: #bbf7d0; --accent: #16a34a; }
-        body.theme-blue { --bg-main: #050b1a; --text-main: #bfdbfe; --accent: #2563eb; }
-        body.theme-purple { --bg-main: #11051a; --text-main: #ddd6fe; --accent: #9333ea; }
-        body.theme-nature { --bg-main: #0d1a0d; --text-main: #ecfccb; --accent: #65a30d; font-family: 'Quicksand', sans-serif; }
-        body.theme-sea { --bg-main: #082f49; --text-main: #e0f2fe; --accent: #0ea5e9; }
-        body.theme-snowy { --bg-main: #a1f5f9; --text-main: #334155; --accent: #94a3b8; }
-        body.theme-starry { --bg-main: #0c0c0c; --text-main: #ffffff; --accent: #6366f1; animation: bgPulse 10s infinite alternate; }
-
-        @keyframes bgPulse { 0% { background-color: #0c0c0c; } 100% { background-color: #1a1a1a; } }
+        body.theme-midnight { --bg-main: #010204; --text-main: #94a3b8; --accent: #3b82f6; --glass: rgba(255, 255, 255, 0.01); --border: rgba(255, 255, 255, 0.05); --panel-bg: rgba(1, 2, 4, 0.9); }
+        body.theme-red { --bg-main: #1a0505; --text-main: #fecaca; --accent: #dc2626; --panel-bg: rgba(26, 5, 5, 0.9); }
+        body.theme-orange { --bg-main: #1c0f05; --text-main: #fed7aa; --accent: #ea580c; --panel-bg: rgba(28, 15, 5, 0.9); }
+        body.theme-yellow { --bg-main: #1a1605; --text-main: #fef08a; --accent: #ca8a04; --panel-bg: rgba(26, 22, 5, 0.9); }
+        body.theme-green { --bg-main: #051a05; --text-main: #bbf7d0; --accent: #16a34a; --panel-bg: rgba(5, 26, 5, 0.9); }
+        body.theme-blue { --bg-main: #0c1a2b; --text-main: #e0f2fe; --accent: #00d2ff; --panel-bg: rgba(12, 26, 43, 0.9); }
+        body.theme-purple { --bg-main: #11051a; --text-main: #ddd6fe; --accent: #9333ea; --panel-bg: rgba(17, 5, 26, 0.9); }
+        body.theme-pink { --bg-main: #1a0510; --text-main: #fce7f3; --accent: #f472b6; --panel-bg: rgba(26, 5, 16, 0.9); }
+        body.theme-nature { --bg-main: #0d1a0d; --text-main: #ecfccb; --accent: #65a30d; --panel-bg: rgba(13, 26, 13, 0.9); }
+        body.theme-sea { --bg-main: #082f49; --text-main: #e0f2fe; --accent: #0ea5e9; --panel-bg: rgba(8, 47, 73, 0.9); }
+        body.theme-snowy { --bg-main: #1e293b; --text-main: #f1f5f9; --accent: #94a3b8; --panel-bg: rgba(30, 41, 59, 0.9); }
+        body.theme-starry { --bg-main: #000000; --text-main: #ffffff; --accent: #6366f1; --panel-bg: rgba(0, 0, 0, 0.9); }
 
         body { font-family: 'Poppins', sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; height: 100vh; width: 100vw; overflow: hidden; transition: background 0.8s ease, color 0.5s ease; }
         .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); transition: var(--transition); }
         
         .left-panel-content { background: var(--panel-bg); transition: var(--transition); }
         .side-tab { background: rgba(0,0,0,0.2); color: var(--text-main); opacity: 0.6; }
-        .side-tab.active { background: var(--accent); color: white; opacity: 1; transform: translateX(5px); }
+        .side-tab.active { background: var(--accent); color: black; opacity: 1; transform: translateX(5px); }
         #score { color: var(--accent); transition: var(--transition); }
 
+        /* Multiplier Display Positioned Bottom-Left */
+        #multiplier-display { 
+            position: fixed; 
+            bottom: 1.5rem; 
+            left: 1.5rem; 
+            z-index: 100; 
+            pointer-events: none;
+        }
+
         /* Warp Transitions */
-        .warp-transition { animation: warpIn 0.5s ease-out forwards; }
+        .warp-transition { animation: warpIn 0.1s ease-out forwards; }
         @keyframes warpIn {
-            0% { transform: scale(0.95) translateY(10px); opacity: 0; filter: blur(5px); }
+            0% { transform: scale(0.95) translateY(10px); opacity: 0.9; filter: blur(5px); }
             100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
         }
 
         /* Particle Overlay */
         #theme-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
-        .particle { position: absolute; pointer-events: none; }
+        .particle { position: absolute; pointer-events: none !important; will-change: transform; }
 
         /* Responsive Grid */
         .game-grid { display: grid; grid-template-columns: 350px 1fr 350px; grid-template-rows: 1fr; height: 100vh; gap: 1.5rem; padding: 1.5rem; box-sizing: border-box; position: relative; z-index: 2; }
@@ -77,7 +85,7 @@
         .side-tabs-container { position: absolute; right: -32px; top: 50px; display: flex; flex-direction: column; gap: 10px; z-index: 20; }
         .side-tab { border: 1px solid var(--border); border-left: none; padding: 15px 8px; border-radius: 0 12px 12px 0; cursor: pointer; writing-mode: vertical-lr; text-orientation: mixed; font-size: 10px; font-weight: 800; transition: all 0.2s; }
         
-        .click-btn-container { transition: transform 0.05s active; cursor: pointer; user-select: none; position: relative; border-color: var(--accent) !important; }
+        .click-btn-container { transition: transform 0.05s active, background 0.5s ease; cursor: pointer; user-select: none; position: relative; background: var(--accent) !important; }
         .click-btn-container:active { transform: scale(0.95); }
         .click-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
         
@@ -98,18 +106,30 @@
         .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 50; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; }
         @keyframes goldenFly { 0% { left: -100px; top: 20%; } 100% { left: 110vw; top: 60%; } }
         
-        .prestige-btn { background: linear-gradient(135deg, #7c3aed, var(--accent)); border: 2px solid rgba(255,255,255,0.2); }
+        /* Fixed Prestige Button Gradient */
+        .prestige-btn { 
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), var(--accent)); 
+            border: 2px solid rgba(255,255,255,0.2); 
+            transition: all 0.3s ease;
+        }
+        
         .lb-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; }
         #game-modal { z-index: 1000; position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
 
         /* Theme Specific CSS */
         .nature-leaf { font-size: 20px; animation: fall 10s linear infinite; }
-        .snow-flake { background: white; border-radius: 50%; animation: fall 8s linear infinite; }
-        .sea-bubble { border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; animation: rise 15s linear infinite; }
+        .snow-flake { background: white; border-radius: 50%; animation: fall 8s linear infinite; filter: blur(1px); }
+        .sea-bubble { 
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
+            border-radius: 50%; 
+            animation: rise 15s linear infinite; 
+        }
         .star { position: absolute; border-radius: 50%; animation: twinkle 3s infinite ease-in-out; }
 
         @keyframes fall {
-            0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+            0% { transform: translateY(-20vh) translateX(0) rotate(0deg); opacity: 0; }
             10% { opacity: 1; }
             90% { opacity: 1; }
             100% { transform: translateY(110vh) translateX(100px) rotate(360deg); opacity: 0; }
@@ -117,7 +137,7 @@
         @keyframes rise {
             0% { transform: translateY(110vh) translateX(0); opacity: 0; }
             10% { opacity: 0.5; }
-            100% { transform: translateY(-10vh) translateX(-50px); opacity: 0; }
+            100% { transform: translateY(-20vh) translateX(-50px); opacity: 0; }
         }
         @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
     </style>
@@ -141,11 +161,11 @@
     </div>
 
     <div id="multiplier-display" class="hidden">
-        <div class="glass p-3 rounded-2xl border-yellow-500/50 border flex items-center gap-3">
+        <div class="glass p-3 rounded-2xl border-yellow-500/50 border flex items-center gap-3 shadow-xl">
             <span class="text-2xl">🌟</span>
             <div>
-                <p class="text-xs font-bold text-yellow-400">2X MULTI ACTIVE</p>
-                <p id="mult-timer" class="text-lg font-black">03:00</p>
+                <p class="text-[9px] font-bold text-yellow-400 tracking-tighter uppercase">2X MULTI ACTIVE</p>
+                <p id="mult-timer" class="text-md font-black">03:00</p>
             </div>
         </div>
     </div>
@@ -204,7 +224,7 @@
                                 <div id="prestige-bar" class="h-full bg-gradient-to-r from-purple-600 to-blue-500 transition-all duration-300" style="width: 0%"></div>
                                 <span id="prestige-percent" class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">0%</span>
                             </div>
-                            <button id="prestige-btn" onclick="openPrestigeModal()" class="prestige-btn w-full py-4 rounded-2xl font-black text-white shadow-lg transform active:scale-95 transition-all">
+                            <button id="prestige-btn" onclick="openPrestigeModal()" class="prestige-btn w-full py-4 rounded-2xl font-black text-white shadow-lg transform active:scale-95">
                                 ASCEND <span id="prestige-gain-display">(+0 Fatflaps)</span>
                             </button>
                             <p class="text-[9px] opacity-50 mt-2 italic">Next Fatflap costs: <span id="next-prestige-cost">10,000</span></p>
@@ -258,7 +278,7 @@
                             <h3 class="font-bold opacity-50 text-xl mb-4">⚙️ System</h3>
                             <div class="space-y-3">
                                 <button onclick="trackSettingClick()" class="w-full p-4 glass rounded-xl text-left text-sm hover:bg-white/5 transition flex justify-between items-center">
-                                    Check for Updates <span class="text-[10px] bg-blue-500/20 px-2 py-1 rounded">v2.4</span>
+                                    Check for Updates <span class="text-[10px] bg-blue-500/20 px-2 py-1 rounded">v2.5</span>
                                 </button>
                                 <button onclick="triggerAccountReset()" class="w-full p-4 bg-red-600/10 border border-red-600/30 text-red-500 rounded-xl text-left text-sm font-bold hover:bg-red-600/20 transition">
                                     Reset Account Progress
@@ -291,7 +311,7 @@
                 </div>
                 
                 <div class="flex flex-col items-center gap-4">
-                    <div id="clicker-container" onclick="clickVraj(event)" class="click-btn-container w-[450px] h-[450px] rounded-full p-1 bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-2xl">
+                    <div id="clicker-container" onclick="clickVraj(event)" class="click-btn-container w-[450px] h-[450px] rounded-full p-1 shadow-2xl">
                         <div class="w-full h-full rounded-full overflow-hidden border-8 border-black/80 transition-colors duration-500 bg-black">
                             <img src="image_0.png" class="click-img">
                         </div>
@@ -456,7 +476,7 @@
             
             const target = document.getElementById('panel-'+tab);
             target.classList.remove('hidden');
-            void target.offsetWidth; // trigger reflow
+            void target.offsetWidth; 
             target.classList.add('warp-transition');
             
             document.getElementById('tab-'+tab).classList.add('active');
@@ -581,8 +601,7 @@
                     const p = document.createElement('div');
                     p.className = 'particle';
                     const left = Math.random() * 100;
-                    const delay = Math.random() * 10;
-                    const size = Math.random() * 10 + 5;
+                    const delay = -(Math.random() * 15); 
                     p.style.left = left + '%';
                     p.style.animationDelay = delay + 's';
                     
@@ -593,20 +612,21 @@
                         p.style.fontSize = (Math.random() * 15 + 10) + 'px';
                     } else if(theme === 'snowy') {
                         p.className += ' snow-flake';
-                        const s = Math.random() * 5 + 2;
+                        const s = Math.random() * 6 + 2;
                         p.style.width = s + 'px'; p.style.height = s + 'px';
                     } else if(theme === 'sea') {
                         p.className += ' sea-bubble';
-                        const s = Math.random() * 15 + 5;
+                        const s = Math.random() * 20 + 8;
                         p.style.width = s + 'px'; p.style.height = s + 'px';
                     } else if(theme === 'starry') {
                         p.className = 'star';
                         const s = Math.random() * 3 + 1;
                         p.style.width = s + 'px'; p.style.height = s + 'px';
                         p.style.top = Math.random() * 100 + '%';
-                        const colors = ['#fff', '#6366f1', '#fbbf24', '#f87171'];
-                        p.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-                        p.style.boxShadow = `0 0 ${s*2}px ${p.style.backgroundColor}`;
+                        const roll = Math.random();
+                        let color = roll < 0.75 ? '#ffffff' : (roll < 0.9 ? '#6366f1' : '#f87171');
+                        p.style.backgroundColor = color;
+                        p.style.boxShadow = `0 0 ${s*4}px ${color}`;
                     }
                     container.appendChild(p);
                 }
@@ -619,12 +639,13 @@
                 const themes = [
                     { id: 'classic', name: 'Classic Dark', emoji: '🌑' },
                     { id: 'light', name: 'Clean Light', emoji: '☀️' },
-                    { id: 'midnight', name: 'Midnight', emoji: '🌌' },
+                    { id: 'midnight', name: 'Midnight Deep', emoji: '🌌' },
                     { id: 'red', name: 'Crimson', emoji: '🔴' },
                     { id: 'orange', name: 'Sunset', emoji: '🟠' },
                     { id: 'yellow', name: 'Golden', emoji: '🟡' },
                     { id: 'green', name: 'Emerald', emoji: '🟢' },
-                    { id: 'blue', name: 'Ocean', emoji: '🔵' },
+                    { id: 'blue', name: 'Oceanic Blue', emoji: '🔵' },
+                    { id: 'pink', name: 'Rose Petal', emoji: '🌸' },
                     { id: 'purple', name: 'Royal', emoji: '🟣' },
                     { id: 'starry', name: 'Starry Sky', emoji: '✨' },
                     { id: 'nature', name: 'Nature Forest', emoji: '🌿' },
