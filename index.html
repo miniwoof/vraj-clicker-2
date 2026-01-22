@@ -6,6 +6,9 @@
     <title>Vraj Clicker 2</title>
     <link rel="icon" type="image/png" href="image_0.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Quicksand:wght@400;600&display=swap');
         
@@ -19,7 +22,7 @@
             --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Theme Definitions */
+        /* --- THEME DEFINITIONS --- */
         body.theme-light { --bg-main: #f8fafc; --text-main: #1e293b; --accent: #2563eb; --glass: rgba(255, 255, 255, 0.7); --border: rgba(0, 0, 0, 0.1); --panel-bg: rgba(241, 245, 249, 0.9); }
         body.theme-midnight { --bg-main: #010204; --text-main: #94a3b8; --accent: #3b82f6; --glass: rgba(255, 255, 255, 0.01); --border: rgba(255, 255, 255, 0.05); --panel-bg: rgba(1, 2, 4, 0.9); }
         body.theme-red { --bg-main: #1a0505; --text-main: #fecaca; --accent: #dc2626; --panel-bg: rgba(26, 5, 5, 0.9); }
@@ -33,38 +36,50 @@
         body.theme-sea { --bg-main: #082f49; --text-main: #e0f2fe; --accent: #0ea5e9; --panel-bg: rgba(8, 47, 73, 0.9); }
         body.theme-snowy { --bg-main: #1e293b; --text-main: #f1f5f9; --accent: #94a3b8; --panel-bg: rgba(30, 41, 59, 0.9); }
         body.theme-starry { --bg-main: #000000; --text-main: #ffffff; --accent: #6366f1; --panel-bg: rgba(0, 0, 0, 0.9); }
+        
+        /* Milky Way Theme Overrides */
+        body.theme-milkyway { --bg-main: #000000; --text-main: #ffffff; --accent: #a855f7; --glass: rgba(0, 0, 0, 0.3); --border: rgba(168, 85, 247, 0.3); --panel-bg: rgba(0, 0, 0, 0.6); }
+        .theme-milkyway .glass { border-color: rgba(168, 85, 247, 0.4); box-shadow: 0 0 20px rgba(124, 58, 237, 0.15); }
+        .theme-milkyway .prestige-btn, 
+        .theme-milkyway .bulk-btn.active, 
+        .theme-milkyway .shop-tab-btn.active, 
+        .theme-milkyway .style-tab-btn.active {
+            background: #7c3aed !important;
+            box-shadow: 0 0 15px #7c3aed, 0 0 5px #a855f7;
+            border: 1px solid #c084fc;
+        }
+        .theme-milkyway #score { text-shadow: 0 0 20px rgba(168, 85, 247, 0.8); }
+        
+        /* Milky Way specific glow for clicker */
+        .theme-milkyway .click-btn-container {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6), 0 0 60px rgba(124, 58, 237, 0.4), inset 0 0 20px rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.8) !important;
+        }
+
+        /* Milky Way Leaderboard Transparency Fix */
+        .theme-milkyway .lb-card {
+            background: rgba(0, 0, 0, 0.2) !important; 
+            border-color: rgba(168, 85, 247, 0.2);
+        }
 
         body { font-family: 'Poppins', sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; height: 100vh; width: 100vw; overflow: hidden; transition: background 0.8s ease, color 0.5s ease; }
         .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); transition: var(--transition); }
         
         .left-panel-content { background: var(--panel-bg); transition: var(--transition); }
-        .side-tab { background: rgba(0,0,0,0.2); color: var(--text-main); opacity: 0.6; }
-        .side-tab.active { background: var(--accent); color: black; opacity: 1; transform: translateX(5px); }
+        .side-tab { background: rgba(0,0,0,0.4); color: var(--text-main); opacity: 0.8; }
+        .side-tab.active { background: var(--accent); color: white; opacity: 1; transform: translateX(5px); }
         #score { color: var(--accent); transition: var(--transition); }
 
-        /* Multiplier Display Positioned Bottom-Left */
-        #multiplier-display { 
-            position: fixed; 
-            bottom: 1.5rem; 
-            left: 1.5rem; 
-            z-index: 100; 
-            pointer-events: none;
-        }
-
-        /* Warp Transitions */
-        .warp-transition { animation: warpIn 0.1s ease-out forwards; }
-        @keyframes warpIn {
-            0% { transform: scale(0.95) translateY(10px); opacity: 0.9; filter: blur(5px); }
-            100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
-        }
+        /* Canvas Background */
+        #galaxy-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 1; }
+        .hidden { display: none !important; }
 
         /* Particle Overlay */
-        #theme-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
-        .particle { position: absolute; pointer-events: none !important; will-change: transform; }
+        #theme-overlay { position: fixed; inset: 0; pointer-events: none !important; z-index: 1; overflow: hidden; }
+        .particle { position: absolute; pointer-events: none !important; will-change: transform; user-select: none; }
 
         /* Responsive Grid */
-        .game-grid { display: grid; grid-template-columns: 350px 1fr 350px; grid-template-rows: 1fr; height: 100vh; gap: 1.5rem; padding: 1.5rem; box-sizing: border-box; position: relative; z-index: 2; }
-        
+        .game-grid { display: grid; grid-template-columns: 350px 1fr 350px; grid-template-rows: 1fr; height: 100vh; gap: 1.5rem; padding: 1.5rem; box-sizing: border-box; position: relative; z-index: 10; }
         @media (max-width: 1200px) { .game-grid { grid-template-columns: 300px 1fr 300px; gap: 1rem; padding: 1rem; } }
         @media (max-width: 1024px) {
             .game-grid { display: flex; flex-direction: column; overflow-y: auto; height: 100vh; }
@@ -85,11 +100,19 @@
         .side-tabs-container { position: absolute; right: -32px; top: 50px; display: flex; flex-direction: column; gap: 10px; z-index: 20; }
         .side-tab { border: 1px solid var(--border); border-left: none; padding: 15px 8px; border-radius: 0 12px 12px 0; cursor: pointer; writing-mode: vertical-lr; text-orientation: mixed; font-size: 10px; font-weight: 800; transition: all 0.2s; }
         
-        .click-btn-container { transition: transform 0.05s active, background 0.5s ease; cursor: pointer; user-select: none; position: relative; background: var(--accent) !important; }
+        /* Main Clicker Styles */
+        .click-btn-container { 
+            transition: transform 0.05s active, background 0.5s ease; 
+            cursor: pointer; 
+            user-select: none; 
+            position: relative; 
+            background: var(--accent) !important; 
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); /* Purple Glow Default */
+        }
         .click-btn-container:active { transform: scale(0.95); }
         .click-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
         
-        .upgrade-card, .ach-card, .prestige-card, .theme-card { transition: all 0.2s; border: 1px solid var(--border); border-radius: 1rem; }
+        .upgrade-card, .ach-card, .prestige-card, .theme-card { transition: all 0.2s; border: 1px solid var(--border); border-radius: 1rem; background: rgba(0,0,0,0.4); }
         .upgrade-card:hover:not(.disabled), .prestige-card:hover:not(.disabled), .theme-card:hover { background: rgba(59, 130, 246, 0.1); border-color: var(--accent); cursor: pointer; }
         .theme-card.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.2); border-width: 2px; }
         
@@ -97,35 +120,47 @@
         .ach-card.locked { opacity: 0.3; filter: grayscale(1); }
         .ach-card.unlocked { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.4); }
         .stat-row { display: flex; justify-content: space-between; padding: 0.75rem; border-bottom: 1px solid var(--border); }
-        .hidden { display: none !important; }
+        
         .bulk-btn.active, .shop-tab-btn.active, .style-tab-btn.active { background: var(--accent); color: white; }
         
-        .float-text { position: absolute; color: var(--accent); font-weight: 800; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 100; }
-        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+        /* Floating Text - Slower (3s) and Bigger (2rem) */
+        .float-text { 
+            position: absolute; 
+            color: var(--accent); 
+            font-weight: 800; 
+            font-size: 2rem; 
+            pointer-events: none; 
+            animation: floatUp 3s ease-out forwards; 
+            z-index: 100; 
+        }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
         
         .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 50; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; }
         @keyframes goldenFly { 0% { left: -100px; top: 20%; } 100% { left: 110vw; top: 60%; } }
         
         /* Fixed Prestige Button Gradient */
         .prestige-btn { 
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), var(--accent)); 
+            background: linear-gradient(135deg, var(--accent), #7c3aed); 
             border: 2px solid rgba(255,255,255,0.2); 
             transition: all 0.3s ease;
         }
         
+        /* Leaderboard Medals */
         .lb-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; }
-        #game-modal { z-index: 1000; position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
+        .lb-rank-1 { background: rgba(255, 215, 0, 0.2) !important; border-color: gold !important; }
+        .lb-rank-2 { background: rgba(192, 192, 192, 0.2) !important; border-color: silver !important; }
+        .lb-rank-3 { background: rgba(205, 127, 50, 0.2) !important; border-color: #cd7f32 !important; }
 
-        /* Theme Specific CSS */
+        #game-modal { z-index: 1000; position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
+        
+        /* Multiplier Display Position - Moved left to avoid touching chat */
+        #multiplier-display { position: fixed; bottom: 2rem; right: 400px; z-index: 100; pointer-events: none; }
+        @media (max-width: 1024px) { #multiplier-display { bottom: auto; top: 20px; right: 20px; } }
+
+        /* Theme Specific CSS Animations - FIXED to prevent sticking */
         .nature-leaf { font-size: 20px; animation: fall 10s linear infinite; }
-        .snow-flake { background: white; border-radius: 50%; animation: fall 8s linear infinite; filter: blur(1px); }
-        .sea-bubble { 
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
-            border-radius: 50%; 
-            animation: rise 15s linear infinite; 
-        }
+        .snow-flake { font-size: 10px; animation: fall 8s linear infinite; opacity: 0.8; }
+        .sea-bubble { font-size: 15px; animation: rise 15s linear infinite; opacity: 0.6; }
         .star { position: absolute; border-radius: 50%; animation: twinkle 3s infinite ease-in-out; }
 
         @keyframes fall {
@@ -140,10 +175,18 @@
             100% { transform: translateY(-20vh) translateX(-50px); opacity: 0; }
         }
         @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+        
+        /* Warp Transitions */
+        .warp-transition { animation: warpIn 0.1s ease-out forwards; }
+        @keyframes warpIn {
+            0% { transform: scale(0.95) translateY(10px); opacity: 0.9; filter: blur(5px); }
+            100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+        }
     </style>
 </head>
 <body class="select-none theme-classic">
 
+    <canvas id="galaxy-canvas" class="hidden"></canvas>
     <div id="theme-overlay"></div>
 
     <div id="game-modal" class="hidden">
@@ -224,7 +267,7 @@
                                 <div id="prestige-bar" class="h-full bg-gradient-to-r from-purple-600 to-blue-500 transition-all duration-300" style="width: 0%"></div>
                                 <span id="prestige-percent" class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">0%</span>
                             </div>
-                            <button id="prestige-btn" onclick="openPrestigeModal()" class="prestige-btn w-full py-4 rounded-2xl font-black text-white shadow-lg transform active:scale-95">
+                            <button id="prestige-btn" onclick="openPrestigeModal()" class="prestige-btn w-full py-4 rounded-2xl font-black text-white shadow-lg transform active:scale-95 transition-all">
                                 ASCEND <span id="prestige-gain-display">(+0 Fatflaps)</span>
                             </button>
                             <p class="text-[9px] opacity-50 mt-2 italic">Next Fatflap costs: <span id="next-prestige-cost">10,000</span></p>
@@ -347,6 +390,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, addDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import * as THREE from 'three';
 
         const firebaseConfig = { apiKey: "AIzaSyDwg2ZSpQspAD-o19AZCOHcrl9VnYc_sdk", authDomain: "vraj-clicker-2.firebaseapp.com", projectId: "vraj-clicker-2", storageBucket: "vraj-clicker-2.firebasestorage.app", messagingSenderId: "162243172716", appId: "1:162243172716:web:874a1f8be471a9f0d83b49" };
         const app = initializeApp(firebaseConfig);
@@ -354,6 +398,76 @@
         const db = getFirestore(app);
         const clickSound = new Audio('click.mp3');
         function playSfx() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
+
+        // --- GALAXY 3D ENGINE ---
+        let galaxyScene, galaxyCamera, galaxyRenderer, worldGroup, galaxyActive = false;
+        
+        function initGalaxy() {
+            if (galaxyRenderer) return;
+            const canvas = document.getElementById('galaxy-canvas');
+            galaxyScene = new THREE.Scene();
+            galaxyCamera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+            galaxyCamera.position.set(0, 18, 90);
+
+            galaxyRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, powerPreference: "high-performance", alpha: true });
+            galaxyRenderer.setSize(window.innerWidth, window.innerHeight);
+            galaxyRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            worldGroup = new THREE.Group();
+            worldGroup.position.y = 8;
+            galaxyScene.add(worldGroup);
+
+            const vShader = `attribute float size; varying vec3 vColor; void main() { vColor = color; vec4 mvPosition = modelViewMatrix * vec4(position, 1.0); gl_PointSize = size * (250.0 / -mvPosition.z); gl_Position = projectionMatrix * mvPosition; }`;
+            const fShader = `varying vec3 vColor; void main() { float d = distance(gl_PointCoord, vec2(0.5)); if (d > 0.5) discard; float strength = pow(1.0 - d * 2.1, 2.5); gl_FragColor = vec4(vColor, strength * 0.9); }`;
+
+            const count = 150000;
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(count * 3), cols = new Float32Array(count * 3), sizes = new Float32Array(count);
+            const cIn = new THREE.Color('#ffe1b0'), cOut = new THREE.Color('#3366ff');
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3, r = Math.random() * 75, bAngle = (i % 2) * Math.PI, spin = r * 0.22;
+                const rX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 4, rY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 2, rZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 4;
+                pos[i3] = Math.cos(bAngle + spin) * r + rX; pos[i3+1] = rY; pos[i3+2] = Math.sin(bAngle + spin) * r + rZ;
+                const mixed = cIn.clone().lerp(cOut, r/75); cols[i3] = mixed.r; cols[i3+1] = mixed.g; cols[i3+2] = mixed.b;
+                sizes[i] = Math.random() * 1.2 + 0.3;
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(cols, 3)); geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            worldGroup.add(new THREE.Points(geo, new THREE.ShaderMaterial({ vertexShader: vShader, fragmentShader: fShader, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, vertexColors: true })));
+
+            function createDust(color, density, spread) {
+                const g = new THREE.BufferGeometry(); const p = new Float32Array(density * 3); const cArr = new Float32Array(density * 3); const c = new THREE.Color(color);
+                for (let i = 0; i < density; i++) {
+                    const i3 = i * 3; p[i3] = (Math.random() - 0.5) * spread; p[i3+1] = (Math.random() - 0.5) * spread * 0.3 - 15; p[i3+2] = (Math.random() - 0.5) * spread;
+                    cArr[i3] = c.r; cArr[i3+1] = c.g; cArr[i3+2] = c.b;
+                }
+                g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('color', new THREE.BufferAttribute(cArr, 3));
+                return new THREE.Points(g, new THREE.PointsMaterial({ size: 0.5, transparent: true, opacity: 0.2, vertexColors: true, blending: THREE.AdditiveBlending }));
+            }
+            worldGroup.add(createDust('#1a0033', 8000, 500)); worldGroup.add(createDust('#001133', 8000, 600));
+
+            const starGeo = new THREE.BufferGeometry(); const starP = new Float32Array(10000 * 3);
+            for(let i=0; i<30000; i++) starP[i] = (Math.random() - 0.5) * 1500;
+            starGeo.setAttribute('position', new THREE.BufferAttribute(starP, 3));
+            galaxyScene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x333333, size: 0.3 })));
+
+            window.addEventListener('resize', () => { galaxyCamera.aspect = window.innerWidth / window.innerHeight; galaxyCamera.updateProjectionMatrix(); galaxyRenderer.setSize(window.innerWidth, window.innerHeight); });
+        }
+
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) - 0.5; mouseY = (e.clientY / window.innerHeight) - 0.5; });
+
+        function animateGalaxy() {
+            if (!galaxyActive) return;
+            requestAnimationFrame(animateGalaxy);
+            worldGroup.rotation.y += 0.0015;
+            const tX = mouseY * 0.15, tZ = mouseX * 0.15;
+            worldGroup.rotation.x += (tX - worldGroup.rotation.x) * 0.04;
+            worldGroup.rotation.z += (tZ - worldGroup.rotation.z) * 0.04;
+            galaxyRenderer.render(galaxyScene, galaxyCamera);
+        }
+
+        initGalaxy();
 
         window.showAlert = (title, content, onConfirm = null, isConfirm = false, isReset = false) => {
             const modal = document.getElementById('game-modal');
@@ -528,7 +642,7 @@
             const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             text.style.left = (clientX - 10) + 'px'; text.style.top = (clientY - 20) + 'px';
-            document.body.appendChild(text); setTimeout(() => text.remove(), 800);
+            document.body.appendChild(text); setTimeout(() => text.remove(), 2000); // 2s duration
         };
 
         function getPrestigeData() {
@@ -536,7 +650,7 @@
             while (true) {
                 let cost = 10000 * Math.pow(1.5, tempPrestige);
                 if (tempScore >= cost) { tempScore -= cost; tempPrestige++; levelsToGain++; } 
-                else { return { gain: levelsToGain, remaining: tempScore, nextCost: cost, percent: (tempScore / cost) * 100 }; }
+                else { return { gain: levelsToGain, remaining: tempScore, nextCost: cost, percent: Math.min((tempScore / cost) * 100, 100) }; }
             }
         }
 
@@ -587,6 +701,22 @@
         window.setTheme = (theme) => {
             document.body.className = `select-none theme-${theme}`;
             activeTheme = theme;
+            
+            const canvas = document.getElementById('galaxy-canvas');
+            if (theme === 'milkyway') {
+                initGalaxy();
+                if(canvas) {
+                    canvas.classList.remove('hidden');
+                    galaxyActive = true;
+                    animateGalaxy();
+                }
+            } else {
+                if(canvas) {
+                    canvas.classList.add('hidden');
+                    galaxyActive = false;
+                }
+            }
+
             initThemeEffects(theme);
             renderStylePanel();
         };
@@ -601,7 +731,10 @@
                     const p = document.createElement('div');
                     p.className = 'particle';
                     const left = Math.random() * 100;
+                    
+                    // Fixed particle clipping by randomizing start delay and using negative delay to pre-warm animation
                     const delay = -(Math.random() * 15); 
+                    
                     p.style.left = left + '%';
                     p.style.animationDelay = delay + 's';
                     
@@ -611,13 +744,15 @@
                         p.className += ' nature-leaf';
                         p.style.fontSize = (Math.random() * 15 + 10) + 'px';
                     } else if(theme === 'snowy') {
+                        p.innerText = '❄️snow';
                         p.className += ' snow-flake';
-                        const s = Math.random() * 6 + 2;
-                        p.style.width = s + 'px'; p.style.height = s + 'px';
+                        const s = Math.random() * 10 + 5;
+                        p.style.fontSize = s + 'px';
                     } else if(theme === 'sea') {
+                        p.innerText = '🔵';
                         p.className += ' sea-bubble';
-                        const s = Math.random() * 20 + 8;
-                        p.style.width = s + 'px'; p.style.height = s + 'px';
+                        const s = Math.random() * 15 + 5;
+                        p.style.fontSize = s + 'px';
                     } else if(theme === 'starry') {
                         p.className = 'star';
                         const s = Math.random() * 3 + 1;
@@ -637,6 +772,7 @@
             const list = document.getElementById('style-list');
             if (currentStyleTab === 'themes') {
                 const themes = [
+                    { id: 'milkyway', name: 'Milky Way', emoji: '🌌' },
                     { id: 'classic', name: 'Classic Dark', emoji: '🌑' },
                     { id: 'light', name: 'Clean Light', emoji: '☀️' },
                     { id: 'midnight', name: 'Midnight Deep', emoji: '🌌' },
@@ -727,11 +863,14 @@
             if (Math.random() < (ownedPrestigeUpgrades.includes("p2") ? 0.01 : 0.005)) spawnGoldenVraj();
             
             const pData = getPrestigeData();
-            document.getElementById('prestige-bar').style.width = pData.percent + '%';
-            document.getElementById('prestige-percent').innerText = Math.floor(pData.percent) + '%';
-            document.getElementById('prestige-gain-display').innerText = `(+${pData.gain} Fatflaps)`;
-            document.getElementById('prestige-btn').disabled = pData.gain === 0;
-            document.getElementById('next-prestige-cost').innerText = Math.floor(pData.nextCost).toLocaleString();
+            const bar = document.getElementById('prestige-bar');
+            if(bar) {
+                bar.style.width = pData.percent + '%';
+                document.getElementById('prestige-percent').innerText = Math.floor(pData.percent) + '%';
+                document.getElementById('prestige-gain-display').innerText = `(+${pData.gain} Fatflaps)`;
+                document.getElementById('prestige-btn').disabled = pData.gain === 0;
+                document.getElementById('next-prestige-cost').innerText = Math.floor(pData.nextCost).toLocaleString();
+            }
         }, 1000);
 
         function updateUI() {
@@ -817,8 +956,14 @@
                     }}, 10000);
                     onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10)), (s) => {
                         document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => {
-                            const dData = d.data(); const medal = (i === 0) ? '🥇' : (i === 1) ? '🥈' : (i === 2) ? '🥉' : '';
-                            return `<div class="lb-card p-3 flex items-center justify-between mb-2"><div class="flex items-center gap-3"><span class="text-xs font-black">#${i+1} ${medal}</span><div><p class="text-xs font-bold">${dData.username}</p><p class="text-[9px] opacity-60 font-bold">${(dData.prestigeCount || 0)} Ascensions</p></div></div><div class="text-right"><p class="text-xs font-black text-blue-400">${Math.floor(dData.score).toLocaleString()}</p></div></div>`;
+                            const dData = d.data(); 
+                            let rankClass = ""; 
+                            let medal = "";
+                            if (i === 0) { rankClass = "lb-rank-1"; medal = "🥇"; }
+                            else if (i === 1) { rankClass = "lb-rank-2"; medal = "🥈"; }
+                            else if (i === 2) { rankClass = "lb-rank-3"; medal = "🥉"; }
+                            
+                            return `<div class="lb-card p-3 flex items-center justify-between mb-2 ${rankClass}"><div class="flex items-center gap-3"><span class="text-xs font-black">#${i+1} ${medal}</span><div><p class="text-xs font-bold">${dData.username}</p><p class="text-[9px] opacity-60 font-bold">${(dData.prestigeCount || 0)} Ascensions</p></div></div><div class="text-right"><p class="text-xs font-black text-blue-400">${Math.floor(dData.score).toLocaleString()}</p></div></div>`;
                         }).join('');
                     });
                     onSnapshot(query(collection(db, "globalChat"), orderBy("timestamp", "desc"), limit(20)), (s) => {
