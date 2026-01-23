@@ -11,6 +11,7 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Quicksand:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
         
         :root {
             --bg-main: #070b14;
@@ -38,12 +39,9 @@
         body.theme-starry { --bg-main: #000000; --text-main: #ffffff; --accent: #6366f1; --panel-bg: rgba(0, 0, 0, 0.9); }
         
         /* Milky Way Theme Overrides */
-        body.theme-milkyway { --bg-main: #000000; --text-main: #ffffff; --accent: #a855f7; --glass: rgba(0, 0, 0, 0.3); --border: rgba(168, 85, 247, 0.3); --panel-bg: rgba(0, 0, 0, 0.3); }
+        body.theme-milkyway { --bg-main: #000000; --text-main: #ffffff; --accent: #a855f7; --glass: rgba(0, 0, 0, 0.3); --border: rgba(168, 85, 247, 0.3); --panel-bg: rgba(0, 0, 0, 0.6); }
         .theme-milkyway .glass { border-color: rgba(168, 85, 247, 0.4); box-shadow: 0 0 20px rgba(124, 58, 237, 0.15); }
-        .theme-milkyway .prestige-btn, 
-        .theme-milkyway .bulk-btn.active, 
-        .theme-milkyway .shop-tab-btn.active, 
-        .theme-milkyway .style-tab-btn.active {
+        .theme-milkyway .prestige-btn, .theme-milkyway .bulk-btn.active, .theme-milkyway .shop-tab-btn.active, .theme-milkyway .style-tab-btn.active {
             background: #7c3aed !important;
             box-shadow: 0 0 15px #7c3aed, 0 0 5px #a855f7;
             border: 1px solid #c084fc;
@@ -64,6 +62,8 @@
         .left-panel-content { background: var(--panel-bg); transition: var(--transition); }
         .side-tab { background: rgba(0,0,0,0.4); color: var(--text-main); opacity: 0.8; }
         .side-tab.active { background: var(--accent); color: white; opacity: 1; transform: translateX(5px); }
+        .side-tab.locked { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; pointer-events: none; position: relative; }
+        .side-tab.locked::after { content: '🔒'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; }
         #score { color: var(--accent); transition: var(--transition); }
 
         /* Canvas Background */
@@ -74,24 +74,89 @@
         #theme-overlay { position: fixed; inset: 0; pointer-events: none !important; z-index: 1; overflow: hidden; }
         .particle { position: absolute; pointer-events: none !important; will-change: transform; user-select: none; }
 
-        /* Ascension Tree Container */
+        /* --- ASCENSION TREE STYLES --- */
         #ascension-tree-view {
             position: fixed; inset: 0; z-index: 0; 
-            background: radial-gradient(circle at center, #1a0b2e 0%, #000000 100%);
+            background: radial-gradient(circle at center, #0f0518 0%, #000000 100%);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 1s ease;
+            overflow: hidden;
         }
         #ascension-tree-view.active { opacity: 1; pointer-events: auto; z-index: 2000; }
+        
+        #tree-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            cursor: grab;
+            background: radial-gradient(circle at center, transparent 0%, #000 90%), url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwWiIvPjwvc3ZnPg==');
+        }
+        #tree-container::-webkit-scrollbar { display: none; }
+
+        .tree-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            background: #1e1b4b;
+            border: 3px solid #4c1d95;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .tree-node:hover { transform: scale(1.2); z-index: 20; border-color: white; }
+        
+        .tree-node.type-root { border-color: white; background: #000; box-shadow: 0 0 30px white; width: 70px; height: 70px; font-size: 35px; }
+        .tree-node.type-click { border-color: #ef4444; background: #450a0a; } 
+        .tree-node.type-passive { border-color: #3b82f6; background: #172554; } 
+        .tree-node.type-golden { border-color: #eab308; background: #422006; } 
+        .tree-node.type-synergy { border-color: #a855f7; background: #3b0764; } 
+        .tree-node.type-pet { border-color: #10b981; background: #064e3b; } 
+
+        .tree-node.owned { filter: brightness(1.2); box-shadow: 0 0 20px currentColor; opacity: 1; }
+        .tree-node.available { animation: pulseNode 2s infinite; opacity: 1; cursor: pointer; filter: brightness(1.1); }
+        .tree-node.locked { filter: grayscale(1) brightness(0.5); opacity: 0.4; cursor: not-allowed; border-color: #4b5563; background: #111827; }
+
+        @keyframes pulseNode { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* Tooltip */
+        #tree-tooltip {
+            position: fixed; pointer-events: none; z-index: 3000;
+            background: rgba(10, 10, 20, 0.95); border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px; border-radius: 12px; width: 280px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            transform: translate(15px, 15px);
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        /* SVG Lines */
+        #tree-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        line { stroke: #4b5563; stroke-width: 2; opacity: 0.3; transition: all 0.5s; stroke-linecap: round; }
+        line.active { stroke: #e2e8f0; opacity: 0.6; stroke-width: 3; }
+
+        /* Pets Overlay */
+        #pet-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+        .game-pet { 
+            position: absolute; width: 60px; height: 60px; 
+            animation: floatPet 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+            font-size: 40px;
+        }
+        @keyframes floatPet { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
 
         /* Screen Fall Animation */
         .screen-falling {
-            animation: crackAndFall 1.5s cubic-bezier(0.5, 0, 0.2, 1) forwards;
+            animation: crackAndFall 2s cubic-bezier(0.6, 0.05, 0.2, 1) forwards;
             pointer-events: none !important;
         }
         @keyframes crackAndFall {
-            0% { transform: translateY(0) rotate(0); opacity: 1; }
-            20% { transform: translateY(50px) rotate(-2deg); opacity: 1; }
-            100% { transform: translateY(120vh) rotate(5deg); opacity: 0; }
+            0% { transform: translateY(0) rotate(0); opacity: 1; filter: contrast(1); }
+            10% { transform: translateY(20px) rotate(-1deg); opacity: 1; filter: contrast(1.2) brightness(1.5); }
+            100% { transform: translateY(150vh) rotate(5deg); opacity: 0; }
         }
 
         /* Responsive Grid */
@@ -167,6 +232,18 @@
         #multiplier-display { position: fixed; bottom: 2rem; right: 400px; z-index: 100; pointer-events: none; }
         @media (max-width: 1024px) { #multiplier-display { bottom: auto; top: 20px; right: 20px; } }
 
+        /* Dev Tag Style */
+        .dev-tag {
+            background: linear-gradient(to right, #ef4444, #f87171);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            margin-right: 5px;
+            text-transform: uppercase;
+            font-size: 0.7em;
+            vertical-align: middle;
+        }
+
         /* Theme Specific CSS Animations */
         .nature-leaf { font-size: 20px; animation: fall 10s linear infinite; }
         .snow-flake { font-size: 15px; animation: fall 8s linear infinite; opacity: 0.8; }
@@ -194,24 +271,41 @@
 
     <canvas id="galaxy-canvas" class="hidden"></canvas>
     <div id="theme-overlay"></div>
+    <div id="pet-container"></div>
 
     <div id="ascension-tree-view">
-        <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500 mb-2 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">ASCENSION TREE</h1>
-        <p class="text-gray-400 mb-8 font-bold tracking-widest text-sm">SPEND YOUR FATFLAPS WISELY</p>
-        
-        <div class="glass p-6 rounded-3xl w-full max-w-4xl h-[60vh] overflow-y-auto border border-purple-500/30 bg-black/40">
-            <div id="ascension-tree-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                </div>
+        <div class="absolute top-0 w-full p-6 text-center z-20 bg-gradient-to-b from-black to-transparent pointer-events-none">
+            <h1 class="text-4xl font-bold text-yellow-500 drop-shadow-lg" style="font-family: 'Cinzel', serif; letter-spacing: 2px;">HEAVENLY UPGRADES</h1>
+            <p class="text-blue-300 text-lg font-bold mt-1">Fatflaps: <span id="tree-fatflaps" class="text-white">0</span> 🥞</p>
         </div>
-
-        <div class="mt-8 flex gap-4">
-            <div class="glass px-6 py-3 rounded-xl border border-white/10">
-                <span class="text-xs text-gray-400 font-bold uppercase">Balance</span>
-                <p class="text-2xl font-black text-purple-400"><span id="tree-fatflaps">0</span> 🥞</p>
+        <div id="tree-container">
+            <svg id="tree-lines"></svg>
+        </div>
+        <div id="tree-tooltip">
+            <h3 class="font-bold text-white text-lg border-b border-white/20 pb-1 mb-1" id="tt-name">Title</h3>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-gray-700 text-gray-300" id="tt-type">Type</span>
+                <span class="text-xs font-black text-yellow-400" id="tt-cost">Cost</span>
             </div>
-            <button onclick="reincarnate()" class="px-8 py-3 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl font-bold text-white shadow-lg hover:scale-105 transition-transform border border-white/20">
+            <p class="text-xs text-gray-300 leading-relaxed" id="tt-desc">Description</p>
+            <p class="text-[10px] text-gray-500 mt-2 italic" id="tt-quote">"Flavor text goes here."</p>
+        </div>
+        <div class="absolute bottom-10 z-20">
+             <button onclick="reincarnate()" class="px-12 py-4 bg-gradient-to-t from-red-900 to-red-600 rounded-lg font-black text-white text-xl border-2 border-red-400 shadow-[0_0_20px_rgba(220,38,38,0.6)] hover:scale-105 transition-transform hover:shadow-[0_0_40px_rgba(220,38,38,0.8)]" style="font-family: 'Cinzel', serif;">
                 REINCARNATE
             </button>
+        </div>
+    </div>
+
+    <div id="owner-modal" class="hidden fixed inset-0 z-[4000] bg-black/90 flex items-center justify-center">
+        <div class="glass p-8 rounded-3xl w-96 border border-red-500/50">
+            <h2 class="text-2xl font-black text-red-500 mb-4 text-center">DEV CONSOLE</h2>
+            <div class="space-y-4">
+                <input type="number" id="cheat-amount" placeholder="Amount" class="w-full p-2 bg-black/50 border border-white/10 rounded text-white">
+                <button onclick="cheatAddVrajs()" class="w-full bg-blue-600 p-2 rounded font-bold">Add Vrajs</button>
+                <button onclick="cheatAddFatflaps()" class="w-full bg-purple-600 p-2 rounded font-bold">Add Fatflaps</button>
+                <button onclick="document.getElementById('owner-modal').classList.add('hidden')" class="w-full bg-gray-600 p-2 rounded font-bold">Close</button>
+            </div>
         </div>
     </div>
 
@@ -296,7 +390,7 @@
                             <button id="prestige-btn" onclick="openPrestigeModal()" class="prestige-btn w-full py-4 rounded-2xl font-black text-white shadow-lg transform active:scale-95 transition-all">
                                 ASCEND <span id="prestige-gain-display">(+0 Fatflaps)</span>
                             </button>
-                            <p class="text-[9px] opacity-50 mt-2 italic">Next Fatflap costs: <span id="next-prestige-cost">10,000</span></p>
+                            <p class="text-[9px] opacity-50 mt-2 italic">Next Fatflap costs: <span id="next-prestige-cost">1,000</span></p>
                         </div>
                         <div id="prestige-shop-list" class="scroll-panel p-4 space-y-3"></div>
                     </div>
@@ -331,14 +425,16 @@
                             <h3 class="font-bold text-emerald-400">📊 Statistics</h3>
                         </div>
                         <div class="scroll-panel p-2 space-y-1 text-sm">
-                            <div class="stat-row"><span>Total Multiplier</span><span id="stat-total-mult" class="text-yellow-400 font-bold">1.0x</span></div>
-                            <div class="stat-row"><span>Fatflaps</span><span id="stat-fatflaps" class="text-purple-400 font-bold">0</span></div>
-                            <div class="stat-row"><span>Total Ascensions</span><span id="stat-prestige-count" class="text-purple-400 font-bold">0</span></div>
-                            <div class="stat-row"><span>Total Vrajs Collected</span><span id="stat-total-vrajs" class="font-bold">0</span></div>
+                            <div class="stat-row"><span>Time Played</span><span id="stat-time-played" class="font-bold">0s</span></div>
+                            <div class="stat-row"><span>Total Vrajs</span><span id="stat-total-vrajs" class="font-bold">0</span></div>
                             <div class="stat-row"><span>Manual Clicks</span><span id="stat-manual-clicks" class="font-bold">0</span></div>
-                            <div class="stat-row"><span>Upgrades Bought</span><span id="stat-upgrades-bought" class="font-bold">0</span></div>
-                            <div class="stat-row"><span>Golden Vrajs Caught</span><span id="stat-golden-caught" class="font-bold">0</span></div>
-                            <div class="stat-row"><span>Time Played</span><span id="stat-time-played" class="font-bold">0m</span></div>
+                            <div class="stat-row"><span>Upgrades</span><span id="stat-upgrades-bought" class="font-bold">0</span></div>
+                            <div class="stat-row"><span>Golden Caught</span><span id="stat-golden-caught" class="font-bold">0</span></div>
+                            <div class="stat-row"><span>Fatflaps</span><span id="stat-fatflaps" class="text-purple-400 font-bold">0</span></div>
+                            <div class="stat-row"><span>Ascensions</span><span id="stat-prestige-count" class="text-purple-400 font-bold">0</span></div>
+                            <div class="p-2 border-b border-white/10"><p class="text-xs font-bold text-purple-400 uppercase tracking-widest">Multipliers</p></div>
+                            <div class="stat-row"><span>Click Power %</span><span id="stat-mult-click" class="text-yellow-400 font-bold">100%</span></div>
+                            <div class="stat-row"><span>Passive Gen %</span><span id="stat-mult-passive" class="text-blue-400 font-bold">100%</span></div>
                         </div>
                     </div>
 
@@ -347,10 +443,13 @@
                             <h3 class="font-bold opacity-50 text-xl mb-4">⚙️ System</h3>
                             <div class="space-y-3">
                                 <button onclick="trackSettingClick()" class="w-full p-4 glass rounded-xl text-left text-sm hover:bg-white/5 transition flex justify-between items-center">
-                                    Check for Updates <span class="text-[10px] bg-blue-500/20 px-2 py-1 rounded">v2.5</span>
+                                    Check for Updates <span class="text-[10px] bg-blue-500/20 px-2 py-1 rounded">v2.7</span>
                                 </button>
                                 <button onclick="triggerAccountReset()" class="w-full p-4 bg-red-600/10 border border-red-600/30 text-red-500 rounded-xl text-left text-sm font-bold hover:bg-red-600/20 transition">
                                     Reset Account Progress
+                                </button>
+                                <button id="dev-menu-btn" onclick="document.getElementById('owner-modal').classList.remove('hidden')" class="hidden w-full p-4 bg-purple-900/20 border border-purple-500/30 text-purple-400 rounded-xl text-left text-sm font-bold">
+                                    [DEV] Owner Menu
                                 </button>
                             </div>
                         </div>
@@ -359,7 +458,7 @@
                 </div>
                 <div class="side-tabs-container">
                     <div id="tab-shop" onclick="switchSideTab('shop')" class="side-tab active">SHOP</div>
-                    <div id="tab-prestige" onclick="switchSideTab('prestige')" class="side-tab">ASCEND</div>
+                    <div id="tab-prestige" onclick="switchSideTab('prestige')" class="side-tab locked">ASCEND</div>
                     <div id="tab-achievements" onclick="switchSideTab('achievements')" class="side-tab">GOALS</div>
                     <div id="tab-style" onclick="switchSideTab('style')" class="side-tab">STYLE</div>
                     <div id="tab-stats" onclick="switchSideTab('stats')" class="side-tab">STATS</div>
@@ -531,9 +630,12 @@
         let score = 0, vps = 0, ppc = 1, bulkAmount = 1, currentShopTab = 'clicker', currentStyleTab = 'themes';
         let totalVrajs = 0, totalClicks = 0, totalUpgrades = 0, settingsClicked = 0, goldenVrajsCaught = 0, chatsSent = 0, timePlayed = 0;
         let goldenMultiplier = 1, multTimeRemaining = 0;
-        let prestigeCount = 0, fatflaps = 0, ownedPrestigeUpgrades = [];
+        let prestigeCount = 0, fatflaps = 0, ownedPrestigeUpgrades = [], ascensionUnlocked = false;
         let currentUser = null, currentUsername = "Guest", activeTheme = 'classic';
         let clickIntervals = [], lastClickTime = 0, hasWarned = false;
+        let savedTime = 0; 
+        let sessionStartTime = Date.now();
+        let isDev = false; // Dev Flag
 
         const upgradeData = [
             { name: "Vraj Finger", baseCost: 10, basePower: 0.2, emoji: "☝️" },
@@ -586,11 +688,62 @@
             { name: "Vraj Datasphere", baseCost: 78679506837, basePower: 393397534, emoji: "🌐" }
         ];
 
-        const prestigeUpgradeData = [
-            { id: "p1", name: "Heavenly Clicks", cost: 1, desc: "Add +1.0 to your total multiplier forever.", emoji: "✨" },
-            { id: "p2", name: "Golden Aura", cost: 2, desc: "Golden Vrajs appear twice as often.", emoji: "☀️" },
-            { id: "p3", name: "Persistent Vraj", cost: 5, desc: "Start every prestige with 50 Vraj Fingers.", emoji: "🥞" }
-        ];
+        // --- EXPANDED ASCENSION TREE DATA (60+ Upgrades) ---
+        const prestigeTreeData = [];
+        
+        // --- Helper to add node ---
+        const addNode = (id, name, cost, desc, emoji, parent, type, boost = 0, effect = null) => {
+            prestigeTreeData.push({ id, name, cost, desc, emoji, parent, type, boost, effect });
+        };
+
+        // Root
+        addNode('origin', 'The Big Bang', 1, 'Where it all begins. Unlocks the potential.', '🌌', null, 'root', 0.1);
+
+        // --- NORTH: RED (CLICK / COMBAT) ---
+        addNode('c1', 'Iron Finger', 2, '+20% Click Power', '👆', 'origin', 'click', 0.2);
+        
+        // Sub-Branch: Criticals
+        addNode('crit1', 'Precision Strike', 10, 'Unlock Critical Hits (10% Chance, 5x Dmg)', '🎯', 'c1', 'click', 0, 'crit_unlock');
+        addNode('crit2', 'Lethal Tempo', 50, 'Crit Multiplier +50%', '⚔️', 'crit1', 'click', 0, 'crit_dmg');
+        addNode('crit3', 'Eagle Eye', 250, 'Crit Chance +5%', '👁️', 'crit2', 'click', 0, 'crit_chance');
+        addNode('crit4', 'Devastation', 1000, 'Crit Multiplier x2', '🩸', 'crit3', 'click', 0, 'crit_mult_2');
+
+        // Sub-Branch: Raw Power
+        addNode('pow1', 'Titanium Mouse', 15, '+50% Click Power', '🖱️', 'c1', 'click', 0.5);
+        addNode('pow2', 'Cybernetic Joints', 75, '+100% Click Power', '🦾', 'pow1', 'click', 1.0);
+        addNode('pow3', 'Plasma Clicks', 400, '+200% Click Power', '⚡', 'pow2', 'click', 2.0);
+        addNode('pow4', 'God Finger', 2500, '+500% Click Power', '🌩️', 'pow3', 'click', 5.0);
+
+        // --- EAST: BLUE (PASSIVE / INDUSTRY) ---
+        addNode('p1', 'Auto Alignment', 2, '+20% VPS', '⚙️', 'origin', 'passive', 0.2);
+        
+        // Sub-Branch: Synergy
+        addNode('syn1', 'Building Synergy', 10, '+1% VPS per Building Owned', '🏗️', 'p1', 'passive', 0, 'syn_build');
+        addNode('syn2', 'Network Effect', 60, '+10% VPS', '🌐', 'syn1', 'passive', 0.1);
+        addNode('syn3', 'Hive Mind', 300, '+50% VPS', '🧠', 'syn2', 'passive', 0.5);
+        
+        // Sub-Branch: Offline
+        addNode('off1', 'Time Bank', 15, 'Gain 50% production while offline', '⏳', 'p1', 'passive', 0, 'offline_50');
+        addNode('off2', 'Temporal Shift', 100, 'Offline Cap increased to 24h', '🕰️', 'off1', 'passive', 0, 'offline_24h');
+        
+        // --- SOUTH: GOLD (LUCK / WEALTH) ---
+        addNode('g1', 'Shiny Sight', 5, 'Golden Vrajs spawn 2x as often', '✨', 'origin', 'golden', 0, 'spawn_2x');
+        addNode('g2', 'Midas Touch', 25, 'Golden Vrajs give 3x Multiplier', '👑', 'g1', 'golden', 0, 'mult_3x');
+        addNode('g3', 'Treasure Hunter', 100, 'Golden Vrajs last 5s longer', '💎', 'g2', 'golden', 0, 'dur_5s');
+        addNode('g4', 'Leprechaun Blood', 500, 'Golden Vrajs give 5x Multiplier', '🍀', 'g3', 'golden', 0, 'mult_5x');
+
+        // --- WEST: PURPLE (UTILITY / COSMIC) ---
+        addNode('u1', 'Haggler', 10, 'Shop prices -5%', '🏷️', 'origin', 'synergy', 0, 'disc_5');
+        addNode('u2', 'Trophy Hunter', 50, '+5% Multiplier per Achievement', '🏆', 'u1', 'synergy', 0, 'ach_scale');
+        addNode('u3', 'Cosmic Insight', 250, 'Show VPS/Click on Tooltips', '🔮', 'u2', 'synergy', 0, 'insight');
+        addNode('u4', 'Black Hole Market', 1000, 'Shop prices -10%', '🕳️', 'u3', 'synergy', 0, 'disc_10');
+
+        // --- PET BRANCH (GREEN) ---
+        addNode('pet1', 'Mysterious Egg', 500, 'Unlocks a companion...', '🥚', 'origin', 'pet', 0, 'pet_egg');
+        addNode('pet2', 'Hatchling', 1500, 'The egg cracks! (+5% Passive)', '🐣', 'pet1', 'pet', 0, 'pet_hatch');
+        addNode('pet3', 'Golden Guardian', 5000, 'Auto-clicks Golden Vrajs!', '👼', 'pet2', 'pet', 0, 'pet_gold');
+        addNode('pet4', 'Void Wisp', 10000, 'Click Power increases with AFK time', '👻', 'pet3', 'pet', 0, 'pet_void');
+
 
         const achievements = [];
         [1, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000].forEach(n => achievements.push({ id: `click-${n}`, title: `${n.toLocaleString()} Clicks`, desc: `Click the Vraj ${n.toLocaleString()} times.`, target: n, type: 'clicks', unlocked: false }));
@@ -601,11 +754,55 @@
 
         const upgrades = upgradeData.map((u, i) => ({ id: i+1, ...u, owned: 0, cost: u.baseCost, isClickUpgrade: (i+1)%2!==0 }));
 
-        function getTotalMultiplier() {
-            const ffBonus = fatflaps * 0.5;
-            const upgradeBonus = ownedPrestigeUpgrades.includes("p1") ? 1.0 : 0;
-            return (1 + ffBonus + upgradeBonus) * goldenMultiplier;
+        function calculateMultipliers() {
+            let clickPct = 100;
+            let passivePct = 100;
+            let globalMult = 1 + (fatflaps * 0.5); // Base global from Fatflaps
+            
+            // Add Tree Root/Global Boosts
+            prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => {
+                if(u.type === 'root' || u.type === 'synergy' || u.type === 'golden' || u.type === 'special') {
+                    if(u.boost) globalMult += u.boost;
+                }
+            });
+
+            // Calculate Type Specifics (Base 100 + Tree Boosts) * Global
+            let treeClick = 0;
+            let treePassive = 0;
+            
+            prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => {
+                if(u.type === 'click' && u.boost) treeClick += u.boost;
+                if(u.type === 'passive' && u.boost) treePassive += u.boost;
+            });
+
+            // Apply to totals
+            clickPct = (1 + treeClick) * globalMult * 100;
+            passivePct = (1 + treePassive) * globalMult * 100;
+            
+            // Special Logic corrections
+            if(hasTree('crit_mult_2')) clickPct *= 2; // Rough estimate for display
+
+            return { click: clickPct, passive: passivePct };
         }
+
+        function getTotalMultiplier() {
+            let mult = 1 + (fatflaps * 0.5);
+            
+            // Apply Boosts from Tree
+            prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => {
+                if(u.boost) mult += u.boost;
+            });
+            
+            // Dynamic Scalers
+            if(hasTree('u2')) {
+                const achCount = achievements.filter(a => a.unlocked).length;
+                mult += (achCount * 0.05);
+            }
+            
+            return mult * goldenMultiplier;
+        }
+        
+        function hasTree(id) { return ownedPrestigeUpgrades.includes(id); }
 
         window.switchSideTab = (tab) => {
             document.querySelectorAll('.left-panel-content').forEach(p => {
@@ -630,7 +827,12 @@
         window.setShopTab = (tab) => { currentShopTab = tab; document.querySelectorAll('.shop-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('shop-tab-'+tab).classList.add('active'); renderShop(); updateUI(); };
         window.setStyleTab = (tab) => { currentStyleTab = tab; document.querySelectorAll('.style-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('style-tab-'+tab).classList.add('active'); renderStylePanel(); };
 
-        function getBulkCost(baseCost, count) { let total = 0; let temp = baseCost; for(let i=0; i<count; i++) { total += temp; temp = Math.ceil(temp * 1.15); } return total; }
+        function getBulkCost(baseCost, count) { 
+            let total = 0; let temp = baseCost; 
+            let discount = (hasTree('u1') ? 0.95 : 1.0) * (hasTree('u4') ? 0.9 : 1.0);
+            for(let i=0; i<count; i++) { total += Math.floor(temp * discount); temp = Math.ceil(temp * 1.15); } 
+            return total; 
+        }
 
         window.buyUpgrade = (id) => {
             const upg = upgrades.find(u => u.id === id);
@@ -660,21 +862,35 @@
                 }
             }
             lastClickTime = now; totalClicks++;
-            const gain = ppc * getTotalMultiplier();
+            
+            let mult = getTotalMultiplier();
+            let isCrit = false;
+            // Crit Logic
+            if(hasTree('crit1') && Math.random() < 0.1) {
+                mult *= (hasTree('crit2') ? 7.5 : 5); // 5x or 7.5x
+                if(hasTree('crit4')) mult *= 2;
+                isCrit = true;
+            }
+
+            const gain = ppc * mult;
             score += gain; totalVrajs += gain; playSfx(); updateUI(); checkAchievements();
             
             const text = document.createElement('div');
-            text.className = 'float-text'; text.innerText = '+' + Math.floor(gain).toLocaleString();
+            text.className = 'float-text'; 
+            text.innerText = (isCrit ? 'CRIT! +' : '+') + Math.floor(gain).toLocaleString();
+            if(isCrit) { text.style.color = '#ef4444'; text.style.fontSize = '3rem'; }
+            
             const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             text.style.left = (clientX - 10) + 'px'; text.style.top = (clientY - 20) + 'px';
-            document.body.appendChild(text); setTimeout(() => text.remove(), 2000); 
+            document.body.appendChild(text); setTimeout(() => text.remove(), 3000); 
         };
 
         function getPrestigeData() {
             let tempScore = score; let tempPrestige = prestigeCount; let levelsToGain = 0;
             while (true) {
-                let cost = 10000 * Math.pow(1.5, tempPrestige);
+                // Testing cost set to 1000 as requested
+                let cost = 1000 * Math.pow(1.5, tempPrestige);
                 if (tempScore >= cost) { tempScore -= cost; tempPrestige++; levelsToGain++; } 
                 else { return { gain: levelsToGain, remaining: tempScore, nextCost: cost, percent: Math.min((tempScore / cost) * 100, 100) }; }
             }
@@ -698,13 +914,17 @@
                         vps += (u.basePower * 50);
                     }
                 });
-                // Reset Screen Falling Animation
+                
+                // Screen Cracking Effect
                 const tree = document.getElementById('ascension-tree-view');
                 const game = document.getElementById('game-screen');
                 game.classList.add('screen-falling');
+                
                 setTimeout(() => {
                     tree.classList.add('active');
+                    renderAscensionTree(); // Initial render
                 }, 1000);
+
                 updateUI(); renderPrestigeShop();
             }
         };
@@ -714,8 +934,41 @@
             const game = document.getElementById('game-screen');
             tree.classList.remove('active');
             game.classList.remove('screen-falling');
-            // Slight delay to ensure clean transition
+            // Check Pets
+            checkPets();
             setTimeout(() => { updateUI(); }, 500);
+        };
+        
+        function checkPets() {
+            const container = document.getElementById('pet-container');
+            container.innerHTML = ''; // Clear and rebuild
+            
+            if(hasTree('pet1')) spawnPet('🥚', 'bounce'); // Egg
+            if(hasTree('pet2')) { container.innerHTML=''; spawnPet('🐣', 'float'); } // Hatchling
+            if(hasTree('pet3')) spawnPet('👼', 'float-fast'); // Guardian
+            if(hasTree('pet4')) spawnPet('👻', 'pulse'); // Wisp
+        }
+        
+        function spawnPet(emoji, anim) {
+            const p = document.createElement('div');
+            p.className = 'game-pet';
+            p.innerText = emoji;
+            p.style.fontSize = '40px';
+            p.style.left = (Math.random() * 80 + 10) + '%';
+            p.style.top = (Math.random() * 60 + 20) + '%';
+            // Simple animation class logic (omitted for brevity, just static for now or use floatPet)
+            p.style.animation = 'floatPet 4s ease-in-out infinite';
+            document.getElementById('pet-container').appendChild(p);
+        }
+        
+        // --- CHEAT FUNCTIONS ---
+        window.cheatAddVrajs = () => {
+            const amt = parseInt(document.getElementById('cheat-amount').value) || 0;
+            score += amt; updateUI();
+        };
+        window.cheatAddFatflaps = () => {
+            const amt = parseInt(document.getElementById('cheat-amount').value) || 0;
+            fatflaps += amt; updateUI();
         };
 
         window.triggerAccountReset = () => {
@@ -725,42 +978,117 @@
         async function executeFullReset() { if(currentUser && !currentUser.isAnonymous) { await deleteDoc(doc(db, "leaderboard", currentUser.uid)); } location.reload(); }
 
         window.buyPrestigeUpgrade = (id) => {
-            const upg = prestigeUpgradeData.find(u => u.id === id);
-            if (fatflaps >= upg.cost && !ownedPrestigeUpgrades.includes(id)) {
+            const upg = prestigeTreeData.find(u => u.id === id);
+            const parentOwned = upg.parent === null || ownedPrestigeUpgrades.includes(upg.parent);
+            
+            if (fatflaps >= upg.cost && !ownedPrestigeUpgrades.includes(id) && parentOwned) {
                 fatflaps -= upg.cost; ownedPrestigeUpgrades.push(id);
                 renderPrestigeShop(); updateUI();
-                renderAscensionTree(); // Refresh tree
+                renderAscensionTree();
             }
         };
 
         function renderPrestigeShop() {
+            // Main Tab: Show ONLY Owned Upgrades
             const list = document.getElementById('prestige-shop-list');
-            list.innerHTML = prestigeUpgradeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).map(u => {
+            list.innerHTML = prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).map(u => {
                 return `<div class="prestige-card glass p-4 flex justify-between items-center opacity-50"><div class="flex items-center gap-3"><span class="text-2xl">${u.emoji}</span><div><p class="font-bold text-sm text-purple-300">${u.name}</p><p class="text-[9px] opacity-60">${u.desc}</p></div></div><div class="text-right"><p class="text-xs font-bold text-yellow-500">OWNED</p></div></div>`;
             }).join('');
             if (list.innerHTML === '') list.innerHTML = '<p class="text-xs text-center opacity-50 py-4">No upgrades purchased yet. Ascend to access the Tree.</p>';
-            
-            // Render actual Tree content
-            renderAscensionTree();
         }
         
         function renderAscensionTree() {
-            const treeContent = document.getElementById('ascension-tree-content');
+            const treeContent = document.getElementById('tree-container');
+            const linesSvg = document.getElementById('tree-lines');
             document.getElementById('tree-fatflaps').innerText = fatflaps;
             
-            treeContent.innerHTML = prestigeUpgradeData.map(u => {
+            const existingNodes = treeContent.querySelectorAll('.tree-node');
+            existingNodes.forEach(n => n.remove());
+            linesSvg.innerHTML = ''; 
+
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const positions = {};
+
+            // Recursive Radial Layout
+            const placeNodes = (parentId, x, y, angleStart, angleRange) => {
+                const children = prestigeTreeData.filter(n => n.parent === parentId);
+                if (children.length === 0) return;
+
+                const step = angleRange / children.length;
+                let currentAngle = angleStart;
+
+                children.forEach((child, index) => {
+                    const dist = parentId === null ? 180 : 120; // Distance between layers
+                    
+                    const nx = x + Math.cos(currentAngle) * dist;
+                    const ny = y + Math.sin(currentAngle) * dist;
+                    
+                    positions[child.id] = { x: nx, y: ny };
+                    createNodeElement(child, nx, ny);
+                    drawLine(x, y, nx, ny, child);
+
+                    // Recurse: Narrower angle range for sub-branches
+                    placeNodes(child.id, nx, ny, currentAngle - step/3, step);
+                    
+                    currentAngle += step;
+                });
+            };
+
+            const createNodeElement = (u, x, y) => {
+                const node = document.createElement('div');
                 const isOwned = ownedPrestigeUpgrades.includes(u.id);
+                const parentOwned = u.parent === null || ownedPrestigeUpgrades.includes(u.parent);
                 const canAfford = fatflaps >= u.cost;
-                return `
-                <div onclick="${isOwned ? '' : `buyPrestigeUpgrade('${u.id}')`}" class="glass p-6 rounded-2xl border ${isOwned ? 'border-green-500/50 bg-green-500/10' : (canAfford ? 'border-purple-500/50 hover:bg-purple-500/20 cursor-pointer' : 'border-red-500/30 opacity-50 cursor-not-allowed')} transition-all flex flex-col items-center text-center gap-2">
-                    <span class="text-4xl mb-2">${u.emoji}</span>
-                    <h3 class="font-bold text-white">${u.name}</h3>
-                    <p class="text-xs text-gray-400 h-8">${u.desc}</p>
-                    <div class="mt-2 px-4 py-1 rounded-full text-xs font-bold ${isOwned ? 'bg-green-500 text-black' : 'bg-purple-600 text-white'}">
-                        ${isOwned ? 'OWNED' : u.cost + ' 🥞'}
-                    </div>
-                </div>`;
-            }).join('');
+                const isLocked = !parentOwned;
+
+                let stateClass = '';
+                if(isOwned) stateClass = 'owned';
+                else if(isLocked) stateClass = 'locked';
+                else if(canAfford) stateClass = 'available';
+                else stateClass = 'locked opacity-50';
+
+                node.className = `tree-node type-${u.type} ${stateClass}`;
+                node.style.left = `${x - 30}px`; 
+                node.style.top = `${y - 30}px`;
+                node.innerText = u.emoji;
+
+                if(!isOwned && !isLocked && canAfford) {
+                    node.onclick = () => buyPrestigeUpgrade(u.id);
+                }
+
+                node.onmousemove = (e) => {
+                    const tt = document.getElementById('tree-tooltip');
+                    document.getElementById('tt-name').innerText = u.name;
+                    document.getElementById('tt-type').innerText = u.type.toUpperCase();
+                    document.getElementById('tt-cost').innerText = isOwned ? "Owned" : `${u.cost} Fatflaps`;
+                    document.getElementById('tt-desc').innerText = u.desc;
+                    tt.style.display = 'block';
+                    tt.style.left = `${e.clientX + 20}px`;
+                    tt.style.top = `${e.clientY + 20}px`;
+                };
+                node.onmouseleave = () => { document.getElementById('tree-tooltip').style.display = 'none'; };
+
+                treeContent.appendChild(node);
+            };
+
+            const drawLine = (x1, y1, x2, y2, child) => {
+                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                 line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+                 line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+                 if (ownedPrestigeUpgrades.includes(child.id) || (ownedPrestigeUpgrades.includes(child.parent) && fatflaps >= child.cost)) {
+                     line.classList.add('active');
+                 }
+                 linesSvg.appendChild(line);
+            };
+
+            // Start layout
+            const rootNode = prestigeTreeData.find(n => n.id === 'origin');
+            positions['origin'] = { x: centerX, y: centerY };
+            createNodeElement(rootNode, centerX, centerY);
+            
+            // 5 Main Branches distributed over 360 deg
+            placeNodes('origin', centerX, centerY, 0, Math.PI * 2);
         }
 
         window.setTheme = (theme) => {
@@ -797,6 +1125,7 @@
                     p.className = 'particle';
                     const left = Math.random() * 100;
                     
+                    // Fixed particle clipping by randomizing start delay and using negative delay to pre-warm animation
                     const delay = -(Math.random() * 15); 
                     
                     p.style.left = left + '%';
@@ -806,6 +1135,7 @@
                         const types = ['🍂','🍃','🍁'];
                         p.innerText = types[Math.floor(Math.random()*3)];
                         p.className += ' nature-leaf';
+                        p.style.fontSize = (Math.random() * 15 + 10) + 'px';
                     } else if(theme === 'snowy') {
                         p.innerText = '❄️';
                         p.className += ' snow-flake';
@@ -883,6 +1213,7 @@
         }
 
         function updateStatsUI() {
+            const mults = calculateMultipliers();
             document.getElementById('stat-total-mult').innerText = getTotalMultiplier().toFixed(1) + "x";
             document.getElementById('stat-total-vrajs').innerText = Math.floor(totalVrajs).toLocaleString();
             document.getElementById('stat-manual-clicks').innerText = totalClicks.toLocaleString();
@@ -890,6 +1221,18 @@
             document.getElementById('stat-golden-caught').innerText = goldenVrajsCaught.toLocaleString();
             document.getElementById('stat-fatflaps').innerText = fatflaps.toLocaleString();
             document.getElementById('stat-prestige-count').innerText = prestigeCount.toLocaleString();
+            
+            // New Percentages
+            document.getElementById('stat-mult-click').innerText = mults.click.toFixed(0) + "%";
+            document.getElementById('stat-mult-passive').innerText = mults.passive.toFixed(0) + "%";
+            
+            // Fix Time Played (Stored + Current Session)
+            const currentSessionTime = Date.now() - sessionStartTime;
+            const totalMs = savedTime + currentSessionTime;
+            const h = Math.floor(totalMs / 3600000);
+            const m = Math.floor((totalMs % 3600000) / 60000);
+            const s = Math.floor((totalMs % 60000) / 1000);
+            document.getElementById('stat-time-played').innerText = `${h}h ${m}m ${s}s`;
         }
 
         function renderAchievements() {
@@ -909,11 +1252,29 @@
         function spawnGoldenVraj() {
             if (document.querySelector('.golden-vraj')) return;
             const golden = document.createElement('img'); golden.src = 'image_0.png'; golden.className = 'golden-vraj';
-            golden.onclick = (e) => { e.stopPropagation(); goldenVrajsCaught++; activateMultiplier(); golden.remove(); };
+            golden.onclick = (e) => { e.stopPropagation(); goldenVrajsCaught++; activateMultiplier(); golden.remove(); 
+            if(hasTree('pet3')) { /* Guardian auto-click logic could be here visually */ } };
+            
+            if(hasTree('pet3')) { // Golden Guardian Auto-click
+                setTimeout(() => { if(golden.parentNode) golden.click(); }, 1000); // Click after 1s
+            }
+            
             document.body.appendChild(golden); setTimeout(() => { if(golden) golden.remove(); }, 10000);
         }
 
-        function activateMultiplier() { goldenMultiplier = 2; multTimeRemaining = 180; document.getElementById('multiplier-display').classList.remove('hidden'); updateUI(); }
+        function activateMultiplier() { 
+            let mult = 2;
+            if(hasTree('g2')) mult = 3; // Midas Touch
+            
+            let duration = 180;
+            if(hasTree('g3')) duration += 5; // Treasure Hunter
+
+            goldenMultiplier = mult; 
+            multTimeRemaining = duration; 
+            
+            document.getElementById('multiplier-display').classList.remove('hidden'); 
+            updateUI(); 
+        }
 
         setInterval(() => {
             timePlayed++;
@@ -923,7 +1284,11 @@
                 document.getElementById('mult-timer').innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
                 if (multTimeRemaining === 0) { goldenMultiplier = 1; document.getElementById('multiplier-display').classList.add('hidden'); updateUI(); }
             }
-            if (Math.random() < (ownedPrestigeUpgrades.includes("p2") ? 0.01 : 0.005)) spawnGoldenVraj();
+            
+            let spawnChance = 0.005;
+            if(hasTree('g1')) spawnChance = 0.01; // Lucky Clover
+            
+            if (Math.random() < spawnChance) spawnGoldenVraj();
             
             const pData = getPrestigeData();
             const bar = document.getElementById('prestige-bar');
@@ -939,7 +1304,12 @@
         function updateUI() {
             const totalMult = getTotalMultiplier();
             document.getElementById('score').innerText = Math.floor(score).toLocaleString();
-            document.getElementById('vps-display').innerText = (vps * totalMult).toLocaleString(undefined, {minimumFractionDigits: 1}) + " VPS";
+            
+            // VPS Calculation (Including tree buffs)
+            let currentVps = vps * totalMult;
+            if(hasTree('p2a')) currentVps += (currentVps * (upgradesBoughtCount * 0.01)); // Synergy
+            
+            document.getElementById('vps-display').innerText = currentVps.toLocaleString(undefined, {minimumFractionDigits: 1}) + " VPS";
             document.getElementById('ppc-display').innerText = (ppc * totalMult).toLocaleString(undefined, {maximumFractionDigits: 0}) + " Points Per Click";
             document.getElementById('icon-mult-display').innerText = totalMult.toFixed(1) + "x";
             
@@ -947,6 +1317,13 @@
                 document.getElementById('fatflap-display').classList.remove('hidden');
                 document.getElementById('fatflap-count').innerText = fatflaps.toLocaleString();
             }
+
+            // Tab Locking Logic
+            if(score >= 1000 || ascensionUnlocked) {
+                ascensionUnlocked = true;
+                document.getElementById('tab-prestige').classList.remove('locked');
+            }
+
             upgrades.forEach(u => {
                 const el = document.getElementById(`upg-${u.id}`);
                 if (el) {
@@ -997,6 +1374,12 @@
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
+                // Check if User is the Dev
+                if (user.email === 'jaash08@gmail.com') {
+                    isDev = true;
+                    document.getElementById('dev-menu-btn').classList.remove('hidden');
+                }
+
                 if (!user.isAnonymous && !user.emailVerified) { document.getElementById('verify-notice').classList.remove('hidden'); document.getElementById('login-form').classList.add('hidden'); document.getElementById('auth-tabs').classList.add('hidden'); } 
                 else {
                     document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('game-screen').classList.remove('hidden');
@@ -1005,17 +1388,26 @@
                         const snap = await getDoc(doc(db, "users", user.uid)); currentUsername = snap.exists() ? snap.data().username : "Vraj";
                         const save = await getDoc(doc(db, "leaderboard", user.uid)); 
                         if(save.exists()){ 
-                            const d = save.data(); score = d.score || 0; vps = d.vps || 0; ppc = d.ppc || 1; totalVrajs = d.totalVrajs || 0; totalClicks = d.totalClicks || 0; totalUpgrades = d.totalUpgrades || 0; goldenVrajsCaught = d.goldenVrajsCaught || 0; timePlayed = d.timePlayed || 0; prestigeCount = d.prestigeCount || 0; fatflaps = d.fatflaps || 0; ownedPrestigeUpgrades = d.ownedPrestigeUpgrades || [];
+                            const d = save.data(); score = d.score || 0; vps = d.vps || 0; ppc = d.ppc || 1; totalVrajs = d.totalVrajs || 0; totalClicks = d.totalClicks || 0; totalUpgrades = d.totalUpgrades || 0; goldenVrajsCaught = d.goldenVrajsCaught || 0; 
+                            savedTime = d.timePlayed || 0; 
+                            prestigeCount = d.prestigeCount || 0; fatflaps = d.fatflaps || 0; ownedPrestigeUpgrades = d.ownedPrestigeUpgrades || [];
+                            ascensionUnlocked = d.ascensionUnlocked || false;
                             if(d.upgStates) d.upgStates.forEach((s, i) => { if(upgrades[i]) { upgrades[i].owned = s.owned; upgrades[i].cost = s.cost; } });
                             if(d.achStates) achievements.forEach((a, i) => { if(d.achStates[i]) a.unlocked = d.achStates[i]; });
                             if(d.activeTheme) setTheme(d.activeTheme);
                         }
                     }
-                    document.getElementById('user-display').innerText = currentUsername; 
-                    renderShop(); renderAchievements(); renderPrestigeShop(); updateUI();
+                    
+                    // Add Dev Tag if applicable
+                    let displayHTML = currentUsername;
+                    if(isDev) displayHTML = `<span class="dev-tag">[DEV]</span> ${currentUsername}`;
+                    document.getElementById('user-display').innerHTML = displayHTML;
+                    
+                    renderShop(); renderAchievements(); renderPrestigeShop(); updateUI(); checkPets();
                     
                     setInterval(() => { if(currentUser && !currentUser.isAnonymous) {
-                        setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, totalVrajs, totalClicks, totalUpgrades, goldenVrajsCaught, timePlayed, username: currentUsername, upgStates: upgrades.map(u => ({ owned: u.owned, cost: u.cost })), achStates: achievements.map(a => a.unlocked), prestigeCount, fatflaps, ownedPrestigeUpgrades, activeTheme }, { merge: true }); 
+                        const currentSession = Date.now() - sessionStartTime;
+                        setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, totalVrajs, totalClicks, totalUpgrades, goldenVrajsCaught, timePlayed: savedTime + currentSession, username: currentUsername, upgStates: upgrades.map(u => ({ owned: u.owned, cost: u.cost })), achStates: achievements.map(a => a.unlocked), prestigeCount, fatflaps, ownedPrestigeUpgrades, activeTheme, ascensionUnlocked }, { merge: true }); 
                     }}, 10000);
                     onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10)), (s) => {
                         document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => {
