@@ -12,6 +12,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Quicksand:wght@400;600&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         
         :root {
             --bg-main: #070b14;
@@ -32,10 +33,10 @@
         body.theme-green { --bg-main: #051a05; --text-main: #bbf7d0; --accent: #16a34a; --panel-bg: rgba(5, 26, 5, 0.9); }
         body.theme-blue { --bg-main: #0c1a2b; --text-main: #e0f2fe; --accent: #00d2ff; --panel-bg: rgba(12, 26, 43, 0.9); }
         body.theme-purple { --bg-main: #11051a; --text-main: #ddd6fe; --accent: #9333ea; --panel-bg: rgba(17, 5, 26, 0.9); }
-        body.theme-pink { --bg-main: #1a0510; --text-main: #fce7f3; --accent: #f472b6; --panel-bg: rgba(26, 5, 16, 0.9); }
-        body.theme-nature { --bg-main: #0d1a0d; --text-main: #ecfccb; --accent: #65a30d; --panel-bg: rgba(13, 26, 13, 0.9); }
-        body.theme-sea { --bg-main: #082f49; --text-main: #e0f2fe; --accent: #0ea5e9; --panel-bg: rgba(8, 47, 73, 0.9); }
-        body.theme-snowy { --bg-main: #1e293b; --text-main: #f1f5f9; --accent: #94a3b8; --panel-bg: rgba(30, 41, 59, 0.9); }
+        body.theme-pink { --bg-main: linear-gradient(to bottom, #3f0e22, #1a0510); --text-main: #fce7f3; --accent: #f472b6; --panel-bg: rgba(26, 5, 16, 0.9); }
+        body.theme-nature { --bg-main: linear-gradient(to bottom, #1a2e05, #0d1a0d); --text-main: #ecfccb; --accent: #65a30d; --panel-bg: rgba(13, 26, 13, 0.9); }
+        body.theme-sea { --bg-main: linear-gradient(to bottom, #021d2e, #082f49); --text-main: #e0f2fe; --accent: #0ea5e9; --panel-bg: rgba(8, 47, 73, 0.9); }
+        body.theme-snowy { --bg-main: linear-gradient(to bottom, #334155, #1e293b); --text-main: #f1f5f9; --accent: #94a3b8; --panel-bg: rgba(30, 41, 59, 0.9); }
         body.theme-starry { --bg-main: #000000; --text-main: #ffffff; --accent: #6366f1; --panel-bg: rgba(0, 0, 0, 0.9); }
         
         /* Milky Way Theme Overrides */
@@ -56,8 +57,26 @@
             border-color: rgba(168, 85, 247, 0.8) !important;
         }
 
-        body { font-family: 'Poppins', sans-serif; background: var(--bg-main); color: var(--text-main); margin: 0; height: 100vh; width: 100vw; overflow: hidden; transition: background 0.8s ease, color 0.5s ease; }
-        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--border); transition: var(--transition); }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-main); 
+            margin: 0; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            transition: background 0.8s ease, color 0.5s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .glass { 
+            background: var(--glass); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid var(--border); 
+            transition: var(--transition);
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
         
         .left-panel-content { background: var(--panel-bg); transition: var(--transition); }
         .side-tab { background: rgba(0,0,0,0.4); color: var(--text-main); opacity: 0.8; }
@@ -66,18 +85,18 @@
         .side-tab.locked::after { content: '🔒'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; }
         #score { color: var(--accent); transition: var(--transition); }
 
-        /* Canvas Background */
         #galaxy-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 1; }
         .hidden { display: none !important; }
 
-        /* Particle Overlay */
         #theme-overlay { position: fixed; inset: 0; pointer-events: none !important; z-index: 1; overflow: hidden; }
         .particle { position: absolute; pointer-events: none !important; will-change: transform; user-select: none; }
 
         /* --- ASCENSION TREE STYLES --- */
         #ascension-tree-view {
             position: fixed; inset: 0; z-index: 0; 
-            background: radial-gradient(circle at center, #0f0518 0%, #000000 100%);
+            background-image: radial-gradient(circle at center, transparent 0%, #000 90%), url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwWiIvPjwvc3ZnPg==');
+            background-color: #050510;
+            background-repeat: repeat;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 1s ease;
             overflow: hidden;
@@ -88,9 +107,11 @@
             position: relative;
             width: 100%;
             height: 100%;
-            overflow: auto; 
+            overflow: visible; 
             cursor: grab;
-            background: radial-gradient(circle at center, transparent 0%, #000 90%), url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwWiIvPjwvc3ZnPg==');
+            transform-origin: 0 0;
+            touch-action: none;
+            padding: 60px;
         }
         #tree-container::-webkit-scrollbar { display: none; }
 
@@ -106,8 +127,10 @@
             box-shadow: 0 0 15px rgba(0,0,0,0.5);
             transition: all 0.2s;
             z-index: 10;
+            will-change: transform;
+            transform: translateZ(0);
         }
-        .tree-node:hover { transform: scale(1.2); z-index: 20; border-color: white; }
+        .tree-node:hover { transform: scale(1.2) translateZ(0); z-index: 20; border-color: white; }
         
         .tree-node.type-root { border-color: white; background: #000; box-shadow: 0 0 30px white; width: 70px; height: 70px; font-size: 35px; }
         .tree-node.type-click { border-color: #ef4444; background: #450a0a; } 
@@ -120,7 +143,7 @@
         .tree-node.available { animation: pulseNode 2s infinite; opacity: 1; cursor: pointer; filter: brightness(1.1); }
         .tree-node.locked { filter: grayscale(1) brightness(0.5); opacity: 0.4; cursor: not-allowed; border-color: #4b5563; background: #111827; }
 
-        @keyframes pulseNode { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes pulseNode { 0% { transform: scale(1) translateZ(0); } 50% { transform: scale(1.1) translateZ(0); } 100% { transform: scale(1) translateZ(0); } }
 
         /* Tooltip */
         #tree-tooltip {
@@ -133,33 +156,68 @@
             backdrop-filter: blur(10px);
         }
 
-        /* SVG Lines */
-        #tree-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        #tree-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: visible !important; }
         line { stroke: #4b5563; stroke-width: 2; opacity: 0.3; transition: all 0.5s; stroke-linecap: round; }
         line.active { stroke: #e2e8f0; opacity: 0.6; stroke-width: 3; }
 
-        /* Pets Overlay */
-        #pet-container { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+        #pet-container { position: fixed; inset: 0; pointer-events: none; z-index: 2500; }
+        
         .game-pet { 
             position: absolute; width: 60px; height: 60px; 
-            animation: floatPet 4s ease-in-out infinite;
             filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
             font-size: 40px;
+            pointer-events: auto;
+            cursor: grab;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent !important; 
+            transition: transform 0.2s ease, filter 0.2s ease;
+            will-change: transform, left, top;
+            transform: translateZ(0);
         }
-        @keyframes floatPet { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        
+        .game-pet:hover {
+            transform: scale(1.15) translateZ(0);
+            filter: brightness(1.2) drop-shadow(0 0 15px rgba(255,255,255,0.5));
+            z-index: 2600;
+        }
 
-        /* Screen Fall Animation */
-        .screen-falling {
-            animation: crackAndFall 2s cubic-bezier(0.6, 0.05, 0.2, 1) forwards;
-            pointer-events: none !important;
+        .game-pet:active { cursor: grabbing; transform: scale(0.95) translateZ(0); }
+        
+        .pet-label {
+            position: absolute;
+            top: 75%; left: 50%; transform: translateX(-50%);
+            text-align: center; white-space: nowrap; line-height: 0.9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 2px black;
+            pointer-events: none; z-index: 2501;
         }
+        
+        .diamond-text { color: #00ffff; text-shadow: 0 0 10px #00ffff, 0 0 20px rgba(0, 255, 255, 0.5); }
+        .pet-smooth { transition: left 3s ease-in-out, top 3s ease-in-out; }
+
+        .anim-float { animation: floatPet 4s ease-in-out infinite; }
+        .anim-float-fast { animation: floatPet 2s ease-in-out infinite; }
+        .anim-bounce { animation: bouncePet 1s infinite alternate; }
+        .anim-pulse { animation: pulsePet 2s infinite; }
+        .anim-shake { animation: shakePet 3s infinite; }
+
+        @keyframes floatPet { 0%, 100% { transform: translateY(0) translateZ(0); } 50% { transform: translateY(-20px) translateZ(0); } }
+        @keyframes bouncePet { 0% { transform: translateY(0) translateZ(0); } 100% { transform: translateY(-15px) translateZ(0); } }
+        @keyframes pulsePet { 0% { transform: scale(1) translateZ(0); opacity: 0.8; } 50% { transform: scale(1.2) translateZ(0); opacity: 1; } 100% { transform: scale(1) translateZ(0); opacity: 0.8; } }
+        @keyframes shakePet { 0%, 100% { transform: rotate(0deg) translateZ(0); } 25% { transform: rotate(5deg) translateZ(0); } 75% { transform: rotate(-5deg) translateZ(0); } }
+        
+        #pm-upgrade-btn { transition: all 0.1s ease-out; }
+        .flash-success { background: #10b981 !important; border-color: #34d399 !important; transform: scale(1.02); filter: brightness(1.2); }
+
+        .screen-falling { animation: crackAndFall 2s cubic-bezier(0.6, 0.05, 0.2, 1) forwards; pointer-events: none !important; }
         @keyframes crackAndFall {
             0% { transform: translateY(0) rotate(0); opacity: 1; filter: contrast(1); }
             10% { transform: translateY(20px) rotate(-1deg); opacity: 1; filter: contrast(1.2) brightness(1.5); }
             100% { transform: translateY(150vh) rotate(5deg); opacity: 0; }
         }
 
-        /* Responsive Grid */
         .game-grid { display: grid; grid-template-columns: 350px 1fr 350px; grid-template-rows: 1fr; height: 100vh; gap: 1.5rem; padding: 1.5rem; box-sizing: border-box; position: relative; z-index: 10; transition: opacity 0.5s; }
         @media (max-width: 1200px) { .game-grid { grid-template-columns: 300px 1fr 300px; gap: 1rem; padding: 1rem; } }
         @media (max-width: 1024px) {
@@ -183,18 +241,17 @@
         
         .click-btn-container { 
             transition: transform 0.05s active, background 0.5s ease; 
-            cursor: pointer; 
-            user-select: none; 
-            position: relative; 
+            cursor: pointer; user-select: none; position: relative; 
             background: var(--accent) !important; 
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.4); 
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+            transform: translateZ(0); will-change: transform;
         }
-        .click-btn-container:active { transform: scale(0.95); }
-        .click-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
+        .click-btn-container:active { transform: scale(0.95) translateZ(0); }
+        .click-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; transform: translateZ(0); }
         
-        .upgrade-card, .ach-card, .prestige-card, .theme-card { transition: all 0.2s; border: 1px solid var(--border); border-radius: 1rem; background: rgba(0,0,0,0.4); }
-        .upgrade-card:hover:not(.disabled), .prestige-card:hover:not(.disabled), .theme-card:hover { background: rgba(59, 130, 246, 0.1); border-color: var(--accent); cursor: pointer; }
-        .theme-card.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.2); border-width: 2px; }
+        .upgrade-card, .ach-card, .prestige-card, .theme-card, .nametag-card { transition: all 0.2s; border: 1px solid var(--border); border-radius: 1rem; background: rgba(0,0,0,0.4); }
+        .upgrade-card:hover:not(.disabled), .prestige-card:hover:not(.disabled), .theme-card:hover, .nametag-card:hover { background: rgba(59, 130, 246, 0.1); border-color: var(--accent); cursor: pointer; }
+        .theme-card.active, .nametag-card.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.2); border-width: 2px; }
         
         .upgrade-card.disabled, .prestige-card.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
         .ach-card.locked { opacity: 0.3; filter: grayscale(1); }
@@ -204,24 +261,15 @@
         .bulk-btn.active, .shop-tab-btn.active, .style-tab-btn.active { background: var(--accent); color: white; }
         
         .float-text { 
-            position: absolute; 
-            color: var(--accent); 
-            font-weight: 800; 
-            font-size: 2rem; 
-            pointer-events: none; 
-            animation: floatUp 3s ease-out forwards; 
-            z-index: 100; 
+            position: absolute; color: var(--accent); font-weight: 800; font-size: 2rem; pointer-events: none; 
+            animation: floatUp 3s ease-out forwards; z-index: 100; 
         }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
         
         .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 50; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; }
         @keyframes goldenFly { 0% { left: -100px; top: 20%; } 100% { left: 110vw; top: 60%; } }
         
-        .prestige-btn { 
-            background: linear-gradient(135deg, var(--accent), #7c3aed); 
-            border: 2px solid rgba(255,255,255,0.2); 
-            transition: all 0.3s ease;
-        }
+        .prestige-btn { background: linear-gradient(135deg, var(--accent), #7c3aed); border: 2px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
         
         .lb-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; }
         .lb-rank-1 { background: rgba(255, 215, 0, 0.2) !important; border-color: gold !important; }
@@ -232,19 +280,43 @@
         #multiplier-display { position: fixed; bottom: 2rem; right: 400px; z-index: 100; pointer-events: none; }
         @media (max-width: 1024px) { #multiplier-display { bottom: auto; top: 20px; right: 20px; } }
 
-        /* Dev Tag Style */
         .dev-tag {
             background: linear-gradient(to right, #ef4444, #f87171);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            margin-right: 5px;
-            text-transform: uppercase;
-            font-size: 0.7em;
-            vertical-align: middle;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 900; margin-right: 5px; text-transform: uppercase; font-size: 0.7em; vertical-align: middle;
         }
 
-        /* Theme Specific CSS Animations */
+        /* --- NAME TAG EFFECTS --- */
+        .nametag-classic { color: #fff; font-weight: bold; }
+
+        .nametag-galaxy {
+            background: linear-gradient(90deg, #ff00cc, #3333ff, #00ccff, #ff00cc);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: galaxyShine 2s linear infinite;
+            font-weight: 900;
+            filter: drop-shadow(0 0 3px rgba(51, 51, 255, 0.8));
+            position: relative;
+        }
+        
+        .nametag-fire { background: linear-gradient(0deg, #f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 -2px 4px rgba(239, 68, 68, 0.5)); }
+        .nametag-ice { background: linear-gradient(180deg, #e0f2fe, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; text-shadow: 0 0 10px #3b82f6; }
+        .nametag-gold { background: linear-gradient(45deg, #ffd700, #b8860b, #ffd700); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; animation: textShine 4s ease infinite; filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.8)); }
+        .nametag-matrix { color: #22c55e; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 5px #22c55e; font-weight: bold; }
+        .nametag-neon { color: #fff; text-shadow: 0 0 5px #fff, 0 0 10px #f0f, 0 0 20px #f0f, 0 0 30px #f0f; font-weight: 900; }
+        .nametag-ghost { color: rgba(255, 255, 255, 0.5); filter: blur(0.5px); text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); }
+        .nametag-royal { background: linear-gradient(to right, #eab308, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-family: 'Cinzel', serif; }
+        .nametag-electric { color: #e0f2fe; text-shadow: 0 0 3px #0ea5e9, 0 0 10px #0ea5e9; font-style: italic; font-weight: 900; }
+        .nametag-shadow { color: #000; text-shadow: 0 0 5px #fff; font-weight: 900; }
+
+        @keyframes textShine { to { background-position: 200% center; } }
+        @keyframes galaxyShine { 
+            0% { background-position: 0% 50%; } 
+            50% { background-position: 100% 50%; } 
+            100% { background-position: 0% 50%; } 
+        }
+
         .nature-leaf { font-size: 20px; animation: fall 10s linear infinite; }
         .snow-flake { font-size: 15px; animation: fall 8s linear infinite; opacity: 0.8; }
         .sea-bubble { font-size: 15px; animation: rise 15s linear infinite; opacity: 0.6; }
@@ -265,6 +337,23 @@
             0% { transform: scale(0.95) translateY(10px); opacity: 0.9; filter: blur(5px); }
             100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
         }
+
+        #pet-menu-modal { 
+            position: absolute; z-index: 5000; background: rgba(10, 15, 30, 0.95);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; backdrop-filter: blur(12px);
+            padding: 12px; width: 240px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            pointer-events: auto; transition: opacity 0.1s ease, transform 0.1s ease;
+        }
+        #pet-menu-content { background: transparent; border: none; padding: 0; box-shadow: none; }
+        
+        #pet-menu-arrow {
+            position: absolute; width: 12px; height: 12px; background: rgba(10, 15, 30, 0.95);
+            transform: rotate(45deg); border: 1px solid rgba(255,255,255,0.2); z-index: -1; 
+        }
+        .menu-top #pet-menu-arrow { bottom: -6px; left: 50%; margin-left: -6px; border-top: none; border-left: none; }
+        .menu-bottom #pet-menu-arrow { top: -6px; left: 50%; margin-left: -6px; border-bottom: none; border-right: none; }
+        .menu-left #pet-menu-arrow { right: -6px; top: 50%; margin-top: -6px; border-bottom: none; border-left: none; }
+        .menu-right #pet-menu-arrow { left: -6px; top: 50%; margin-top: -6px; border-top: none; border-right: none; }
     </style>
 </head>
 <body class="select-none theme-classic">
@@ -320,6 +409,38 @@
                 <button id="modal-cancel" class="flex-1 py-3 bg-gray-800 rounded-xl font-bold">Cancel</button>
                 <button id="modal-confirm" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold">Confirm</button>
             </div>
+        </div>
+    </div>
+
+    <div id="pet-menu-modal" class="hidden">
+        <div id="pet-menu-arrow"></div>
+        <div id="pet-menu-content">
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-3">
+                    <div id="pm-emoji" class="text-3xl filter drop-shadow-md">🥚</div>
+                    <div>
+                         <input type="text" id="pm-name" class="bg-transparent border-b border-white/10 w-28 text-sm font-bold focus:outline-none focus:border-white text-white" placeholder="Name">
+                         <p class="text-xs font-bold text-blue-300 mt-0.5">Lvl <span id="pm-level">1</span></p>
+                    </div>
+                </div>
+                <button onclick="closePetMenu()" class="text-white/30 hover:text-white text-sm font-bold">✕</button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                 <div class="bg-white/5 rounded-lg p-2 text-center border border-white/5">
+                     <p class="text-[8px] text-gray-400 uppercase tracking-wider mb-1">EFFECT</p>
+                     <p id="pm-effect" class="text-[9px] font-bold text-white leading-tight">...</p>
+                 </div>
+                 <div onclick="togglePetMode()" class="bg-white/5 rounded-lg p-2 text-center border border-white/5 cursor-pointer hover:bg-white/10 transition">
+                     <p class="text-[8px] text-gray-400 uppercase tracking-wider mb-1">MODE</p>
+                     <p id="pm-mode-btn" class="text-[9px] font-bold text-blue-300">ROAM</p>
+                 </div>
+            </div>
+
+            <button onclick="upgradePet()" id="pm-upgrade-btn" class="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg font-bold shadow-lg flex justify-between px-3 items-center hover:scale-[1.02]">
+                <span class="text-[10px] uppercase">Upgrade</span>
+                <span class="text-[9px] bg-black/20 px-1.5 py-0.5 rounded text-emerald-100" id="pm-cost">1k</span>
+            </button>
         </div>
     </div>
 
@@ -430,7 +551,6 @@
                             <div class="stat-row"><span>Manual Clicks</span><span id="stat-manual-clicks" class="font-bold">0</span></div>
                             <div class="stat-row"><span>Upgrades</span><span id="stat-upgrades-bought" class="font-bold">0</span></div>
                             <div class="stat-row"><span>Golden Caught</span><span id="stat-golden-caught" class="font-bold">0</span></div>
-                            <div class="stat-row"><span>Fatflaps</span><span id="stat-fatflaps" class="text-purple-400 font-bold">0</span></div>
                             <div class="stat-row"><span>Ascensions</span><span id="stat-prestige-count" class="text-purple-400 font-bold">0</span></div>
                             <div class="p-2 border-b border-white/10"><p class="text-xs font-bold text-purple-400 uppercase tracking-widest">Multipliers</p></div>
                             <div class="stat-row"><span>Click Power %</span><span id="stat-mult-click" class="text-yellow-400 font-bold">100%</span></div>
@@ -523,6 +643,15 @@
         const db = getFirestore(app);
         const clickSound = new Audio('click.mp3');
         function playSfx() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
+
+        // Scientific Notation Formatter (>= 1e19 is 20 digits)
+        function formatNumber(num) {
+            if (num === undefined || num === null) return "0";
+            if (num >= 1e19) {
+                return num.toExponential(2).replace('+', '');
+            }
+            return Math.floor(num).toLocaleString();
+        }
 
         // --- GALAXY 3D ENGINE ---
         let galaxyScene, galaxyCamera, galaxyRenderer, worldGroup, galaxyActive = false;
@@ -631,118 +760,190 @@
         let totalVrajs = 0, totalClicks = 0, totalUpgrades = 0, settingsClicked = 0, goldenVrajsCaught = 0, chatsSent = 0, timePlayed = 0;
         let goldenMultiplier = 1, multTimeRemaining = 0;
         let prestigeCount = 0, fatflaps = 0, ownedPrestigeUpgrades = [], ascensionUnlocked = false;
-        let currentUser = null, currentUsername = "Guest", activeTheme = 'classic';
-        let clickIntervals = [], lastClickTime = 0, hasWarned = false;
+        let currentUser = null, currentUsername = "Guest", activeTheme = 'classic', activeNametag = 'classic';
+        let clickIntervals = [], lastClickTime = Date.now(), hasWarned = false;
         let savedTime = 0; 
         let sessionStartTime = Date.now();
-        let isDev = false; // Dev Flag
+        let isDev = false; 
+
+        // --- PET DATA SYSTEM & DRAG STATE ---
+        let petsState = {}; 
+        let selectedPetId = null;
+        let dragTargetId = null;
+        let dragStartPos = { x: 0, y: 0 };
+        let isDragActive = false;
+        let dragOffset = { x: 0, y: 0 };
+        
+        let cachedElements = null;
+        function getCachedElements() {
+            if (!cachedElements) {
+                cachedElements = {
+                    score: document.getElementById('score'),
+                    vpsDisplay: document.getElementById('vps-display'),
+                    ppcDisplay: document.getElementById('ppc-display'),
+                    iconMultDisplay: document.getElementById('icon-mult-display'),
+                    fatflapDisplay: document.getElementById('fatflap-display'),
+                    fatflapCount: document.getElementById('fatflap-count'),
+                    tabPrestige: document.getElementById('tab-prestige')
+                };
+            }
+            return cachedElements;
+        }
 
         const upgradeData = [
-            { name: "Vraj Finger", baseCost: 10, basePower: 0.2, emoji: "☝️" },
-            { name: "Vraj Sprout", baseCost: 20, basePower: 0.4, emoji: "🌱" },
-            { name: "Vraj Cursor", baseCost: 50, basePower: 1, emoji: "🖱️" },
-            { name: "Vraj Nanobots", baseCost: 80, basePower: 2, emoji: "🤏" },
-            { name: "Vraj Drone", baseCost: 120, basePower: 4, emoji: "🚁" },
-            { name: "Vraj Magnet", baseCost: 210, basePower: 6, emoji: "🧲" },
-            { name: "Vraj Juice", baseCost: 336, basePower: 10, emoji: "🧃" },
-            { name: "Vraj Keyboard", baseCost: 538, basePower: 15, emoji: "⌨️" },
-            { name: "Vraj Potion", baseCost: 861, basePower: 30, emoji: "🧪" },
-            { name: "Vraj Coffee", baseCost: 1378, basePower: 50, emoji: "☕" },
-            { name: "Vraj Gear", baseCost: 2205, basePower: 100, emoji: "⚙️" },
-            { name: "Vraj Botnet", baseCost: 3528, basePower: 120, emoji: "🌐" },
-            { name: "Vraj Tuner", baseCost: 5645, basePower: 150, emoji: "🎚️" },
-            { name: "Vraj Garden", baseCost: 9032, basePower: 170, emoji: "🌿" },
-            { name: "Vraj Typist", baseCost: 14451, basePower: 200, emoji: "💻" },
-            { name: "Vraj Swarm", baseCost: 23122, basePower: 250, emoji: "🐝" },
-            { name: "Vraj Automaton", baseCost: 36995, basePower: 280, emoji: "🤖" },
-            { name: "Vraj Attractor", baseCost: 59192, basePower: 296, emoji: "🧲" },
-            { name: "Vraj Smoothie", baseCost: 94707, basePower: 474, emoji: "🥤" },
-            { name: "Vraj Console", baseCost: 151531, basePower: 758, emoji: "🕹️" },
-            { name: "Vraj Lab", baseCost: 242450, basePower: 1212, emoji: "⚗️" },
-            { name: "Vraj Brewery", baseCost: 387920, basePower: 1940, emoji: "🍺" },
-            { name: "Vraj Workshop", baseCost: 620672, basePower: 3103, emoji: "🛠️" },
-            { name: "Vraj Network", baseCost: 993075, basePower: 4965, emoji: "📡" },
-            { name: "Vraj Reactor", baseCost: 1588920, basePower: 7945, emoji: "⚛️" },
-            { name: "Vraj Meadow", baseCost: 2542272, basePower: 12711, emoji: "🌾" },
-            { name: "Vraj Terminal", baseCost: 4067635, basePower: 20338, emoji: "🖥️" },
-            { name: "Vraj Hive", baseCost: 6508216, basePower: 32541, emoji: "🐜" },
-            { name: "Vraj Factory", baseCost: 10413146, basePower: 52066, emoji: "🏭" },
-            { name: "Vraj Collider", baseCost: 16661034, basePower: 83305, emoji: "🔬" },
-            { name: "Vraj Extract", baseCost: 26657654, basePower: 133288, emoji: "🧉" },
-            { name: "Vraj Deck", baseCost: 42652246, basePower: 213261, emoji: "🎮" },
-            { name: "Vraj Chemworks", baseCost: 68243594, basePower: 341218, emoji: "🧫" },
-            { name: "Vraj Distillery", baseCost: 109189750, basePower: 545949, emoji: "🥃" },
-            { name: "Vraj Assembly", baseCost: 174703600, basePower: 873518, emoji: "🤝" },
-            { name: "Vraj Mainframe", baseCost: 279525760, basePower: 1397629, emoji: "💽" },
-            { name: "Vraj Singularity", baseCost: 447241216, basePower: 2236206, emoji: "🌀" },
-            { name: "Vraj Forest", baseCost: 715585946, basePower: 3577930, emoji: "🌲" },
-            { name: "Vraj Supercomp", baseCost: 1144937514, basePower: 5724688, emoji: "💾" },
-            { name: "Vraj Colony", baseCost: 1831900022, basePower: 9159501, emoji: "🐜" },
-            { name: "Vraj Megaplant", baseCost: 2931040035, basePower: 14655200, emoji: "🏗️" },
-            { name: "Vraj Accelerator", baseCost: 4689664056, basePower: 23448320, emoji: "🚀" },
-            { name: "Vraj Serum", baseCost: 7503462490, basePower: 37517312, emoji: "💉" },
-            { name: "Vraj Interface", baseCost: 12005539984, basePower: 60027700, emoji: "🧩" },
-            { name: "Vraj Genome", baseCost: 19208863974, basePower: 96044320, emoji: "🧬" },
-            { name: "Vraj Roast", baseCost: 30734182358, basePower: 153670912, emoji: "🌰" },
-            { name: "Vraj Forge", baseCost: 49174691773, basePower: 245873459, emoji: "🗜️" },
-            { name: "Vraj Datasphere", baseCost: 78679506837, basePower: 393397534, emoji: "🌐" }
+           { name: "Vraj Finger", baseCost: 10, basePower: 0.2, emoji: "☝️" },
+    { name: "Vraj Sprout", baseCost: 100, basePower: 1, emoji: "🌱" },
+    { name: "Vraj Nanobots", baseCost: 500, basePower: 4, emoji: "🤏" },
+    { name: "Vraj Cursor", baseCost: 2500, basePower: 15, emoji: "🖱️" },
+    { name: "Vraj Magnet", baseCost: 10000, basePower: 50, emoji: "🧲" },
+    { name: "Vraj Drone", baseCost: 50000, basePower: 200, emoji: "🚁" },
+
+    // TIER 2: INDUSTRIAL GROWTH
+    { name: "Vraj Keyboard", baseCost: 200000, basePower: 750, emoji: "⌨️" },
+    { name: "Vraj Coffee", baseCost: 1000000, basePower: 3000, emoji: "☕" },
+    { name: "Vraj Juice", baseCost: 5000000, basePower: 12000, emoji: "🧃" },
+    { name: "Vraj Potion", baseCost: 25000000, basePower: 50000, emoji: "🧪" },
+    { name: "Vraj Botnet", baseCost: 100000000, basePower: 180000, emoji: "🌐" },
+    { name: "Vraj Garden", baseCost: 500000000, basePower: 800000, emoji: "🌿" },
+
+    // TIER 3: THE HIGH-TECH ERA
+    { name: "Vraj Tuner", baseCost: 2500000000, basePower: 3500000, emoji: "🎚️" },
+    { name: "Vraj Typist", baseCost: 12000000000, basePower: 15000000, emoji: "💻" },
+    { name: "Vraj Automaton", baseCost: 60000000000, basePower: 70000000, emoji: "🤖" },
+    { name: "Vraj Smoothie", baseCost: 300000000000, basePower: 300000000, emoji: "🥤" },
+    { name: "Vraj Console", baseCost: 1500000000000, basePower: 1200000000, emoji: "🕹️" },
+    { name: "Vraj Lab", baseCost: 8000000000000, basePower: 5000000000, emoji: "⚗️" },
+
+    // TIER 4: GLOBAL DOMINATION
+    { name: "Vraj Brewery", baseCost: 40000000000000, basePower: 20000000000, emoji: "🍺" },
+    { name: "Vraj Workshop", baseCost: 200000000000000, basePower: 80000000000, emoji: "🛠️" },
+    { name: "Vraj Network", baseCost: 1e15, basePower: 350000000000, emoji: "📡" },
+    { name: "Vraj Reactor", baseCost: 5e15, basePower: 1.5e12, emoji: "⚛️" },
+    { name: "Vraj Meadow", baseCost: 2.5e16, basePower: 6e12, emoji: "🌾" },
+    { name: "Vraj Terminal", baseCost: 1.2e17, basePower: 2.5e13, emoji: "🖥️" },
+
+    // TIER 5: THE SINGULARITY
+    { name: "Vraj Hive", baseCost: 6e17, basePower: 1e14, emoji: "🐜" },
+    { name: "Vraj Factory", baseCost: 3e18, basePower: 4.5e14, emoji: "🏭" },
+    { name: "Vraj Collider", baseCost: 1.5e19, basePower: 2e15, emoji: "🔬" },
+    { name: "Vraj Extract", baseCost: 8e19, basePower: 9e15, emoji: "🧉" },
+    { name: "Vraj Deck", baseCost: 4e20, basePower: 4e16, emoji: "🎮" },
+    { name: "Vraj Assembly", baseCost: 2e21, basePower: 1.8e17, emoji: "🤝" },
+
+    // TIER 6: COSMIC SCALE
+    { name: "Vraj Mainframe", baseCost: 1e22, basePower: 8e17, emoji: "💽" },
+    { name: "Vraj Singularity", baseCost: 5e22, basePower: 3.5e18, emoji: "🌀" },
+    { name: "Vraj Forest", baseCost: 2.5e23, basePower: 1.5e19, emoji: "🌲" },
+    { name: "Vraj Supercomp", baseCost: 1e24, basePower: 6e19, emoji: "💾" },
+    { name: "Vraj Colony", baseCost: 5e24, basePower: 2.5e20, emoji: "🐜" },
+    { name: "Vraj Megaplant", baseCost: 2.5e25, basePower: 1e21, emoji: "🏗️" },
+
+    // TIER 7: GOD-TIER
+    { name: "Vraj Accelerator", baseCost: 1.2e26, basePower: 4.5e21, emoji: "🚀" },
+    { name: "Vraj Serum", baseCost: 6e26, basePower: 2e22, emoji: "💉" },
+    { name: "Vraj Interface", baseCost: 3e27, basePower: 9e22, emoji: "🧩" },
+    { name: "Vraj Genome", baseCost: 1.5e28, basePower: 4e23, emoji: "🧬" },
+    { name: "Vraj Roast", baseCost: 7e28, basePower: 1.8e24, emoji: "🌰" },
+    { name: "Vraj Forge", baseCost: 3.5e29, basePower: 8e24, emoji: "🗜️" },
+    { name: "Vraj Datasphere", baseCost: 1.5e30, basePower: 3.5e25, emoji: "🌐" }
         ];
 
-        // --- EXPANDED ASCENSION TREE DATA (60+ Upgrades) ---
         const prestigeTreeData = [];
-        
-        // --- Helper to add node ---
         const addNode = (id, name, cost, desc, emoji, parent, type, boost = 0, effect = null) => {
             prestigeTreeData.push({ id, name, cost, desc, emoji, parent, type, boost, effect });
         };
 
-        // Root
+        // --- ORIGINAL NODES ---
         addNode('origin', 'The Big Bang', 1, 'Where it all begins. Unlocks the potential.', '🌌', null, 'root', 0.1);
-
-        // --- NORTH: RED (CLICK / COMBAT) ---
         addNode('c1', 'Iron Finger', 2, '+20% Click Power', '👆', 'origin', 'click', 0.2);
-        
-        // Sub-Branch: Criticals
         addNode('crit1', 'Precision Strike', 10, 'Unlock Critical Hits (10% Chance, 5x Dmg)', '🎯', 'c1', 'click', 0, 'crit_unlock');
         addNode('crit2', 'Lethal Tempo', 50, 'Crit Multiplier +50%', '⚔️', 'crit1', 'click', 0, 'crit_dmg');
         addNode('crit3', 'Eagle Eye', 250, 'Crit Chance +5%', '👁️', 'crit2', 'click', 0, 'crit_chance');
         addNode('crit4', 'Devastation', 1000, 'Crit Multiplier x2', '🩸', 'crit3', 'click', 0, 'crit_mult_2');
-
-        // Sub-Branch: Raw Power
         addNode('pow1', 'Titanium Mouse', 15, '+50% Click Power', '🖱️', 'c1', 'click', 0.5);
         addNode('pow2', 'Cybernetic Joints', 75, '+100% Click Power', '🦾', 'pow1', 'click', 1.0);
         addNode('pow3', 'Plasma Clicks', 400, '+200% Click Power', '⚡', 'pow2', 'click', 2.0);
         addNode('pow4', 'God Finger', 2500, '+500% Click Power', '🌩️', 'pow3', 'click', 5.0);
-
-        // --- EAST: BLUE (PASSIVE / INDUSTRY) ---
         addNode('p1', 'Auto Alignment', 2, '+20% VPS', '⚙️', 'origin', 'passive', 0.2);
-        
-        // Sub-Branch: Synergy
         addNode('syn1', 'Building Synergy', 10, '+1% VPS per Building Owned', '🏗️', 'p1', 'passive', 0, 'syn_build');
         addNode('syn2', 'Network Effect', 60, '+10% VPS', '🌐', 'syn1', 'passive', 0.1);
         addNode('syn3', 'Hive Mind', 300, '+50% VPS', '🧠', 'syn2', 'passive', 0.5);
-        
-        // Sub-Branch: Offline
         addNode('off1', 'Time Bank', 15, 'Gain 50% production while offline', '⏳', 'p1', 'passive', 0, 'offline_50');
         addNode('off2', 'Temporal Shift', 100, 'Offline Cap increased to 24h', '🕰️', 'off1', 'passive', 0, 'offline_24h');
-        
-        // --- SOUTH: GOLD (LUCK / WEALTH) ---
         addNode('g1', 'Shiny Sight', 5, 'Golden Vrajs spawn 2x as often', '✨', 'origin', 'golden', 0, 'spawn_2x');
         addNode('g2', 'Midas Touch', 25, 'Golden Vrajs give 3x Multiplier', '👑', 'g1', 'golden', 0, 'mult_3x');
         addNode('g3', 'Treasure Hunter', 100, 'Golden Vrajs last 5s longer', '💎', 'g2', 'golden', 0, 'dur_5s');
         addNode('g4', 'Leprechaun Blood', 500, 'Golden Vrajs give 5x Multiplier', '🍀', 'g3', 'golden', 0, 'mult_5x');
-
-        // --- WEST: PURPLE (UTILITY / COSMIC) ---
         addNode('u1', 'Haggler', 10, 'Shop prices -5%', '🏷️', 'origin', 'synergy', 0, 'disc_5');
         addNode('u2', 'Trophy Hunter', 50, '+5% Multiplier per Achievement', '🏆', 'u1', 'synergy', 0, 'ach_scale');
         addNode('u3', 'Cosmic Insight', 250, 'Show VPS/Click on Tooltips', '🔮', 'u2', 'synergy', 0, 'insight');
         addNode('u4', 'Black Hole Market', 1000, 'Shop prices -10%', '🕳️', 'u3', 'synergy', 0, 'disc_10');
-
-        // --- PET BRANCH (GREEN) ---
         addNode('pet1', 'Mysterious Egg', 500, 'Unlocks a companion...', '🥚', 'origin', 'pet', 0, 'pet_egg');
         addNode('pet2', 'Hatchling', 1500, 'The egg cracks! (+5% Passive)', '🐣', 'pet1', 'pet', 0, 'pet_hatch');
         addNode('pet3', 'Golden Guardian', 5000, 'Auto-clicks Golden Vrajs!', '👼', 'pet2', 'pet', 0, 'pet_gold');
         addNode('pet4', 'Void Wisp', 10000, 'Click Power increases with AFK time', '👻', 'pet3', 'pet', 0, 'pet_void');
+        addNode('pet5', 'Cosmic Slime', 25000, 'Passive generation +25%', '🟣', 'pet4', 'pet', 0.25, 'pet_slime');
+        addNode('pet6', 'Mecha Vraj', 75000, 'Click Power +50%', '🤖', 'pet5', 'pet', 0.5, 'pet_mech');
+        addNode('pet7', 'Time Dragon', 150000, 'Golden Vrajs last +10s', '🐉', 'pet6', 'pet', 0, 'pet_dragon');
+
+        // --- NEW CLICK BRANCH UPGRADES (RED) ---
+        addNode('c_combo1', 'Combo Starter', 300, 'Click Power +20%', '🥊', 'c1', 'click', 0.2);
+        addNode('c_combo2', 'Rhythm Strike', 800, 'Click Power +30%', '🎵', 'c_combo1', 'click', 0.3);
+        addNode('c_combo3', 'Flow State', 2500, 'Click Power +50%', '🌊', 'c_combo2', 'click', 0.5);
+        addNode('c_hyper', 'Hyper Clicks', 7500, 'Click Power +100%', '⏩', 'c_combo3', 'click', 1.0);
+        addNode('c_titan', 'Titan Grip', 25000, 'Click Power +200%', '✊', 'c_hyper', 'click', 2.0);
+        addNode('crit_fatal', 'Fatal Wounds', 2000, 'Crit Multiplier +2.5x', '💔', 'crit2', 'click', 0, 'crit_dmg_2');
+        addNode('crit_bounty', 'Headhunter', 5000, 'Crit Chance +5%', '💀', 'crit3', 'click', 0, 'crit_chance_2');
+        addNode('crit_execute', 'Executioner', 15000, 'Crit Multiplier +5x', '🪓', 'crit_fatal', 'click', 0, 'crit_dmg_3');
+        addNode('c_frenzy', 'Click Frenzy', 100000, 'Click Power +300%', '🤬', 'c_titan', 'click', 3.0);
+        addNode('c_godhand', 'Hand of God', 5000000, 'Click Power +1000%', '✋', 'c_frenzy', 'click', 10.0);
+
+        // --- NEW PASSIVE BRANCH UPGRADES (BLUE) ---
+        addNode('p_factory', 'Factory Overclock', 500, 'Passive Gen +20%', '🏭', 'p1', 'passive', 0.2);
+        addNode('p_quantum', 'Quantum Computing', 1500, 'Passive Gen +30%', '⚛️', 'p_factory', 'passive', 0.3);
+        addNode('p_ai', 'AI Management', 5000, 'Passive Gen +50%', '🤖', 'p_quantum', 'passive', 0.5);
+        addNode('p_fusion', 'Cold Fusion', 15000, 'Passive Gen +100%', '🔋', 'p_ai', 'passive', 1.0);
+        addNode('p_dyson', 'Dyson Sphere', 50000, 'Passive Gen +200%', '🌞', 'p_fusion', 'passive', 2.0);
+        addNode('off_cryo', 'Cryo Sleep', 2000, 'Offline Time Cap +2h', '❄️', 'off2', 'passive', 0, 'off_cap_2');
+        addNode('off_sim', 'Neural Sim', 8000, 'Offline Rate +20%', '🧠', 'off_cryo', 'passive', 0, 'off_rate');
+        addNode('p_invest', 'Compound Interest', 150000, 'Passive Gen +150%', '📈', 'p_dyson', 'passive', 1.5);
+        addNode('p_market', 'Stock Market', 1000000, 'Passive Gen +250%', '📉', 'p_invest', 'passive', 2.5);
+        addNode('p_printing', 'Money Printer', 10000000, 'Passive Gen +500%', '🖨️', 'p_market', 'passive', 5.0);
+
+        // --- NEW GOLDEN BRANCH UPGRADES (GOLD) ---
+        addNode('g_clover', 'Four Leaf Clover', 200, 'Spawn Rate +10%', '🍀', 'g1', 'golden', 0, 'spawn_10');
+        addNode('g_dice', 'Loaded Dice', 1000, 'Spawn Rate +15%', '🎲', 'g_clover', 'golden', 0, 'spawn_15');
+        addNode('g_charm', 'Lucky Charm', 5000, 'Spawn Rate +20%', '🧿', 'g_dice', 'golden', 0, 'spawn_20');
+        addNode('g_coin', 'Golden Coin', 15000, 'Golden Multiplier +1x', '🪙', 'g2', 'golden', 0, 'mult_1');
+        addNode('g_bar', 'Golden Bar', 40000, 'Golden Multiplier +2x', '🍫', 'g_coin', 'golden', 0, 'mult_2');
+        addNode('g_vault', 'Golden Vault', 2500, 'Duration +5s', '🏦', 'g3', 'golden', 0, 'dur_5');
+        addNode('g_time', 'Time Dilation', 10000, 'Duration +10s', '⌛', 'g_vault', 'golden', 0, 'dur_10');
+        addNode('g_greed', 'Greed is Good', 200000, 'Golden Multiplier +5x', '🤑', 'g_bar', 'golden', 0, 'mult_5');
+        addNode('g_alchemy', 'Alchemy', 500000, 'Spawn Rate +25%', '⚗️', 'g_charm', 'golden', 0, 'spawn_25');
+        addNode('g_midas2', 'True Midas', 5000000, 'Golden Multiplier +10x', '🤴', 'g_greed', 'golden', 0, 'mult_10');
+
+        // --- NEW SYNERGY/UTILITY UPGRADES (PURPLE) ---
+        addNode('u_tax', 'Tax Evasion', 5000, 'Shop Prices -5%', '🏃', 'u1', 'synergy', 0, 'disc_5_2');
+        addNode('u_lobby', 'Lobbying', 20000, 'Shop Prices -5%', '🤝', 'u_tax', 'synergy', 0, 'disc_5_3');
+        addNode('u_monopoly', 'Monopoly', 100000, 'Shop Prices -10%', '🎩', 'u_lobby', 'synergy', 0, 'disc_10_2');
+        addNode('syn_fat1', 'Fatflap Power', 2500, 'Global Multiplier +10%', '🥞', 'syn3', 'synergy', 0.1);
+        addNode('syn_fat2', 'Fatflap Mastery', 10000, 'Global Multiplier +20%', '👨‍🍳', 'syn_fat1', 'synergy', 0.2);
+        addNode('syn_asc1', 'Ascension Power', 50000, 'Global Multiplier +25%', '🆙', 'syn_fat2', 'synergy', 0.25);
+        addNode('syn_pure', 'Pure Energy', 150000, 'Global Multiplier +50%', '✨', 'syn_asc1', 'synergy', 0.5);
+        addNode('syn_void', 'Void Energy', 500000, 'Global Multiplier +100%', '⚫', 'syn_pure', 'synergy', 1.0);
+        addNode('u_bulk2', 'Wholesale', 2000000, 'Shop Prices -5%', '📦', 'u_monopoly', 'synergy', 0, 'disc_5_4');
+
+        // --- NEW ELEMENTAL/SPECIAL UPGRADES (VARIOUS) ---
+        addNode('el_fire', 'Fire Essence', 30000, 'Click Power +50%', '🔥', 'c_hyper', 'click', 0.5);
+        addNode('el_water', 'Water Essence', 30000, 'Passive Gen +50%', '💧', 'p_fusion', 'passive', 0.5);
+        addNode('el_earth', 'Earth Essence', 30000, 'Shop Prices -5%', '🪨', 'u_lobby', 'synergy', 0, 'disc_5_5');
+        addNode('el_air', 'Air Essence', 30000, 'Crit Chance +5%', '💨', 'crit_bounty', 'click', 0, 'crit_chance_3');
+        addNode('el_light', 'Light Essence', 30000, 'Golden Spawn +10%', '🕯️', 'g_charm', 'golden', 0, 'spawn_10_2');
+        addNode('el_dark', 'Dark Essence', 75000, 'Global Multiplier +20%', '🌑', 'syn_asc1', 'synergy', 0.2);
+        addNode('spec_one', 'The One', 10000000, 'Global Multiplier +200%', '🕶️', 'syn_void', 'synergy', 2.0);
+        addNode('spec_neo', 'Matrix Code', 25000000, 'Passive Gen +300%', '🟩', 'p_printing', 'passive', 3.0);
+        addNode('spec_trinity', 'Holy Trinity', 25000000, 'Click Power +300%', '✝️', 'c_godhand', 'click', 3.0);
+        addNode('spec_omega', 'Omega Point', 100000000, 'Global Multiplier +500%', 'Ω', 'spec_one', 'synergy', 5.0);
 
 
         const achievements = [];
@@ -754,74 +955,89 @@
 
         const upgrades = upgradeData.map((u, i) => ({ id: i+1, ...u, owned: 0, cost: u.baseCost, isClickUpgrade: (i+1)%2!==0 }));
 
+        const nameTagsData = [
+            { id: 'classic', name: 'Classic', class: 'nametag-classic', emoji: '👤' },
+            { id: 'galaxy', name: 'Galaxy', class: 'nametag-galaxy', emoji: '🌌' },
+            { id: 'fire', name: 'Inferno', class: 'nametag-fire', emoji: '🔥' },
+            { id: 'ice', name: 'Frost', class: 'nametag-ice', emoji: '🧊' },
+            { id: 'gold', name: 'Midas', class: 'nametag-gold', emoji: '🏆' },
+            { id: 'matrix', name: 'Hacker', class: 'nametag-matrix', emoji: '💻' },
+            { id: 'neon', name: 'Neon City', class: 'nametag-neon', emoji: '🌃' },
+            { id: 'ghost', name: 'Phantom', class: 'nametag-ghost', emoji: '👻' },
+            { id: 'royal', name: 'Royal', class: 'nametag-royal', emoji: '👑' },
+            { id: 'electric', name: 'Spark', class: 'nametag-electric', emoji: '⚡' },
+            { id: 'shadow', name: 'Void', class: 'nametag-shadow', emoji: '⚫' }
+        ];
+
         function calculateMultipliers() {
             let clickPct = 100;
             let passivePct = 100;
-            let globalMult = 1 + (fatflaps * 0.5); // Base global from Fatflaps
+            let globalMult = 1 + (fatflaps * 0.5); 
             
-            // Add Tree Root/Global Boosts
             prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => {
                 if(u.type === 'root' || u.type === 'synergy' || u.type === 'golden' || u.type === 'special') {
                     if(u.boost) globalMult += u.boost;
                 }
             });
 
-            // Calculate Type Specifics (Base 100 + Tree Boosts) * Global
             let treeClick = 0;
             let treePassive = 0;
             
             prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => {
                 if(u.type === 'click' && u.boost) treeClick += u.boost;
                 if(u.type === 'passive' && u.boost) treePassive += u.boost;
+                if(u.type === 'pet') {
+                     let mult = 1;
+                     if(petsState[u.id]) {
+                         mult = 1 + ((petsState[u.id].level - 1) * 0.1); 
+                     }
+                     
+                     if(u.boost) {
+                         if(u.id === 'pet5') treePassive += (u.boost * mult);
+                         else if(u.id === 'pet6') treeClick += (u.boost * mult);
+                     }
+                     
+                     if(u.id === 'pet2') treePassive += (0.05 * mult); 
+                     
+                     if(u.id === 'pet4') {
+                         const now = Date.now();
+                         const diffMs = now - lastClickTime;
+                         const diffMins = Math.max(0, diffMs / 60000);
+                         const wispBonus = (0.02 * mult) * diffMins; 
+                         const cappedBonus = Math.min(wispBonus, (0.02 * mult * 1440));
+                         treeClick += cappedBonus;
+                     }
+                }
             });
 
-            // Apply to totals
             clickPct = (1 + treeClick) * globalMult * 100;
             passivePct = (1 + treePassive) * globalMult * 100;
             
-            // Special Logic corrections
-            if(hasTree('crit_mult_2')) clickPct *= 2; // Rough estimate for display
+            // Check for new Crit multiplier nodes to update clickPct display slightly (visual only)
+            if(hasTree('crit_mult_2')) clickPct *= 2; 
 
             return { click: clickPct, passive: passivePct };
         }
 
         function getTotalMultiplier() {
             let mult = 1 + (fatflaps * 0.5);
-            
-            // Apply Boosts from Tree
-            prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => {
-                if(u.boost) mult += u.boost;
-            });
-            
-            // Dynamic Scalers
-            if(hasTree('u2')) {
-                const achCount = achievements.filter(a => a.unlocked).length;
-                mult += (achCount * 0.05);
-            }
-            
+            prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => { if(u.boost) mult += u.boost; });
+            if(hasTree('u2')) { const achCount = achievements.filter(a => a.unlocked).length; mult += (achCount * 0.05); }
             return mult * goldenMultiplier;
         }
         
         function hasTree(id) { return ownedPrestigeUpgrades.includes(id); }
 
         window.switchSideTab = (tab) => {
-            document.querySelectorAll('.left-panel-content').forEach(p => {
-                p.classList.add('hidden');
-                p.classList.remove('warp-transition');
-            });
+            document.querySelectorAll('.left-panel-content').forEach(p => { p.classList.add('hidden'); p.classList.remove('warp-transition'); });
             document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('active'));
-            
-            const target = document.getElementById('panel-'+tab);
-            target.classList.remove('hidden');
-            void target.offsetWidth; 
-            target.classList.add('warp-transition');
-            
+            const target = document.getElementById('panel-'+tab); target.classList.remove('hidden'); void target.offsetWidth; target.classList.add('warp-transition');
             document.getElementById('tab-'+tab).classList.add('active');
-            if(tab === 'achievements') renderAchievements();
-            if(tab === 'stats') updateStatsUI();
-            if(tab === 'prestige') renderPrestigeShop();
-            if(tab === 'style') renderStylePanel();
+            if(tab === 'achievements') renderAchievements(); if(tab === 'stats') updateStatsUI();
+            if(tab === 'prestige') renderPrestigeShop(); if(tab === 'style') renderStylePanel();
         };
+        
+        setInterval(() => { const statsPanel = document.getElementById('panel-stats'); if(statsPanel && !statsPanel.classList.contains('hidden')) { updateStatsUI(); } }, 1000);
 
         window.setBulk = (amt) => { bulkAmount = amt; document.querySelectorAll('.bulk-btn').forEach(b => b.classList.remove('active')); document.getElementById('bulk-'+amt).classList.add('active'); updateUI(); };
         window.setShopTab = (tab) => { currentShopTab = tab; document.querySelectorAll('.shop-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('shop-tab-'+tab).classList.add('active'); renderShop(); updateUI(); };
@@ -829,7 +1045,17 @@
 
         function getBulkCost(baseCost, count) { 
             let total = 0; let temp = baseCost; 
-            let discount = (hasTree('u1') ? 0.95 : 1.0) * (hasTree('u4') ? 0.9 : 1.0);
+            
+            // Stackable Discounts
+            let discount = 1.0;
+            if (hasTree('u1')) discount *= 0.95;
+            if (hasTree('u_tax')) discount *= 0.95;
+            if (hasTree('u_lobby')) discount *= 0.95;
+            if (hasTree('el_earth')) discount *= 0.95;
+            if (hasTree('u_bulk2')) discount *= 0.95;
+            if (hasTree('u4')) discount *= 0.90;
+            if (hasTree('u_monopoly')) discount *= 0.90;
+
             for(let i=0; i<count; i++) { total += Math.floor(temp * discount); temp = Math.ceil(temp * 1.15); } 
             return total; 
         }
@@ -865,10 +1091,23 @@
             
             let mult = getTotalMultiplier();
             let isCrit = false;
-            // Crit Logic
-            if(hasTree('crit1') && Math.random() < 0.1) {
-                mult *= (hasTree('crit2') ? 7.5 : 5); // 5x or 7.5x
-                if(hasTree('crit4')) mult *= 2;
+            
+            // UPDATED CRIT LOGIC - STACKING
+            let critChance = 0.1;
+            if (hasTree('crit3')) critChance += 0.05;
+            if (hasTree('crit_bounty')) critChance += 0.05;
+            if (hasTree('el_air')) critChance += 0.05;
+
+            if(hasTree('crit1') && Math.random() < critChance) {
+                let critMult = 5;
+                if(hasTree('crit2')) critMult += 2.5; // +50% of base
+                if(hasTree('crit_fatal')) critMult += 2.5; 
+                if(hasTree('crit_execute')) critMult += 5.0; 
+                
+                // Multipliers
+                if(hasTree('crit4')) critMult *= 2;
+                
+                mult *= critMult;
                 isCrit = true;
             }
 
@@ -877,7 +1116,7 @@
             
             const text = document.createElement('div');
             text.className = 'float-text'; 
-            text.innerText = (isCrit ? 'CRIT! +' : '+') + Math.floor(gain).toLocaleString();
+            text.innerText = (isCrit ? 'CRIT! +' : '+') + formatNumber(gain);
             if(isCrit) { text.style.color = '#ef4444'; text.style.fontSize = '3rem'; }
             
             const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
@@ -888,9 +1127,13 @@
 
         function getPrestigeData() {
             let tempScore = score; let tempPrestige = prestigeCount; let levelsToGain = 0;
+            
+            // --- UPDATED PRESTIGE COST LOGIC (1.0005x) ---
             while (true) {
-                // Testing cost set to 1000 as requested
-                let cost = 1000 * Math.pow(1.5, tempPrestige);
+                let linear = 1000000000 * (tempPrestige + 1);
+                let exponential = Math.pow(1.0005, tempPrestige);
+                let cost = linear * exponential;
+                
                 if (tempScore >= cost) { tempScore -= cost; tempPrestige++; levelsToGain++; } 
                 else { return { gain: levelsToGain, remaining: tempScore, nextCost: cost, percent: Math.min((tempScore / cost) * 100, 100) }; }
             }
@@ -915,17 +1158,16 @@
                     }
                 });
                 
-                // Screen Cracking Effect
                 const tree = document.getElementById('ascension-tree-view');
                 const game = document.getElementById('game-screen');
                 game.classList.add('screen-falling');
                 
                 setTimeout(() => {
                     tree.classList.add('active');
-                    renderAscensionTree(); // Initial render
+                    renderAscensionTree(); 
                 }, 1000);
 
-                updateUI(); renderPrestigeShop();
+                updateUI(); renderPrestigeShop(); renderShop();
             }
         };
         
@@ -934,37 +1176,284 @@
             const game = document.getElementById('game-screen');
             tree.classList.remove('active');
             game.classList.remove('screen-falling');
-            // Check Pets
             checkPets();
-            setTimeout(() => { updateUI(); }, 500);
+            setTimeout(() => { updateUI(); renderShop(); }, 500);
         };
         
         function checkPets() {
             const container = document.getElementById('pet-container');
-            container.innerHTML = ''; // Clear and rebuild
+            const petNodes = prestigeTreeData.filter(n => n.type === 'pet' && ownedPrestigeUpgrades.includes(n.id));
             
-            if(hasTree('pet1')) spawnPet('🥚', 'bounce'); // Egg
-            if(hasTree('pet2')) { container.innerHTML=''; spawnPet('🐣', 'float'); } // Hatchling
-            if(hasTree('pet3')) spawnPet('👼', 'float-fast'); // Guardian
-            if(hasTree('pet4')) spawnPet('👻', 'pulse'); // Wisp
+            petNodes.forEach(node => {
+                if (node.id === 'pet1' && ownedPrestigeUpgrades.includes('pet2')) return;
+
+                if(!petsState[node.id]) {
+                    petsState[node.id] = { id: node.id, name: node.name, level: 1, mode: 'sit', x: 20 + Math.random()*60, y: 20 + Math.random()*60 };
+                }
+                
+                let el = document.getElementById(`pet-${node.id}`);
+                if(!el) {
+                    el = document.createElement('div');
+                    el.id = `pet-${node.id}`;
+                    el.innerText = node.emoji;
+                    
+                    let anim = 'anim-float';
+                    if(node.id === 'pet1') anim = 'anim-bounce';
+                    if(node.id === 'pet3') anim = 'anim-float-fast';
+                    if(node.id === 'pet4') anim = 'anim-pulse';
+                    if(node.id === 'pet5') anim = 'anim-bounce';
+                    if(node.id === 'pet6') anim = 'anim-shake';
+                    if(node.id === 'pet7') anim = 'anim-float-fast';
+                    
+                    el.className = `game-pet ${anim}`;
+                    
+                    el.addEventListener('mousedown', (e) => {
+                        if (e.button !== 0) return; 
+                        if(dragTargetId !== null && dragTargetId !== node.id) {
+                            dragTargetId = null; isDragActive = false;
+                        }
+                        dragTargetId = node.id;
+                        dragStartPos = { x: e.clientX, y: e.clientY };
+                        isDragActive = false; 
+                        const rect = el.getBoundingClientRect();
+                        dragOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                        el.classList.remove('pet-smooth');
+                        e.stopPropagation(); e.preventDefault(); 
+                    });
+
+                    container.appendChild(el);
+                }
+                
+                el.style.left = petsState[node.id].x + '%';
+                el.style.top = petsState[node.id].y + '%';
+                updatePetLabel(node.id);
+            });
+            
+            if (ownedPrestigeUpgrades.includes('pet2')) {
+                const eggEl = document.getElementById('pet-pet1');
+                if(eggEl) eggEl.remove();
+            }
+        }
+
+        function updatePetLabel(id) {
+            const el = document.getElementById(`pet-${id}`);
+            if(!el) return;
+            
+            let label = el.querySelector('.pet-label');
+            if(!label) { label = document.createElement('div'); label.className = 'pet-label'; el.appendChild(label); }
+
+            const data = petsState[id];
+            const maxLevel = id === 'pet3' ? 1 : 10;
+            const isMaxed = data.level >= maxLevel;
+            const nameClass = isMaxed ? 'diamond-text' : 'text-white';
+            
+            label.innerHTML = `<span class="text-xs font-bold ${nameClass} shadow-black drop-shadow-md">${data.name}</span><br><span class="text-[8px] text-yellow-300 font-bold shadow-black drop-shadow-md">Lvl ${data.level}</span>`;
         }
         
-        function spawnPet(emoji, anim) {
-            const p = document.createElement('div');
-            p.className = 'game-pet';
-            p.innerText = emoji;
-            p.style.fontSize = '40px';
-            p.style.left = (Math.random() * 80 + 10) + '%';
-            p.style.top = (Math.random() * 60 + 20) + '%';
-            // Simple animation class logic (omitted for brevity, just static for now or use floatPet)
-            p.style.animation = 'floatPet 4s ease-in-out infinite';
-            document.getElementById('pet-container').appendChild(p);
+        window.openPetMenu = (id) => {
+            const menuModal = document.getElementById('pet-menu-modal');
+            if(!menuModal.classList.contains('hidden') && selectedPetId !== id) { closePetMenu(); }
+            
+            dragTargetId = null; isDragActive = false;
+            
+            selectedPetId = id;
+            const data = petsState[id];
+            const node = prestigeTreeData.find(n => n.id === id);
+            
+            document.getElementById('pm-emoji').innerText = node.emoji;
+            document.getElementById('pm-name').value = data.name;
+            
+            updatePetMenuUI();
+            
+            document.getElementById('pm-name').onchange = (e) => {
+                petsState[id].name = e.target.value; updatePetLabel(id); 
+            };
+            
+            menuModal.classList.remove('hidden');
+            repositionPetMenu();
+        };
+
+        window.closePetMenu = () => {
+             const menuModal = document.getElementById('pet-menu-modal');
+             menuModal.classList.add('hidden');
+             selectedPetId = null;
+             dragTargetId = null; isDragActive = false; dragStartPos = { x: 0, y: 0 }; dragOffset = { x: 0, y: 0 };
+        };
+        
+        function repositionPetMenu() {
+            if(!selectedPetId) return;
+            const menuEl = document.getElementById('pet-menu-modal');
+            const petEl = document.getElementById(`pet-${selectedPetId}`);
+            if(!petEl || menuEl.classList.contains('hidden')) return;
+            
+            menuEl.classList.remove('menu-top', 'menu-bottom', 'menu-left', 'menu-right');
+            let arrowClass = 'menu-top'; 
+            
+            const rect = petEl.getBoundingClientRect();
+            const menuWidth = 240; const menuHeight = 180; const gap = 15;
+            
+            let top = rect.top - menuHeight - gap;
+            let left = rect.left + (rect.width/2) - (menuWidth/2);
+            
+            if (top < 10) { top = rect.bottom + gap; arrowClass = 'menu-bottom'; }
+            if(left < 10) { left = 10; }
+            if(left + menuWidth > window.innerWidth) { left = window.innerWidth - menuWidth - 10; }
+            
+            menuEl.style.top = top + 'px'; menuEl.style.left = left + 'px';
+            menuEl.style.transform = 'none'; menuEl.classList.add(arrowClass);
         }
         
-        // --- CHEAT FUNCTIONS ---
+        window.addEventListener('mousedown', (e) => {
+            const menu = document.getElementById('pet-menu-modal');
+            if(!menu.classList.contains('hidden') && !e.target.closest('#pet-menu-modal') && !e.target.closest('.game-pet')) { closePetMenu(); }
+        });
+
+        function updatePetMenuUI() {
+            if(!selectedPetId) return;
+            const data = petsState[selectedPetId];
+            const node = prestigeTreeData.find(n => n.id === selectedPetId);
+            
+            const modeBtn = document.getElementById('pm-mode-btn');
+            modeBtn.innerText = data.mode === 'sit' ? 'SITTING' : 'ROAMING';
+            modeBtn.className = data.mode === 'sit' ? 'text-[9px] font-bold text-gray-300' : 'text-[9px] font-bold text-blue-300';
+            
+            let desc = node.desc;
+            let mult = 1 + ((data.level - 1) * 0.1); 
+            
+            if(node.id === 'pet5') desc = `Passive Gen +${(25 * mult).toFixed(0)}%`;
+            else if(node.id === 'pet6') desc = `Click Power +${(50 * mult).toFixed(0)}%`;
+            else if(node.id === 'pet7') desc = `Golden Vrajs +${(10 + (data.level-1)*2)}s`;
+            else if(node.id === 'pet2') desc = `Passive Gen +${(5 * mult).toFixed(0)}%`;
+            else if(node.id === 'pet1') desc = `Just an egg. Might hatch?`;
+            else if(node.id === 'pet3') desc = `Auto-clicks Golden Vrajs!`;
+            else if(node.id === 'pet4') desc = `Click Power +${(2 * data.level).toFixed(0)}% per min AFK`;
+            else desc = node.desc + ` (Lvl Bonus: +${((mult-1)*100).toFixed(0)}%)`;
+            
+            document.getElementById('pm-effect').innerText = desc;
+            
+            const baseCost = node.cost * 10;
+            const cost = Math.floor(baseCost * Math.pow(50, data.level)); 
+            
+            const btn = document.getElementById('pm-upgrade-btn');
+            const maxLevel = node.id === 'pet3' ? 1 : 10;
+            const isMax = data.level >= maxLevel;
+            const canUpgrade = ['pet2','pet4','pet5','pet6','pet7'].includes(node.id); 
+
+            if(isMax) {
+                btn.innerHTML = `<span class="text-xs">MAX LEVEL</span>`;
+                btn.className = "w-full py-3 bg-gray-700 rounded-lg font-bold shadow-lg flex justify-center items-center opacity-50 cursor-not-allowed";
+                btn.onclick = null;
+            } else if (!canUpgrade) {
+                 btn.innerHTML = `<span class="text-xs">MAX POWER</span>`;
+                 btn.className = "w-full py-3 bg-gray-700 rounded-lg font-bold shadow-lg flex justify-center items-center opacity-50 cursor-not-allowed";
+                 btn.onclick = null;
+            } else {
+                btn.innerHTML = `<span class="text-xs">LEVEL UP</span><span class="text-[9px] bg-black/20 px-2 py-0.5 rounded text-emerald-100" id="pm-cost">${formatNumber(cost)} Vrajs</span>`;
+                btn.className = "w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg font-bold shadow-lg flex justify-between px-3 items-center hover:scale-[1.02]";
+                btn.onclick = upgradePet;
+            }
+            document.getElementById('pm-level').innerText = `${data.level} / ${maxLevel}`;
+        }
+
+        window.togglePetMode = () => {
+            if(!selectedPetId) return;
+            petsState[selectedPetId].mode = petsState[selectedPetId].mode === 'sit' ? 'roam' : 'sit';
+            updatePetMenuUI();
+        };
+
+        window.upgradePet = () => {
+            if(!selectedPetId) return;
+            const data = petsState[selectedPetId];
+            const node = prestigeTreeData.find(n => n.id === selectedPetId);
+            const maxLevel = node.id === 'pet3' ? 1 : 10;
+            
+            if(data.level >= maxLevel) return;
+            
+            const baseCost = node.cost * 10;
+            const cost = Math.floor(baseCost * Math.pow(50, data.level)); 
+
+            if(score >= cost) {
+                score -= cost;
+                data.level++;
+                playSfx();
+                
+                const btn = document.getElementById('pm-upgrade-btn');
+                btn.classList.add('flash-success');
+                setTimeout(() => btn.classList.remove('flash-success'), 100); 
+
+                updateUI(); 
+                updatePetMenuUI(); 
+                updatePetLabel(selectedPetId); 
+            }
+        };
+
+        window.addEventListener('mousemove', (e) => {
+            if(dragTargetId) {
+                const dist = Math.sqrt(Math.pow(e.clientX - dragStartPos.x, 2) + Math.pow(e.clientY - dragStartPos.y, 2));
+                if(dist > 5) isDragActive = true; 
+
+                if(isDragActive) {
+                    const el = document.getElementById(`pet-${dragTargetId}`);
+                    const container = document.getElementById('pet-container');
+                    const rect = container.getBoundingClientRect();
+                    
+                    let rawX = e.clientX - rect.left - dragOffset.x;
+                    let rawY = e.clientY - rect.top - dragOffset.y;
+                    
+                    let x = (rawX / rect.width) * 100;
+                    let y = (rawY / rect.height) * 100;
+                    
+                    x = Math.max(0, Math.min(95, x)); 
+                    y = Math.max(0, Math.min(95, y));
+                    
+                    if(el) {
+                        el.style.left = x + '%'; el.style.top = y + '%';
+                        petsState[dragTargetId].x = x; petsState[dragTargetId].y = y;
+                        if(selectedPetId === dragTargetId) { repositionPetMenu(); }
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if(dragTargetId) {
+                const menuModal = document.getElementById('pet-menu-modal');
+                const isMenuOpen = !menuModal.classList.contains('hidden');
+                const isMenuForThisPet = selectedPetId === dragTargetId;
+                
+                if(!isDragActive) {
+                    if(isMenuOpen && isMenuForThisPet) { closePetMenu(); } else { openPetMenu(dragTargetId); }
+                } else {
+                    if(petsState[dragTargetId].mode === 'roam') {
+                        const el = document.getElementById(`pet-${dragTargetId}`);
+                        if(el) el.classList.add('pet-smooth');
+                    }
+                }
+                dragTargetId = null; isDragActive = false;
+            }
+        });
+        
+        window.addEventListener('mouseleave', () => { dragTargetId = null; isDragActive = false; });
+
+        setInterval(() => {
+            Object.keys(petsState).forEach(id => {
+                const p = petsState[id];
+                if(p.mode === 'roam' && dragTargetId === null) {
+                    if(Math.random() < 0.3) { 
+                        p.x = Math.random() * 90; p.y = Math.random() * 90;
+                        const el = document.getElementById(`pet-${id}`);
+                        if(el) {
+                            if(!el.classList.contains('pet-smooth')) el.classList.add('pet-smooth');
+                            el.style.left = p.x + '%'; el.style.top = p.y + '%';
+                        }
+                    }
+                }
+            });
+        }, 2000); 
+
         window.cheatAddVrajs = () => {
             const amt = parseInt(document.getElementById('cheat-amount').value) || 0;
-            score += amt; updateUI();
+            score += amt; updateUI(); renderShop();
         };
         window.cheatAddFatflaps = () => {
             const amt = parseInt(document.getElementById('cheat-amount').value) || 0;
@@ -989,7 +1478,6 @@
         };
 
         function renderPrestigeShop() {
-            // Main Tab: Show ONLY Owned Upgrades
             const list = document.getElementById('prestige-shop-list');
             list.innerHTML = prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).map(u => {
                 return `<div class="prestige-card glass p-4 flex justify-between items-center opacity-50"><div class="flex items-center gap-3"><span class="text-2xl">${u.emoji}</span><div><p class="font-bold text-sm text-purple-300">${u.name}</p><p class="text-[9px] opacity-60">${u.desc}</p></div></div><div class="text-right"><p class="text-xs font-bold text-yellow-500">OWNED</p></div></div>`;
@@ -1010,7 +1498,6 @@
             const centerY = window.innerHeight / 2;
             const positions = {};
 
-            // Recursive Radial Layout
             const placeNodes = (parentId, x, y, angleStart, angleRange) => {
                 const children = prestigeTreeData.filter(n => n.parent === parentId);
                 if (children.length === 0) return;
@@ -1019,18 +1506,22 @@
                 let currentAngle = angleStart;
 
                 children.forEach((child, index) => {
-                    const dist = parentId === null ? 180 : 120; // Distance between layers
+                    const dist = parentId === 'origin' ? 300 : 220; 
                     
                     const nx = x + Math.cos(currentAngle) * dist;
                     const ny = y + Math.sin(currentAngle) * dist;
                     
                     positions[child.id] = { x: nx, y: ny };
-                    createNodeElement(child, nx, ny);
-                    drawLine(x, y, nx, ny, child);
-
-                    // Recurse: Narrower angle range for sub-branches
-                    placeNodes(child.id, nx, ny, currentAngle - step/3, step);
                     
+                    const parentIsOwned = parentId === 'origin' || ownedPrestigeUpgrades.includes(parentId);
+                    
+                    if (parentIsOwned) {
+                        createNodeElement(child, nx, ny);
+                        drawLine(x, y, nx, ny, child);
+                        if (ownedPrestigeUpgrades.includes(child.id)) {
+                             placeNodes(child.id, nx, ny, currentAngle - step/3, step);
+                        }
+                    }
                     currentAngle += step;
                 });
             };
@@ -1082,12 +1573,9 @@
                  linesSvg.appendChild(line);
             };
 
-            // Start layout
             const rootNode = prestigeTreeData.find(n => n.id === 'origin');
             positions['origin'] = { x: centerX, y: centerY };
             createNodeElement(rootNode, centerX, centerY);
-            
-            // 5 Main Branches distributed over 360 deg
             placeNodes('origin', centerX, centerY, 0, Math.PI * 2);
         }
 
@@ -1098,54 +1586,43 @@
             const canvas = document.getElementById('galaxy-canvas');
             if (theme === 'milkyway') {
                 initGalaxy();
-                if(canvas) {
-                    canvas.classList.remove('hidden');
-                    galaxyActive = true;
-                    animateGalaxy();
-                }
+                if(canvas) { canvas.classList.remove('hidden'); galaxyActive = true; animateGalaxy(); }
             } else {
-                if(canvas) {
-                    canvas.classList.add('hidden');
-                    galaxyActive = false;
-                }
+                if(canvas) { canvas.classList.add('hidden'); galaxyActive = false; }
             }
-
-            initThemeEffects(theme);
-            renderStylePanel();
+            initThemeEffects(theme); renderStylePanel();
+        };
+        
+        window.equipNametag = (id) => {
+            activeNametag = id;
+            renderStylePanel(); updateUI();
         };
 
         function initThemeEffects(theme) {
             const container = document.getElementById('theme-overlay');
             container.innerHTML = '';
             
-            if(['nature', 'snowy', 'sea', 'starry'].includes(theme)) {
+            if(['nature', 'snowy', 'sea', 'starry', 'pink'].includes(theme)) {
                 const count = theme === 'starry' ? 100 : 30;
                 for(let i=0; i<count; i++) {
                     const p = document.createElement('div');
                     p.className = 'particle';
                     const left = Math.random() * 100;
-                    
-                    // Fixed particle clipping by randomizing start delay and using negative delay to pre-warm animation
                     const delay = -(Math.random() * 15); 
                     
-                    p.style.left = left + '%';
-                    p.style.animationDelay = delay + 's';
+                    p.style.left = left + '%'; p.style.animationDelay = delay + 's';
                     
-                    if(theme === 'nature') {
-                        const types = ['🍂','🍃','🍁'];
-                        p.innerText = types[Math.floor(Math.random()*3)];
+                    if(theme === 'nature' || theme === 'pink') {
+                        const types = theme === 'nature' ? ['🍂','🍃','🍁'] : ['🌸'];
+                        p.innerText = types[Math.floor(Math.random()*types.length)];
                         p.className += ' nature-leaf';
                         p.style.fontSize = (Math.random() * 15 + 10) + 'px';
                     } else if(theme === 'snowy') {
-                        p.innerText = '❄️';
-                        p.className += ' snow-flake';
-                        const s = Math.random() * 10 + 5;
-                        p.style.fontSize = s + 'px';
+                        p.innerText = '❄️'; p.className += ' snow-flake';
+                        const s = Math.random() * 10 + 5; p.style.fontSize = s + 'px';
                     } else if(theme === 'sea') {
-                        p.innerText = '🫧';
-                        p.className += ' sea-bubble';
-                        const s = Math.random() * 15 + 5;
-                        p.style.fontSize = s + 'px';
+                        p.innerText = '🫧'; p.className += ' sea-bubble';
+                        const s = Math.random() * 15 + 5; p.style.fontSize = s + 'px';
                     } else if(theme === 'starry') {
                         p.className = 'star';
                         const s = Math.random() * 3 + 1;
@@ -1163,6 +1640,7 @@
 
         function renderStylePanel() {
             const list = document.getElementById('style-list');
+            
             if (currentStyleTab === 'themes') {
                 const themes = [
                     { id: 'milkyway', name: 'Milky Way', emoji: '🌌' },
@@ -1193,6 +1671,19 @@
                         <span class="font-bold text-xs">${activeTheme === t.id ? 'EQUIPPED' : 'EQUIP'}</span>
                     </div>
                 `).join('');
+            } else if (currentStyleTab === 'names') {
+                list.innerHTML = nameTagsData.map(n => `
+                    <div onclick="equipNametag('${n.id}')" class="nametag-card glass p-4 flex justify-between items-center ${activeNametag === n.id ? 'active' : ''}">
+                         <div class="flex items-center gap-3">
+                            <span class="text-2xl">${n.emoji}</span>
+                            <div>
+                                <p class="font-bold text-lg ${n.class}">${n.name}</p>
+                                <p class="text-[9px] opacity-60">Chat Name Effect</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-xs">${activeNametag === n.id ? 'EQUIPPED' : 'EQUIP'}</span>
+                    </div>
+                `).join('');
             } else {
                 list.innerHTML = `<div class="p-8 text-center opacity-50 text-xs font-bold uppercase tracking-widest">Available in future updates</div>`;
             }
@@ -1214,25 +1705,27 @@
 
         function updateStatsUI() {
             const mults = calculateMultipliers();
-            document.getElementById('stat-total-mult').innerText = getTotalMultiplier().toFixed(1) + "x";
-            document.getElementById('stat-total-vrajs').innerText = Math.floor(totalVrajs).toLocaleString();
+            document.getElementById('stat-total-vrajs').innerText = formatNumber(Math.floor(totalVrajs));
             document.getElementById('stat-manual-clicks').innerText = totalClicks.toLocaleString();
             document.getElementById('stat-upgrades-bought').innerText = totalUpgrades.toLocaleString();
             document.getElementById('stat-golden-caught').innerText = goldenVrajsCaught.toLocaleString();
-            document.getElementById('stat-fatflaps').innerText = fatflaps.toLocaleString();
+            // REMOVED FATFLAPS STAT
             document.getElementById('stat-prestige-count').innerText = prestigeCount.toLocaleString();
             
-            // New Percentages
             document.getElementById('stat-mult-click').innerText = mults.click.toFixed(0) + "%";
             document.getElementById('stat-mult-passive').innerText = mults.passive.toFixed(0) + "%";
             
-            // Fix Time Played (Stored + Current Session)
             const currentSessionTime = Date.now() - sessionStartTime;
             const totalMs = savedTime + currentSessionTime;
-            const h = Math.floor(totalMs / 3600000);
+            const d = Math.floor(totalMs / 86400000);
+            const h = Math.floor((totalMs % 86400000) / 3600000);
             const m = Math.floor((totalMs % 3600000) / 60000);
             const s = Math.floor((totalMs % 60000) / 1000);
-            document.getElementById('stat-time-played').innerText = `${h}h ${m}m ${s}s`;
+            
+            let timeStr = '';
+            if(d > 0) timeStr += `${d}d `;
+            timeStr += `${h}h ${m}m ${s}s`;
+            document.getElementById('stat-time-played').innerText = timeStr;
         }
 
         function renderAchievements() {
@@ -1253,21 +1746,26 @@
             if (document.querySelector('.golden-vraj')) return;
             const golden = document.createElement('img'); golden.src = 'image_0.png'; golden.className = 'golden-vraj';
             golden.onclick = (e) => { e.stopPropagation(); goldenVrajsCaught++; activateMultiplier(); golden.remove(); 
-            if(hasTree('pet3')) { /* Guardian auto-click logic could be here visually */ } };
+            if(hasTree('pet3')) { } };
             
-            if(hasTree('pet3')) { // Golden Guardian Auto-click
-                setTimeout(() => { if(golden.parentNode) golden.click(); }, 1000); // Click after 1s
-            }
+            if(hasTree('pet3')) { setTimeout(() => { if(golden.parentNode) golden.click(); }, 1000); }
             
             document.body.appendChild(golden); setTimeout(() => { if(golden) golden.remove(); }, 10000);
         }
 
         function activateMultiplier() { 
             let mult = 2;
-            if(hasTree('g2')) mult = 3; // Midas Touch
+            if(hasTree('g2')) mult = 3; 
+            if(hasTree('g_coin')) mult += 1;
+            if(hasTree('g_bar')) mult += 2;
+            if(hasTree('g_greed')) mult += 5;
+            if(hasTree('g_midas2')) mult += 10;
             
             let duration = 180;
-            if(hasTree('g3')) duration += 5; // Treasure Hunter
+            if(hasTree('g3')) duration += 5; 
+            if(hasTree('g_vault')) duration += 5;
+            if(hasTree('g_time')) duration += 10;
+            if(hasTree('pet7')) duration += (10 + ((petsState['pet7']?.level||1)-1)*2); 
 
             goldenMultiplier = mult; 
             multTimeRemaining = duration; 
@@ -1286,7 +1784,12 @@
             }
             
             let spawnChance = 0.005;
-            if(hasTree('g1')) spawnChance = 0.01; // Lucky Clover
+            if(hasTree('g1')) spawnChance += 0.005;
+            if(hasTree('g_clover')) spawnChance += 0.001; // Small bumps to keep it balanced
+            if(hasTree('g_dice')) spawnChance += 0.0015;
+            if(hasTree('g_charm')) spawnChance += 0.002;
+            if(hasTree('g_alchemy')) spawnChance += 0.0025;
+            if(hasTree('el_light')) spawnChance += 0.001;
             
             if (Math.random() < spawnChance) spawnGoldenVraj();
             
@@ -1301,60 +1804,113 @@
             }
         }, 1000);
 
+        let currentVisibleLimit = 0; // Optimization state
+
         function updateUI() {
+            const cached = getCachedElements();
             const totalMult = getTotalMultiplier();
-            document.getElementById('score').innerText = Math.floor(score).toLocaleString();
+            cached.score.innerText = formatNumber(Math.floor(score));
             
-            // VPS Calculation (Including tree buffs)
             let currentVps = vps * totalMult;
-            if(hasTree('p2a')) currentVps += (currentVps * (upgradesBoughtCount * 0.01)); // Synergy
+            if(hasTree('p2a')) currentVps += (currentVps * (upgradesBoughtCount * 0.01)); 
             
-            document.getElementById('vps-display').innerText = currentVps.toLocaleString(undefined, {minimumFractionDigits: 1}) + " VPS";
-            document.getElementById('ppc-display').innerText = (ppc * totalMult).toLocaleString(undefined, {maximumFractionDigits: 0}) + " Points Per Click";
-            document.getElementById('icon-mult-display').innerText = totalMult.toFixed(1) + "x";
+            cached.vpsDisplay.innerText = formatNumber(currentVps) + " VPS";
+            cached.ppcDisplay.innerText = formatNumber(ppc * totalMult) + " Points Per Click";
+            cached.iconMultDisplay.innerText = totalMult.toFixed(1) + "x";
             
             if (fatflaps > 0 || prestigeCount > 0) {
-                document.getElementById('fatflap-display').classList.remove('hidden');
-                document.getElementById('fatflap-count').innerText = fatflaps.toLocaleString();
+                cached.fatflapDisplay.classList.remove('hidden');
+                cached.fatflapCount.innerText = fatflaps.toLocaleString();
             }
 
-            // Tab Locking Logic
             if(score >= 1000 || ascensionUnlocked) {
                 ascensionUnlocked = true;
-                document.getElementById('tab-prestige').classList.remove('locked');
+                cached.tabPrestige.classList.remove('locked');
             }
 
-            upgrades.forEach(u => {
-                const el = document.getElementById(`upg-${u.id}`);
-                if (el) {
-                    const bCost = getBulkCost(u.cost, bulkAmount);
-                    el.classList.toggle('disabled', score < bCost);
-                    document.getElementById(`cost-${u.id}`).innerText = bCost.toLocaleString();
-                    document.getElementById(`owned-${u.id}`).innerText = u.owned.toLocaleString();
-                }
-            });
+            // OPTIMIZED: Update status of existing visible upgrades
+            // Only rebuild list if we need to show a NEW upgrade.
+            const filtered = upgrades.filter(u => currentShopTab === 'clicker' ? u.isClickUpgrade : !u.isClickUpgrade);
+            let showLimit = 0;
+            for(let i = 0; i < filtered.length; i++) {
+                showLimit = i;
+                const u = filtered[i];
+                const cost = getBulkCost(u.cost, bulkAmount);
+                if (u.owned > 0 || score >= cost) { continue; } else { break; }
+            }
+            
+            // Check if we need to reveal more items
+            if (showLimit > currentVisibleLimit) {
+                renderShop(); // REVEAL NEW ITEMS
+            } else {
+                // Just update existing
+                const visibleUpgrades = filtered.slice(0, currentVisibleLimit + 1);
+                visibleUpgrades.forEach(u => {
+                    const el = document.getElementById(`upg-${u.id}`);
+                    if (el) {
+                        const bCost = getBulkCost(u.cost, bulkAmount);
+                        el.classList.toggle('disabled', score < bCost);
+                        document.getElementById(`cost-${u.id}`).innerText = formatNumber(bCost);
+                        document.getElementById(`owned-${u.id}`).innerText = u.owned.toLocaleString();
+                    }
+                });
+            }
+            
+            let displayHTML = currentUsername;
+            if(activeNametag !== 'classic') {
+                const tagData = nameTagsData.find(n => n.id === activeNametag);
+                if(tagData) { displayHTML = `<span class="${tagData.class}">${currentUsername}</span>`; }
+            }
+            if(isDev) displayHTML = `<span class="dev-tag">[DEV]</span> ${displayHTML}`;
+            document.getElementById('user-display').innerHTML = displayHTML;
         }
 
         function renderShop() {
             const shop = document.getElementById('shop-list');
             const filtered = upgrades.filter(u => currentShopTab === 'clicker' ? u.isClickUpgrade : !u.isClickUpgrade);
-            shop.innerHTML = filtered.map(u => `
+            
+            // --- SMART SHOP VISIBILITY LOGIC ---
+            let showLimit = 0;
+            for(let i = 0; i < filtered.length; i++) {
+                showLimit = i;
+                const u = filtered[i];
+                const cost = getBulkCost(u.cost, bulkAmount);
+                if (u.owned > 0 || score >= cost) {
+                    continue; 
+                } else {
+                    break; 
+                }
+            }
+            currentVisibleLimit = showLimit; // Store state
+            const toShow = filtered.slice(0, showLimit + 1);
+            // -----------------------------------
+
+            shop.innerHTML = toShow.map(u => `
                 <div id="upg-${u.id}" onclick="buyUpgrade(${u.id})" class="upgrade-card glass p-4 flex justify-between items-center disabled">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">${u.emoji}</span>
                         <div>
                             <p class="font-bold text-sm">${u.name}</p>
-                            <p class="text-[10px] text-emerald-400">+${u.basePower.toLocaleString()} ${u.isClickUpgrade?'PPC':'VPS'}</p>
+                            <p class="text-[10px] text-emerald-400">+${formatNumber(u.basePower)} ${u.isClickUpgrade?'PPC':'VPS'}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-xs font-bold opacity-80" id="cost-${u.id}">${u.cost.toLocaleString()}</p>
+                        <p class="text-xs font-bold opacity-80" id="cost-${u.id}">${formatNumber(u.cost)}</p>
                         <p class="text-[9px] opacity-60">Owned: <span id="owned-${u.id}">${u.owned}</span></p>
                     </div>
                 </div>`).join('');
         }
 
-        setInterval(() => { if (vps > 0) { score += (vps * getTotalMultiplier()) / 10; updateUI(); } }, 100);
+        setInterval(() => { 
+            if (vps > 0) { 
+                score += (vps * getTotalMultiplier()) / 10; 
+                const cached = getCachedElements();
+                cached.score.innerText = formatNumber(Math.floor(score));
+                // We rely on updateUI loop for shop reveal to avoid heavy calc here
+            } 
+        }, 100);
+        
+        setInterval(() => { if (vps > 0 || score > 0) { updateUI(); } }, 500);
 
         window.switchTab = (t) => {
             document.getElementById('login-form').classList.toggle('hidden', t !== 'login');
@@ -1374,10 +1930,8 @@
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
-                // Check if User is the Dev
                 if (user.email === 'jaash08@gmail.com') {
-                    isDev = true;
-                    document.getElementById('dev-menu-btn').classList.remove('hidden');
+                    isDev = true; document.getElementById('dev-menu-btn').classList.remove('hidden');
                 }
 
                 if (!user.isAnonymous && !user.emailVerified) { document.getElementById('verify-notice').classList.remove('hidden'); document.getElementById('login-form').classList.add('hidden'); document.getElementById('auth-tabs').classList.add('hidden'); } 
@@ -1392,37 +1946,46 @@
                             savedTime = d.timePlayed || 0; 
                             prestigeCount = d.prestigeCount || 0; fatflaps = d.fatflaps || 0; ownedPrestigeUpgrades = d.ownedPrestigeUpgrades || [];
                             ascensionUnlocked = d.ascensionUnlocked || false;
+                            activeNametag = d.activeNametag || 'classic';
                             if(d.upgStates) d.upgStates.forEach((s, i) => { if(upgrades[i]) { upgrades[i].owned = s.owned; upgrades[i].cost = s.cost; } });
                             if(d.achStates) achievements.forEach((a, i) => { if(d.achStates[i]) a.unlocked = d.achStates[i]; });
                             if(d.activeTheme) setTheme(d.activeTheme);
+                            if(d.petsState) petsState = d.petsState; 
                         }
                     }
-                    
-                    // Add Dev Tag if applicable
-                    let displayHTML = currentUsername;
-                    if(isDev) displayHTML = `<span class="dev-tag">[DEV]</span> ${currentUsername}`;
-                    document.getElementById('user-display').innerHTML = displayHTML;
                     
                     renderShop(); renderAchievements(); renderPrestigeShop(); updateUI(); checkPets();
                     
                     setInterval(() => { if(currentUser && !currentUser.isAnonymous) {
                         const currentSession = Date.now() - sessionStartTime;
-                        setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, totalVrajs, totalClicks, totalUpgrades, goldenVrajsCaught, timePlayed: savedTime + currentSession, username: currentUsername, upgStates: upgrades.map(u => ({ owned: u.owned, cost: u.cost })), achStates: achievements.map(a => a.unlocked), prestigeCount, fatflaps, ownedPrestigeUpgrades, activeTheme, ascensionUnlocked }, { merge: true }); 
+                        setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, totalVrajs, totalClicks, totalUpgrades, goldenVrajsCaught, timePlayed: savedTime + currentSession, username: currentUsername, upgStates: upgrades.map(u => ({ owned: u.owned, cost: u.cost })), achStates: achievements.map(a => a.unlocked), prestigeCount, fatflaps, ownedPrestigeUpgrades, activeTheme, activeNametag, ascensionUnlocked, petsState }, { merge: true }); 
                     }}, 10000);
                     onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10)), (s) => {
                         document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => {
                             const dData = d.data(); 
-                            let rankClass = ""; 
-                            let medal = "";
+                            let rankClass = ""; let medal = "";
                             if (i === 0) { rankClass = "lb-rank-1"; medal = "🥇"; }
                             else if (i === 1) { rankClass = "lb-rank-2"; medal = "🥈"; }
                             else if (i === 2) { rankClass = "lb-rank-3"; medal = "🥉"; }
                             
-                            return `<div class="lb-card p-3 flex items-center justify-between mb-2 ${rankClass}"><div class="flex items-center gap-3"><span class="text-xs font-black">#${i+1} ${medal}</span><div><p class="text-xs font-bold">${dData.username}</p><p class="text-[9px] opacity-60 font-bold">${(dData.prestigeCount || 0)} Ascensions</p></div></div><div class="text-right"><p class="text-xs font-black text-blue-400">${Math.floor(dData.score).toLocaleString()}</p></div></div>`;
+                            // Leaderboard Nametag Support
+                            let lbNameDisplay = dData.username;
+                            const tagData = nameTagsData.find(n => n.id === dData.activeNametag);
+                            if(tagData && dData.activeNametag !== 'classic') {
+                                lbNameDisplay = `<span class="${tagData.class}">${dData.username}</span>`;
+                            }
+
+                            return `<div class="lb-card p-3 flex items-center justify-between mb-2 ${rankClass}"><div class="flex items-center gap-3"><span class="text-xs font-black">#${i+1} ${medal}</span><div><p class="text-xs font-bold">${lbNameDisplay}</p><p class="text-[9px] opacity-60 font-bold">${(dData.prestigeCount || 0)} Ascensions</p></div></div><div class="text-right"><p class="text-xs font-black text-blue-400">${formatNumber(Math.floor(dData.score))}</p></div></div>`;
                         }).join('');
                     });
                     onSnapshot(query(collection(db, "globalChat"), orderBy("timestamp", "desc"), limit(20)), (s) => {
-                        document.getElementById('chat-box').innerHTML = s.docs.map(d => `<div class="mb-1"><span class="text-emerald-400 font-bold">${d.data().username}:</span> ${d.data().text}</div>`).join('');
+                        document.getElementById('chat-box').innerHTML = s.docs.map(d => {
+                            const dData = d.data();
+                            let nameClass = "text-emerald-400 font-bold";
+                            const tagData = nameTagsData.find(n => n.id === dData.nametag);
+                            if(tagData && dData.nametag !== 'classic') nameClass = tagData.class;
+                            return `<div class="mb-1"><span class="${nameClass}">${dData.username}:</span> ${dData.text}</div>`;
+                        }).join('');
                     });
                 }
             } else { document.getElementById('auth-screen').classList.remove('hidden'); document.getElementById('game-screen').classList.add('hidden'); }
@@ -1430,9 +1993,55 @@
 
         document.getElementById('chat-form').onsubmit = async (e) => {
             e.preventDefault(); const input = document.getElementById('chat-input'); if(!input.value.trim()) return;
-            await addDoc(collection(db, "globalChat"), { text: input.value, username: currentUsername, timestamp: serverTimestamp() }); 
+            await addDoc(collection(db, "globalChat"), { text: input.value, username: currentUsername, nametag: activeNametag, timestamp: serverTimestamp() }); 
             chatsSent++; input.value = "";
         };
+
+        // --- ASCENSION TREE DRAG & ZOOM ---
+        let treeScale = 1, treePanX = 0, treePanY = 0, isDraggingTree = false, dragStartX, dragStartY;
+        const treeContainerEl = document.getElementById('tree-container');
+        const treeViewEl = document.getElementById('ascension-tree-view');
+
+        treeViewEl.addEventListener('wheel', (e) => {
+            if(!treeViewEl.classList.contains('active')) return;
+            e.preventDefault();
+            const xs = (e.clientX - treePanX) / treeScale;
+            const ys = (e.clientY - treePanY) / treeScale;
+            const delta = -Math.sign(e.deltaY);
+            const factor = 1.1;
+            const newScale = delta > 0 ? treeScale * factor : treeScale / factor;
+            
+            if (newScale < 0.2 || newScale > 5) return;
+            
+            treeScale = newScale;
+            treePanX = e.clientX - xs * treeScale;
+            treePanY = e.clientY - ys * treeScale;
+            treeContainerEl.style.transform = `translate(${treePanX}px, ${treePanY}px) scale(${treeScale})`;
+            treeViewEl.style.backgroundPosition = `${treePanX}px ${treePanY}px`;
+        }, { passive: false });
+
+        treeViewEl.addEventListener('mousedown', (e) => {
+            if(!treeViewEl.classList.contains('active')) return;
+            if(e.target.closest('.tree-node') || e.target.closest('button')) return;
+            isDraggingTree = true;
+            dragStartX = e.clientX - treePanX;
+            dragStartY = e.clientY - treePanY;
+            treeContainerEl.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if(!isDraggingTree) return;
+            e.preventDefault();
+            treePanX = e.clientX - dragStartX;
+            treePanY = e.clientY - dragStartY;
+            treeContainerEl.style.transform = `translate(${treePanX}px, ${treePanY}px) scale(${treeScale})`;
+            treeViewEl.style.backgroundPosition = `${treePanX}px ${treePanY}px`;
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingTree = false;
+            treeContainerEl.style.cursor = 'grab';
+        });
     </script>
 </body>
 </html>
