@@ -147,7 +147,8 @@
         .bulk-btn.active, .shop-tab-btn.active, .style-tab-btn.active { background: var(--accent); color: white; }
         .float-text { position: absolute; color: var(--accent); font-weight: 800; font-size: 2rem; pointer-events: none; animation: floatUp 3s ease-out forwards; z-index: 100; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
-        .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 50; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; }
+        /* Golden Vraj Update: Added pointer-events: auto !important and high z-index */
+        .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 3500; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; pointer-events: auto !important; }
         @keyframes goldenFly { 0% { left: -100px; top: 20%; } 100% { left: 110vw; top: 60%; } }
         .prestige-btn { background: linear-gradient(135deg, var(--accent), #7c3aed); border: 2px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
         .lb-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; }
@@ -489,9 +490,9 @@
                         <span id="fatflap-count" class="text-2xl font-black text-purple-400">0</span>
                         <span class="text-[10px] font-bold text-purple-500/80 uppercase">Fatflaps</span>
                     </div>
-                    <h2 id="score" class="text-7xl font-black drop-shadow-lg">0</h2>
+                    <h2 id="score" class="text-7xl font-black drop-shadow-lg">0 Vrajs</h2>
                     <p id="vps-display" class="text-emerald-400 font-bold tracking-widest text-sm uppercase">0 VPS</p>
-                    <p id="ppc-display" class="font-bold text-[10px] mt-1 opacity-80">1 Points Per Click</p>
+                    <p id="ppc-display" class="font-bold text-[10px] mt-1 opacity-80">1 Vrajs Per Click</p>
                 </div>
                 
                 <div class="flex flex-col items-center gap-4">
@@ -654,6 +655,7 @@
         let equippedStyles = new Set();
         let isTop10 = false;
         let achievementPercent = 0;
+        let clickTimestamps = []; // New tracker for CPS achievements
 
         // --- NOTIFICATIONS & STATE ---
         let hasNewAch = false;
@@ -755,34 +757,71 @@
         let cachedElements = null;
         function getCachedElements() { if (!cachedElements) { cachedElements = { score: document.getElementById('score'), vpsDisplay: document.getElementById('vps-display'), ppcDisplay: document.getElementById('ppc-display'), iconMultDisplay: document.getElementById('icon-mult-display'), fatflapDisplay: document.getElementById('fatflap-display'), fatflapCount: document.getElementById('fatflap-count'), tabPrestige: document.getElementById('tab-prestige') }; } return cachedElements; }
 
+        // UPDATED: All passive upgrades (Indices 1, 3, 5, etc.) prices halved
         const upgradeData = [
-            { name: "Vraj Finger", baseCost: 10, basePower: 0.2, emoji: "☝️" }, { name: "Vraj Sprout", baseCost: 100, basePower: 1, emoji: "🌱" }, { name: "Vraj Nanobots", baseCost: 500, basePower: 4, emoji: "🤏" }, { name: "Vraj Cursor", baseCost: 2500, basePower: 15, emoji: "🖱️" }, { name: "Vraj Magnet", baseCost: 10000, basePower: 50, emoji: "🧲" }, { name: "Vraj Drone", baseCost: 50000, basePower: 200, emoji: "🚁" },
-            { name: "Vraj Keyboard", baseCost: 200000, basePower: 750, emoji: "⌨️" }, { name: "Vraj Coffee", baseCost: 1000000, basePower: 3000, emoji: "☕" }, { name: "Vraj Juice", baseCost: 5000000, basePower: 12000, emoji: "🧃" }, { name: "Vraj Potion", baseCost: 25000000, basePower: 50000, emoji: "🧪" }, { name: "Vraj Botnet", baseCost: 100000000, basePower: 180000, emoji: "🌐" }, { name: "Vraj Garden", baseCost: 500000000, basePower: 800000, emoji: "🌿" },
-            { name: "Vraj Tuner", baseCost: 2500000000, basePower: 3500000, emoji: "🎚️" }, { name: "Vraj Typist", baseCost: 12000000000, basePower: 15000000, emoji: "💻" }, { name: "Vraj Automaton", baseCost: 60000000000, basePower: 70000000, emoji: "🤖" }, { name: "Vraj Smoothie", baseCost: 300000000000, basePower: 300000000, emoji: "🥤" }, { name: "Vraj Console", baseCost: 1500000000000, basePower: 1200000000, emoji: "🕹️" }, { name: "Vraj Lab", baseCost: 8000000000000, basePower: 5000000000, emoji: "⚗️" },
-            { name: "Vraj Brewery", baseCost: 40000000000000, basePower: 20000000000, emoji: "🍺" }, { name: "Vraj Workshop", baseCost: 200000000000000, basePower: 80000000000, emoji: "🛠️" }, { name: "Vraj Network", baseCost: 1e15, basePower: 350000000000, emoji: "📡" }, { name: "Vraj Reactor", baseCost: 5e15, basePower: 1.5e12, emoji: "⚛️" }, { name: "Vraj Meadow", baseCost: 2.5e16, basePower: 6e12, emoji: "🌾" }, { name: "Vraj Terminal", baseCost: 1.2e17, basePower: 2.5e13, emoji: "🖥️" },
-            { name: "Vraj Hive", baseCost: 6e17, basePower: 1e14, emoji: "🐜" }, { name: "Vraj Factory", baseCost: 3e18, basePower: 4.5e14, emoji: "🏭" }, { name: "Vraj Collider", baseCost: 1.5e19, basePower: 2e15, emoji: "🔬" }, { name: "Vraj Extract", baseCost: 8e19, basePower: 9e15, emoji: "🧉" }, { name: "Vraj Deck", baseCost: 4e20, basePower: 4e16, emoji: "🎮" }, { name: "Vraj Assembly", baseCost: 2e21, basePower: 1.8e17, emoji: "🤝" },
-            { name: "Vraj Mainframe", baseCost: 1e22, basePower: 8e17, emoji: "💽" }, { name: "Vraj Singularity", baseCost: 5e22, basePower: 3.5e18, emoji: "🌀" }, { name: "Vraj Forest", baseCost: 2.5e23, basePower: 1.5e19, emoji: "🌲" }, { name: "Vraj Supercomp", baseCost: 1e24, basePower: 6e19, emoji: "💾" }, { name: "Vraj Colony", baseCost: 5e24, basePower: 2.5e20, emoji: "🐜" }, { name: "Vraj Megaplant", baseCost: 2.5e25, basePower: 1e21, emoji: "🏗️" },
-            { name: "Vraj Accelerator", baseCost: 1.2e26, basePower: 4.5e21, emoji: "🚀" }, { name: "Vraj Serum", baseCost: 6e26, basePower: 2e22, emoji: "💉" }, { name: "Vraj Interface", baseCost: 3e27, basePower: 9e22, emoji: "🧩" }, { name: "Vraj Genome", baseCost: 1.5e28, basePower: 4e23, emoji: "🧬" }, { name: "Vraj Roast", baseCost: 7e28, basePower: 1.8e24, emoji: "🌰" }, { name: "Vraj Forge", baseCost: 3.5e29, basePower: 8e24, emoji: "🗜️" }, { name: "Vraj Datasphere", baseCost: 1.5e30, basePower: 3.5e25, emoji: "🌐" }
+            { name: "Vraj Finger", baseCost: 50, basePower: 0.2, emoji: "☝️" }, 
+            { name: "Vraj Sprout", baseCost: 150, basePower: 1, emoji: "🌱" }, // 300 -> 150
+            { name: "Vraj Nanobots", baseCost: 2000, basePower: 4, emoji: "🤏" }, 
+            { name: "Vraj Cursor", baseCost: 3750, basePower: 15, emoji: "🖱️" }, // 7500 -> 3750
+            { name: "Vraj Magnet", baseCost: 30000, basePower: 50, emoji: "🧲" }, 
+            { name: "Vraj Drone", baseCost: 100000, basePower: 200, emoji: "🚁" }, // 200000 -> 100000
+            { name: "Vraj Keyboard", baseCost: 1000000, basePower: 750, emoji: "⌨️" }, 
+            { name: "Vraj Coffee", baseCost: 3000000, basePower: 3000, emoji: "☕" }, // 6000000 -> 3000000
+            { name: "Vraj Juice", baseCost: 35000000, basePower: 12000, emoji: "🧃" }, 
+            { name: "Vraj Potion", baseCost: 100000000, basePower: 50000, emoji: "🧪" }, // 200000000 -> 100000000
+            { name: "Vraj Botnet", baseCost: 800000000, basePower: 180000, emoji: "🌐" }, 
+            { name: "Vraj Garden", baseCost: 2250000000, basePower: 800000, emoji: "🌿" }, // 4.5b -> 2.25b
+            { name: "Vraj Tuner", baseCost: 25000000000, basePower: 3500000, emoji: "🎚️" }, 
+            { name: "Vraj Typist", baseCost: 60000000000, basePower: 15000000, emoji: "💻" }, // 120b -> 60b
+            { name: "Vraj Automaton", baseCost: 720000000000, basePower: 70000000, emoji: "🤖" }, 
+            { name: "Vraj Smoothie", baseCost: 1800000000000, basePower: 300000000, emoji: "🥤" }, // 3.6t -> 1.8t
+            { name: "Vraj Console", baseCost: 22500000000000, basePower: 1200000000, emoji: "🕹️" }, 
+            { name: "Vraj Lab", baseCost: 60000000000000, basePower: 5000000000, emoji: "⚗️" }, // 120t -> 60t
+            { name: "Vraj Brewery", baseCost: 720000000000000, basePower: 20000000000, emoji: "🍺" }, 
+            { name: "Vraj Workshop", baseCost: 2.0e+15, basePower: 80000000000, emoji: "🛠️" }, // 4e15 -> 2e15
+            { name: "Vraj Network", baseCost: 2.0e+16, basePower: 350000000000, emoji: "📡" }, 
+            { name: "Vraj Reactor", baseCost: 5.5e+16, basePower: 1.5e12, emoji: "⚛️" }, // 1.1e17 -> 5.5e16
+            { name: "Vraj Meadow", baseCost: 6.2e+17, basePower: 6e12, emoji: "🌾" }, 
+            { name: "Vraj Terminal", baseCost: 1.5e+18, basePower: 2.5e13, emoji: "🖥️" }, // 3.0e18 -> 1.5e18
+            { name: "Vraj Hive", baseCost: 1.7e+19, basePower: 1e14, emoji: "🐜" }, 
+            { name: "Vraj Factory", baseCost: 4.5e+19, basePower: 4.5e14, emoji: "🏭" }, // 9e19 -> 4.5e19
+            { name: "Vraj Collider", baseCost: 4.8e+20, basePower: 2e15, emoji: "🔬" }, 
+            { name: "Vraj Extract", baseCost: 1.4e+21, basePower: 9e15, emoji: "🧉" }, // 2.8e21 -> 1.4e21
+            { name: "Vraj Deck", baseCost: 1.5e+22, basePower: 4e16, emoji: "🎮" }, 
+            { name: "Vraj Assembly", baseCost: 4.0e+22, basePower: 1.8e17, emoji: "🤝" }, // 8.0e22 -> 4.0e22
+            { name: "Vraj Mainframe", baseCost: 4.5e+23, basePower: 8e17, emoji: "💽" }, 
+            { name: "Vraj Singularity", baseCost: 1.25e+24, basePower: 3.5e18, emoji: "🌀" }, // 2.5e24 -> 1.25e24
+            { name: "Vraj Forest", baseCost: 1.4e+25, basePower: 1.5e19, emoji: "🌲" }, 
+            { name: "Vraj Supercomp", baseCost: 3.0e+25, basePower: 6e19, emoji: "💾" }, // 6.0e25 -> 3.0e25
+            { name: "Vraj Colony", baseCost: 3.5e+26, basePower: 2.5e20, emoji: "🐜" }, 
+            { name: "Vraj Megaplant", baseCost: 1.0e+27, basePower: 1e21, emoji: "🏗️" }, // 2.0e27 -> 1.0e27
+            { name: "Vraj Accelerator", baseCost: 1.1e+28, basePower: 4.5e21, emoji: "🚀" }, 
+            { name: "Vraj Serum", baseCost: 3.0e+28, basePower: 2e22, emoji: "💉" }, // 6.0e28 -> 3.0e28
+            { name: "Vraj Interface", baseCost: 3.6e+29, basePower: 9e22, emoji: "🧩" }, 
+            { name: "Vraj Genome", baseCost: 1.05e+30, basePower: 4e23, emoji: "🧬" }, // 2.1e30 -> 1.05e30
+            { name: "Vraj Roast", baseCost: 1.1e+31, basePower: 1.8e24, emoji: "🌰" }, 
+            { name: "Vraj Forge", baseCost: 3.15e+31, basePower: 8e24, emoji: "🗜️" }, // 6.3e31 -> 3.15e31
+            { name: "Vraj Datasphere", baseCost: 1.5e30, basePower: 3.5e25, emoji: "🌐" }
         ];
 
         const prestigeTreeData = [];
         const addNode = (id, name, cost, desc, emoji, parent, type, boost = 0, effect = null) => { prestigeTreeData.push({ id, name, cost, desc, emoji, parent, type, boost, effect }); };
 
         addNode('origin', 'The Big Bang', 1, 'Where it all begins. Unlocks the potential.', '🌌', null, 'root', 0.1);
-        addNode('mute_upg', 'Divine Silence', 9999999, 'Unlocks a Mute Button.', '🔇', 'origin', 'special', 0, 'mute_unlock');
-        addNode('c1', 'Iron Finger', 2, '+20% Click Power', '👆', 'origin', 'click', 0.2); addNode('crit1', 'Precision Strike', 10, 'Unlock Critical Hits (10% Chance, 5x Dmg)', '🎯', 'c1', 'click', 0, 'crit_unlock'); addNode('crit2', 'Lethal Tempo', 50, 'Crit Multiplier +50%', '⚔️', 'crit1', 'click', 0, 'crit_dmg'); addNode('crit3', 'Eagle Eye', 250, 'Crit Chance +5%', '👁️', 'crit2', 'click', 0, 'crit_chance'); addNode('crit4', 'Devastation', 1000, 'Crit Multiplier x2', '🩸', 'crit3', 'click', 0, 'crit_mult_2');
-        addNode('pow1', 'Titanium Mouse', 15, '+50% Click Power', '🖱️', 'c1', 'click', 0.5); addNode('pow2', 'Cybernetic Joints', 75, '+100% Click Power', '🦾', 'pow1', 'click', 1.0); addNode('pow3', 'Plasma Clicks', 400, '+200% Click Power', '⚡', 'pow2', 'click', 2.0); addNode('pow4', 'God Finger', 2500, '+500% Click Power', '🌩️', 'pow3', 'click', 5.0);
-        addNode('p1', 'Auto Alignment', 2, '+20% VPS', '⚙️', 'origin', 'passive', 0.2); addNode('syn1', 'Building Synergy', 10, '+1% VPS per Building Owned', '🏗️', 'p1', 'passive', 0, 'syn_build'); addNode('syn2', 'Network Effect', 60, '+10% VPS', '🌐', 'syn1', 'passive', 0.1); addNode('syn3', 'Hive Mind', 300, '+50% VPS', '🧠', 'syn2', 'passive', 0.5);
-        addNode('off1', 'Time Bank', 15, 'Gain 50% production while offline', '⏳', 'p1', 'passive', 0, 'offline_50'); addNode('off2', 'Temporal Shift', 100, 'Offline Cap increased to 24h', '🕰️', 'off1', 'passive', 0, 'offline_24h');
-        addNode('g1', 'Shiny Sight', 5, 'Golden Vrajs spawn 2x as often', '✨', 'origin', 'golden', 0, 'spawn_2x'); addNode('g2', 'Midas Touch', 25, 'Golden Vrajs give 3x Multiplier', '👑', 'g1', 'golden', 0, 'mult_3x'); addNode('g3', 'Treasure Hunter', 100, 'Golden Vrajs last 5s longer', '💎', 'g2', 'golden', 0, 'dur_5s'); addNode('g4', 'Leprechaun Blood', 500, 'Golden Vrajs give 5x Multiplier', '🍀', 'g3', 'golden', 0, 'mult_5x');
-        addNode('u1', 'Haggler', 10, 'Shop prices -5%', '🏷️', 'origin', 'synergy', 0, 'disc_5'); addNode('u2', 'Trophy Hunter', 50, '+20% Multiplier per Achievement', '🏆', 'u1', 'synergy', 0, 'ach_scale'); addNode('u4', 'Black Hole Market', 1000, 'Shop prices -10%', '🕳️', 'u2', 'synergy', 0, 'disc_10');
-        addNode('pet1', 'Mysterious Egg', 500, 'Unlocks a companion...', '🥚', 'origin', 'pet', 0, 'pet_egg'); addNode('pet2', 'Hatchling', 1500, 'The egg cracks! (+2x Passive)', '🐣', 'pet1', 'pet', 1.0, 'pet_hatch'); addNode('pet7', 'Time Dragon', 5000, 'Golden Vrajs last +30s', '🐉', 'pet2', 'pet', 0, 'pet_dragon'); addNode('pet4', 'Void Wisp', 10000, 'Click Power increases with AFK time', '👻', 'pet7', 'pet', 0, 'pet_void'); addNode('pet5', 'Cosmic Slime', 25000, 'Passive generation +10x', '🟣', 'pet4', 'pet', 9.0, 'pet_slime'); addNode('pet6', 'Mecha Vraj', 75000, 'Click Power +5x', '🤖', 'pet5', 'pet', 4.0, 'pet_mech'); addNode('pet3', 'Golden Guardian', 150000, 'Auto-clicks Golden Vrajs!', '👼', 'pet6', 'pet', 0, 'pet_gold');
+        addNode('mute_upg', 'Divine Silence', 49999995, 'Unlocks a Mute Button.', '🔇', 'origin', 'special', 0, 'mute_unlock');
+        addNode('c1', 'Iron Finger', 5, '+20% Click Power', '👆', 'origin', 'click', 0.2); addNode('crit1', 'Precision Strike', 25, 'Unlock Critical Hits (10% Chance, 5x Dmg)', '🎯', 'c1', 'click', 0, 'crit_unlock'); addNode('crit2', 'Lethal Tempo', 125, 'Crit Multiplier +50%', '⚔️', 'crit1', 'click', 0, 'crit_dmg'); addNode('crit3', 'Eagle Eye', 750, 'Crit Chance +5%', '👁️', 'crit2', 'click', 0, 'crit_chance'); addNode('crit4', 'Devastation', 4000, 'Crit Multiplier x2', '🩸', 'crit3', 'click', 0, 'crit_mult_2');
+        addNode('pow1', 'Titanium Mouse', 37, '+50% Click Power', '🖱️', 'c1', 'click', 0.5); addNode('pow2', 'Cybernetic Joints', 187, '+100% Click Power', '🦾', 'pow1', 'click', 1.0); addNode('pow3', 'Plasma Clicks', 1200, '+200% Click Power', '⚡', 'pow2', 'click', 2.0); addNode('pow4', 'God Finger', 10000, '+500% Click Power', '🌩️', 'pow3', 'click', 5.0);
+        addNode('p1', 'Auto Alignment', 5, '+20% VPS', '⚙️', 'origin', 'passive', 0.2); addNode('syn1', 'Building Synergy', 25, '+1% VPS per Building Owned', '🏗️', 'p1', 'passive', 0, 'syn_build'); addNode('syn2', 'Network Effect', 150, '+10% VPS', '🌐', 'syn1', 'passive', 0.1); addNode('syn3', 'Hive Mind', 900, '+50% VPS', '🧠', 'syn2', 'passive', 0.5);
+        addNode('off1', 'Time Bank', 37, 'Gain 50% production while offline', '⏳', 'p1', 'passive', 0, 'offline_50'); addNode('off2', 'Temporal Shift', 300, 'Offline Cap increased to 24h', '🕰️', 'off1', 'passive', 0, 'offline_24h');
+        addNode('g1', 'Shiny Sight', 12, 'Golden Vrajs spawn 2x as often', '✨', 'origin', 'golden', 0, 'spawn_2x'); addNode('g2', 'Midas Touch', 62, 'Golden Vrajs give 3x Multiplier', '👑', 'g1', 'golden', 0, 'mult_3x'); addNode('g3', 'Treasure Hunter', 300, 'Golden Vrajs last 5s longer', '💎', 'g2', 'golden', 0, 'dur_5s'); addNode('g4', 'Leprechaun Blood', 1500, 'Golden Vrajs give 5x Multiplier', '🍀', 'g3', 'golden', 0, 'mult_5x');
+        addNode('u1', 'Haggler', 25, 'Shop prices -5%', '🏷️', 'origin', 'synergy', 0, 'disc_5'); addNode('u2', 'Trophy Hunter', 125, '+20% Multiplier per Achievement', '🏆', 'u1', 'synergy', 0, 'ach_scale'); addNode('u4', 'Black Hole Market', 4000, 'Shop prices -10%', '🕳️', 'u2', 'synergy', 0, 'disc_10');
+        addNode('pet1', 'Mysterious Egg', 1500, 'Unlocks a companion...', '🥚', 'origin', 'pet', 0, 'pet_egg'); addNode('pet2', 'Hatchling', 6000, 'The egg cracks! (+2x Passive)', '🐣', 'pet1', 'pet', 1.0, 'pet_hatch'); addNode('pet7', 'Time Dragon', 20000, 'Golden Vrajs last +30s', '🐉', 'pet2', 'pet', 0, 'pet_dragon'); addNode('pet4', 'Void Wisp', 50000, 'Click Power increases with AFK time', '👻', 'pet7', 'pet', 0, 'pet_void'); addNode('pet5', 'Cosmic Slime', 125000, 'Passive generation +10x', '🟣', 'pet4', 'pet', 9.0, 'pet_slime'); addNode('pet6', 'Mecha Vraj', 375000, 'Click Power +5x', '🤖', 'pet5', 'pet', 4.0, 'pet_mech'); addNode('pet3', 'Golden Guardian', 750000, 'Auto-clicks Golden Vrajs!', '👼', 'pet6', 'pet', 0, 'pet_gold');
         
-        addNode('c_combo1', 'Combo Starter', 300, 'Click Power +20%', '🥊', 'c1', 'click', 0.2); addNode('c_combo2', 'Rhythm Strike', 800, 'Click Power +30%', '🎵', 'c_combo1', 'click', 0.3); addNode('c_combo3', 'Flow State', 2500, 'Click Power +50%', '🌊', 'c_combo2', 'click', 0.5); addNode('c_hyper', 'Hyper Clicks', 7500, 'Click Power +100%', '⏩', 'c_combo3', 'click', 1.0); addNode('c_titan', 'Titan Grip', 25000, 'Click Power +200%', '✊', 'c_hyper', 'click', 2.0); addNode('crit_fatal', 'Fatal Wounds', 2000, 'Crit Multiplier +2.5x', '💔', 'crit2', 'click', 0, 'crit_dmg_2'); addNode('crit_bounty', 'Headhunter', 5000, 'Crit Chance +5%', '💀', 'crit3', 'click', 0, 'crit_chance_2'); addNode('crit_execute', 'Executioner', 15000, 'Crit Multiplier +5x', '🪓', 'crit_fatal', 'click', 0, 'crit_dmg_3'); addNode('c_frenzy', 'Click Frenzy', 100000, 'Click Power +300%', '🤬', 'c_titan', 'click', 3.0); addNode('c_godhand', 'Hand of God', 5000000, 'Click Power +1000%', '✋', 'c_frenzy', 'click', 10.0);
-        addNode('p_factory', 'Factory Overclock', 500, 'Passive Gen +20%', '🏭', 'p1', 'passive', 0.2); addNode('p_quantum', 'Quantum Computing', 1500, 'Passive Gen +30%', '⚛️', 'p_factory', 'passive', 0.3); addNode('p_ai', 'AI Management', 5000, 'Passive Gen +50%', '🤖', 'p_quantum', 'passive', 0.5); addNode('p_fusion', 'Cold Fusion', 15000, 'Passive Gen +100%', '🔋', 'p_ai', 'passive', 1.0); addNode('p_dyson', 'Dyson Sphere', 50000, 'Passive Gen +200%', '🌞', 'p_fusion', 'passive', 2.0); addNode('off_cryo', 'Cryo Sleep', 2000, 'Offline Time Cap +2h', '❄️', 'off2', 'passive', 0, 'off_cap_2'); addNode('off_sim', 'Neural Sim', 8000, 'Offline Rate +20%', '🧠', 'off_cryo', 'passive', 0, 'off_rate'); addNode('p_invest', 'Compound Interest', 150000, 'Passive Gen +150%', '📈', 'p_dyson', 'passive', 1.5); addNode('p_market', 'Stock Market', 1000000, 'Passive Gen +250%', '📉', 'p_invest', 'passive', 2.5); addNode('p_printing', 'Money Printer', 10000000, 'Passive Gen +500%', '🖨️', 'p_market', 'passive', 5.0);
-        addNode('g_clover', 'Four Leaf Clover', 200, 'Spawn Rate +10%', '🍀', 'g1', 'golden', 0, 'spawn_10'); addNode('g_dice', 'Loaded Dice', 1000, 'Spawn Rate +15%', '🎲', 'g_clover', 'golden', 0, 'spawn_15'); addNode('g_charm', 'Lucky Charm', 5000, 'Spawn Rate +20%', '🧿', 'g_dice', 'golden', 0, 'spawn_20'); addNode('g_coin', 'Golden Coin', 15000, 'Golden Multiplier +1x', '🪙', 'g2', 'golden', 0, 'mult_1'); addNode('g_bar', 'Golden Bar', 40000, 'Golden Multiplier +2x', '🍫', 'g_coin', 'golden', 0, 'mult_2'); addNode('g_vault', 'Golden Vault', 2500, 'Duration +5s', '🏦', 'g3', 'golden', 0, 'dur_5'); addNode('g_time', 'Time Dilation', 10000, 'Duration +10s', '⌛', 'g_vault', 'golden', 0, 'dur_10'); addNode('g_greed', 'Greed is Good', 200000, 'Golden Multiplier +5x', '🤑', 'g_bar', 'golden', 0, 'mult_5'); addNode('g_alchemy', 'Alchemy', 500000, 'Spawn Rate +25%', '⚗️', 'g_charm', 'golden', 0, 'spawn_25'); addNode('g_midas2', 'True Midas', 5000000, 'Golden Multiplier +10x', '🤴', 'g_greed', 'golden', 0, 'mult_10');
-        addNode('u_tax', 'Tax Evasion', 5000, 'Shop Prices -5%', '🏃', 'u1', 'synergy', 0, 'disc_5_2'); addNode('u_lobby', 'Lobbying', 20000, 'Shop Prices -5%', '🤝', 'u_tax', 'synergy', 0, 'disc_5_3'); addNode('u_monopoly', 'Monopoly', 100000, 'Shop Prices -10%', '🎩', 'u_lobby', 'synergy', 0, 'disc_10_2'); addNode('syn_fat1', 'Fatflap Power', 2500, 'Global Multiplier +10%', '🥞', 'syn3', 'synergy', 0.1); addNode('syn_fat2', 'Fatflap Mastery', 10000, 'Global Multiplier +20%', '👨‍🍳', 'syn_fat1', 'synergy', 0.2); addNode('syn_asc1', 'Ascension Power', 50000, 'Global Multiplier +25%', '🆙', 'syn_fat2', 'synergy', 0.25); addNode('syn_pure', 'Pure Energy', 150000, 'Global Multiplier +50%', '✨', 'syn_asc1', 'synergy', 0.5); addNode('syn_void', 'Void Energy', 500000, 'Global Multiplier +100%', '⚫', 'syn_pure', 'synergy', 1.0); addNode('u_bulk2', 'Wholesale', 2000000, 'Shop Prices -5%', '📦', 'u_monopoly', 'synergy', 0, 'disc_5_4');
-        addNode('el_fire', 'Fire Essence', 30000, 'Click Power +50%', '🔥', 'c_hyper', 'click', 0.5); addNode('el_water', 'Water Essence', 30000, 'Passive Gen +50%', '💧', 'p_fusion', 'passive', 0.5); addNode('el_earth', 'Earth Essence', 30000, 'Shop Prices -5%', '🪨', 'u_lobby', 'synergy', 0, 'disc_5_5'); addNode('el_air', 'Air Essence', 30000, 'Crit Chance +5%', '💨', 'crit_bounty', 'click', 0, 'crit_chance_3'); addNode('el_light', 'Light Essence', 30000, 'Golden Spawn +10%', '🕯️', 'g_charm', 'golden', 0, 'spawn_10_2'); addNode('el_dark', 'Dark Essence', 75000, 'Global Multiplier +20%', '🌑', 'syn_asc1', 'synergy', 0.2); addNode('spec_one', 'The One', 10000000, 'Global Multiplier +200%', '🕶️', 'syn_void', 'synergy', 2.0); addNode('spec_neo', 'Matrix Code', 25000000, 'Passive Gen +300%', '🟩', 'p_printing', 'passive', 3.0); addNode('spec_trinity', 'Holy Trinity', 25000000, 'Click Power +300%', '✝️', 'c_godhand', 'click', 3.0); addNode('spec_omega', 'Omega Point', 100000000, 'Global Multiplier +500%', 'Ω', 'spec_one', 'synergy', 5.0);
+        addNode('c_combo1', 'Combo Starter', 900, 'Click Power +20%', '🥊', 'c1', 'click', 0.2); addNode('c_combo2', 'Rhythm Strike', 2400, 'Click Power +30%', '🎵', 'c_combo1', 'click', 0.3); addNode('c_combo3', 'Flow State', 10000, 'Click Power +50%', '🌊', 'c_combo2', 'click', 0.5); addNode('c_hyper', 'Hyper Clicks', 30000, 'Click Power +100%', '⏩', 'c_combo3', 'click', 1.0); addNode('c_titan', 'Titan Grip', 125000, 'Click Power +200%', '✊', 'c_hyper', 'click', 2.0); addNode('crit_fatal', 'Fatal Wounds', 8000, 'Crit Multiplier +2.5x', '💔', 'crit2', 'click', 0, 'crit_dmg_2'); addNode('crit_bounty', 'Headhunter', 20000, 'Crit Chance +5%', '💀', 'crit3', 'click', 0, 'crit_chance_2'); addNode('crit_execute', 'Executioner', 75000, 'Crit Multiplier +5x', '🪓', 'crit_fatal', 'click', 0, 'crit_dmg_3'); addNode('c_frenzy', 'Click Frenzy', 500000, 'Click Power +300%', '🤬', 'c_titan', 'click', 3.0); addNode('c_godhand', 'Hand of God', 25000000, 'Click Power +1000%', '✋', 'c_frenzy', 'click', 10.0);
+        addNode('p_factory', 'Factory Overclock', 1500, 'Passive Gen +20%', '🏭', 'p1', 'passive', 0.2); addNode('p_quantum', 'Quantum Computing', 6000, 'Passive Gen +30%', '⚛️', 'p_factory', 'passive', 0.3); addNode('p_ai', 'AI Management', 20000, 'Passive Gen +50%', '🤖', 'p_quantum', 'passive', 0.5); addNode('p_fusion', 'Cold Fusion', 75000, 'Passive Gen +100%', '🔋', 'p_ai', 'passive', 1.0); addNode('p_dyson', 'Dyson Sphere', 250000, 'Passive Gen +200%', '🌞', 'p_fusion', 'passive', 2.0); addNode('off_cryo', 'Cryo Sleep', 8000, 'Offline Time Cap +2h', '❄️', 'off2', 'passive', 0, 'off_cap_2'); addNode('off_sim', 'Neural Sim', 32000, 'Offline Rate +20%', '🧠', 'off_cryo', 'passive', 0, 'off_rate'); addNode('p_invest', 'Compound Interest', 750000, 'Passive Gen +150%', '📈', 'p_dyson', 'passive', 1.5); addNode('p_market', 'Stock Market', 5000000, 'Passive Gen +250%', '📉', 'p_invest', 'passive', 2.5); addNode('p_printing', 'Money Printer', 50000000, 'Passive Gen +500%', '🖨️', 'p_market', 'passive', 5.0);
+        addNode('g_clover', 'Four Leaf Clover', 600, 'Spawn Rate +10%', '🍀', 'g1', 'golden', 0, 'spawn_10'); addNode('g_dice', 'Loaded Dice', 4000, 'Spawn Rate +15%', '🎲', 'g_clover', 'golden', 0, 'spawn_15'); addNode('g_charm', 'Lucky Charm', 20000, 'Spawn Rate +20%', '🧿', 'g_dice', 'golden', 0, 'spawn_20'); addNode('g_coin', 'Golden Coin', 75000, 'Golden Multiplier +1x', '🪙', 'g2', 'golden', 0, 'mult_1'); addNode('g_bar', 'Golden Bar', 200000, 'Golden Multiplier +2x', '🍫', 'g_coin', 'golden', 0, 'mult_2'); addNode('g_vault', 'Golden Vault', 10000, 'Duration +5s', '🏦', 'g3', 'golden', 0, 'dur_5'); addNode('g_time', 'Time Dilation', 50000, 'Duration +10s', '⌛', 'g_vault', 'golden', 0, 'dur_10'); addNode('g_greed', 'Greed is Good', 1000000, 'Golden Multiplier +5x', '🤑', 'g_bar', 'golden', 0, 'mult_5'); addNode('g_alchemy', 'Alchemy', 2500000, 'Spawn Rate +25%', '⚗️', 'g_charm', 'golden', 0, 'spawn_25'); addNode('g_midas2', 'True Midas', 25000000, 'Golden Multiplier +10x', '🤴', 'g_greed', 'golden', 0, 'mult_10');
+        addNode('u_tax', 'Tax Evasion', 20000, 'Shop Prices -5%', '🏃', 'u1', 'synergy', 0, 'disc_5_2'); addNode('u_lobby', 'Lobbying', 100000, 'Shop Prices -5%', '🤝', 'u_tax', 'synergy', 0, 'disc_5_3'); addNode('u_monopoly', 'Monopoly', 500000, 'Shop Prices -10%', '🎩', 'u_lobby', 'synergy', 0, 'disc_10_2'); addNode('syn_fat1', 'Fatflap Power', 10000, 'Global Multiplier +10%', '🥞', 'syn3', 'synergy', 0.1); addNode('syn_fat2', 'Fatflap Mastery', 50000, 'Global Multiplier +20%', '👨‍🍳', 'syn_fat1', 'synergy', 0.2); addNode('syn_asc1', 'Ascension Power', 250000, 'Global Multiplier +25%', '🆙', 'syn_fat2', 'synergy', 0.25); addNode('syn_pure', 'Pure Energy', 750000, 'Global Multiplier +50%', '✨', 'syn_asc1', 'synergy', 0.5); addNode('syn_void', 'Void Energy', 2500000, 'Global Multiplier +100%', '⚫', 'syn_pure', 'synergy', 1.0); addNode('u_bulk2', 'Wholesale', 10000000, 'Shop Prices -5%', '📦', 'u_monopoly', 'synergy', 0, 'disc_5_4');
+        addNode('el_fire', 'Fire Essence', 150000, 'Click Power +50%', '🔥', 'c_hyper', 'click', 0.5); addNode('el_water', 'Water Essence', 150000, 'Passive Gen +50%', '💧', 'p_fusion', 'passive', 0.5); addNode('el_earth', 'Earth Essence', 150000, 'Shop Prices -5%', '🪨', 'u_lobby', 'synergy', 0, 'disc_5_5'); addNode('el_air', 'Air Essence', 150000, 'Crit Chance +5%', '💨', 'crit_bounty', 'click', 0, 'crit_chance_3'); addNode('el_light', 'Light Essence', 150000, 'Golden Spawn +10%', '🕯️', 'g_charm', 'golden', 0, 'spawn_10_2'); addNode('el_dark', 'Dark Essence', 375000, 'Global Multiplier +20%', '🌑', 'syn_asc1', 'synergy', 0.2); addNode('spec_one', 'The One', 50000000, 'Global Multiplier +200%', '🕶️', 'syn_void', 'synergy', 2.0); addNode('spec_neo', 'Matrix Code', 125000000, 'Passive Gen +300%', '🟩', 'p_printing', 'passive', 3.0); addNode('spec_trinity', 'Holy Trinity', 125000000, 'Click Power +300%', '✝️', 'c_godhand', 'click', 3.0); addNode('spec_omega', 'Omega Point', 500000000, 'Global Multiplier +500%', 'Ω', 'spec_one', 'synergy', 5.0);
 
         // --- UNIQUE ACHIEVEMENT GENERATION ---
         const achievements = [];
@@ -796,7 +835,7 @@
             "Keyboard Destroyer", "Mouse Obliterator", "Clicking Legend", "Mythical Tapper", "Cosmic Clicker",
             "Universal Prodder", "Multiversal Touch", "Omnipotent Finger", "The Final Click", "Infinity Tapper"
         ];
-        let cAcc = 1; for(let i=0; i<30; i++) { createAch(`click-${cAcc}`, clickTitles[i] || `Click God ${i+1}`, `Click ${formatNumber(cAcc)} times.`, 'clicks', cAcc, {cat: 'click'}); cAcc *= (i%3===0 ? 5 : 2); }
+        let cAcc = 10; for(let i=0; i<25; i++) { createAch(`click-${cAcc}`, clickTitles[i] || `Click God ${i+1}`, `Click ${formatNumber(cAcc)} times.`, 'clicks', cAcc, {cat: 'click'}); cAcc *= 5; }
 
         const vrajTitles = [
             "Pocket Change", "Piggy Bank", "Allowance", "Payday", "Wallet Full",
@@ -810,7 +849,7 @@
             "Matter Owner", "Energy Owner", "Time Owner", "Space Owner", "Concept Owner",
             "Void Filler", "Abyss Owner", "Existence Buyer", "The Vraj Singularity", "Vraj God"
         ];
-        let vAcc = 100; for(let i=0; i<50; i++) { createAch(`total-${vAcc}`, vrajTitles[i] || `Vraj Lord ${i+1}`, `Earn ${formatNumber(vAcc)} Total Vrajs.`, 'totalVrajs', vAcc, {cat: 'eco'}); vAcc *= 5; }
+        let vAcc = 100; for(let i=0; i<30; i++) { createAch(`total-${vAcc}`, vrajTitles[i] || `Vraj Lord ${i+1}`, `Earn ${formatNumber(vAcc)} Total Vrajs.`, 'totalVrajs', vAcc, {cat: 'eco'}); vAcc *= 5; }
 
         const vpsTitles = [
             "Trickle", "Flow", "Stream", "River", "Waterfall",
@@ -820,13 +859,13 @@
             "Infinite Power", "Unstoppable", "Overwhelming", "Catastrophic Production", "Apocalyptic Yield",
             "Divine Creation", "Cosmic Fabrication", "Universal Assembly", "Multiversal Factory", "The Source"
         ];
-        let vpsAcc = 10; for(let i=0; i<30; i++) { createAch(`vps-${vpsAcc}`, vpsTitles[i] || `Generator ${i+1}`, `Reach ${formatNumber(vpsAcc)} VPS.`, 'vps', vpsAcc, {cat: 'eco'}); vpsAcc *= 4; }
+        let vpsAcc = 50; for(let i=0; i<25; i++) { createAch(`vps-${vpsAcc}`, vpsTitles[i] || `Generator ${i+1}`, `Reach ${formatNumber(vpsAcc)} VPS.`, 'vps', vpsAcc, {cat: 'eco'}); vpsAcc *= 6; }
 
         const playTitles = ["Newbie", "Casual", "Regular", "Dedicated", "Addict", "No Life", "Time Lord", "Chronos", "Eternal", "Timeless"];
-        [10, 60, 360, 1440, 7200, 14400, 43200, 100000, 200000, 500000].forEach((m, i) => createAch(`play-${m}`, playTitles[i], `Play for ${m} minutes.`, 'timePlayed', m, {cat: 'misc'}));
+        [5, 15, 30, 60, 120, 240, 360, 480, 600, 900].forEach((m, i) => createAch(`play-${m}`, playTitles[i] || `Player ${i+1}`, `Play for ${m} minutes.`, 'timePlayed', m, {cat: 'misc'}));
 
         const goldTitles = ["Lucky", "Clover Finder", "Leprechaun", "Pot of Gold", "Midas Touch", "Golden Goose", "Treasure Hunter", "Gold Rush", "El Dorado", "King Solomon", "Dragon Hoard", "Golden God", "Aurum Rex", "Shiny Master", "The Alchemist"];
-        let gAcc = 1; for(let i=0; i<15; i++) { createAch(`gold-${gAcc}`, goldTitles[i], `Catch ${gAcc} Golden Vrajs.`, 'golden', gAcc, {cat: 'eco'}); gAcc *= 3; }
+        let gAcc = 5; for(let i=0; i<12; i++) { createAch(`gold-${gAcc}`, goldTitles[i], `Catch ${gAcc} Golden Vrajs.`, 'golden', gAcc, {cat: 'eco'}); gAcc *= 4; }
 
         const chatTitles = ["Hello World", "Talkative", "Spammer", "Town Crier", "Orator", "Bard", "Voice of Reason", "Shoutmaster", "Megaphone", "Telepath"];
         [1, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000].forEach((c, i) => createAch(`chat-${c}`, chatTitles[i], `Send ${c} chat messages.`, 'chat', c, {cat: 'misc'}));
@@ -835,7 +874,12 @@
         let pAcc = 1; for(let i=0; i<15; i++) { createAch(`asc-${pAcc}`, ascTitles[i], `Ascend ${pAcc} times.`, 'prestige', pAcc, {cat: 'asc'}); pAcc = Math.ceil(pAcc * 2.5); }
 
         const critTitles = ["Ouch!", "Critical Hit", "Bullseye", "Deadshot", "Sniper", "Assassin", "Executioner", "Devastator", "Annihilator", "One Hit Kill"];
-        [1, 50, 250, 1000, 5000, 10000, 50000, 100000, 500000, 1000000].forEach((c, i) => createAch(`crit-${c}`, critTitles[i], `Land ${c} Critical Hits.`, 'crit', c, {cat: 'click'}));
+        [10, 100, 500, 2000, 10000, 50000, 200000, 1000000].forEach((c, i) => createAch(`crit-${c}`, critTitles[i] || `Critter ${i+1}`, `Land ${c} Critical Hits.`, 'crit', c, {cat: 'click'}));
+
+        // UPDATED: Added new CPS Achievements
+        createAch('cps-7', 'Fast Fingers', 'Reach 7 clicks per second.', 'cps', 7, {cat: 'click'});
+        createAch('cps-10', 'Blurry Fingers', 'Reach 10 clicks per second.', 'cps', 10, {cat: 'click'});
+        createAch('cps-12', 'Light Speed', 'Reach 12 clicks per second.', 'cps', 12, {cat: 'click'});
 
         ['pet1','pet2','pet3','pet4','pet5','pet6','pet7'].forEach(pid => { 
             const pName = prestigeTreeData.find(n=>n.id===pid).name;
@@ -914,10 +958,10 @@
         }
 
         function getTotalMultiplier() {
-            let mult = 1 + (fatflaps * 0.5);
+            let mult = 1 + (prestigeCount * 0.5);
             prestigeTreeData.filter(u => ownedPrestigeUpgrades.includes(u.id)).forEach(u => { if(u.boost) mult += u.boost; });
             if(hasTree('u2')) { const achCount = achievements.filter(a => a.unlocked).length; mult += (achCount * 0.20); }
-            return mult * goldenMultiplier;
+            return mult;
         }
         
         function hasTree(id) { return ownedPrestigeUpgrades.includes(id); }
@@ -977,6 +1021,12 @@
             }
 
             const now = Date.now();
+            
+            // UPDATED: CPS Calculation
+            clickTimestamps.push(now);
+            // Filter clicks older than 1 second
+            clickTimestamps = clickTimestamps.filter(t => now - t < 1000);
+
             lastClickTime = now; totalClicks++;
             let mult = getTotalMultiplier(); let isCrit = false;
             let critChance = 0.1; if (hasTree('crit3')) critChance += 0.05; if (hasTree('crit_bounty')) critChance += 0.05; if (hasTree('el_air')) critChance += 0.05;
@@ -985,7 +1035,7 @@
                 if(hasTree('crit4')) critMult *= 2;
                 mult *= critMult; isCrit = true; totalCrits++;
             }
-            const gain = ppc * mult; score += gain; totalVrajs += gain; playSfx(); updateUI(); checkAchievements();
+            const gain = ppc * mult * goldenMultiplier; score += gain; totalVrajs += gain; playSfx(); updateUI(); checkAchievements();
             const text = document.createElement('div'); text.className = 'float-text'; 
             text.innerText = (isCrit ? 'CRIT! +' : '+') + formatNumber(gain);
             if(isCrit) { text.style.color = '#ef4444'; text.style.fontSize = '3rem'; }
@@ -998,20 +1048,40 @@
         // Attach listeners for hold time tracking
         const clickerContainer = document.getElementById('clicker-container');
         clickerContainer.addEventListener('mousedown', window.clickVraj);
-        // click event handles the actual score add logic already in HTML onclick attribute, 
-        // but we add mouseup listener to same function to track hold time end just in case
+        // UPDATED: Removed double firing loop. The 'mouseup' listener here was firing window.clickVraj
+        // AND the html attribute onclick="clickVraj" was firing it. 
+        // We removed onclick from HTML? No, easier to remove this specific listener's call logic.
         clickerContainer.addEventListener('mouseup', (e) => {
-             // Logic handled in clickVraj via event type check
-             window.clickVraj(e);
+             // Logic handled in clickVraj via event type check from onclick attribute
+             // We only want to track hold time here if needed, but clickVraj handles it.
+             // window.clickVraj(e); <--- REMOVED TO FIX DOUBLE CLICK
         });
 
 
         function getPrestigeData() {
-            let tempScore = score; let tempPrestige = prestigeCount; let levelsToGain = 0;
+            // UPDATED: Use totalVrajs instead of score so spending doesn't hurt progress
+            let tempScore = totalVrajs; 
+            let tempPrestige = prestigeCount; let levelsToGain = 0;
             while (true) {
                 let linear = 1000000 * (tempPrestige + 1); // 1 Million per level
-                let exponential = Math.pow(1.0005, tempPrestige);
+                // Dynamic exponential scaling
+                let exponential;
+                if (tempPrestige < 20000) {
+                    exponential = Math.pow(1.0005, tempPrestige);
+                } else if (tempPrestige < 180000) {
+                    // After 20k, much gentler scaling
+                    const base20k = Math.pow(1.0005, 20000);
+                    const additional = tempPrestige - 20000;
+                    exponential = base20k * Math.pow(1.00015, additional);
+                } else {
+                    // UPDATED: After 180k, even gentler scaling (1.000025)
+                    const base20k = Math.pow(1.0005, 20000);
+                    const base180k = base20k * Math.pow(1.00015, 160000); // 180k - 20k = 160k steps
+                    const additional = tempPrestige - 180000;
+                    exponential = base180k * Math.pow(1.000025, additional);
+                }
                 let cost = linear * exponential;
+                // Note: We don't deduct totalVrajs from the player, just from the calculation variable
                 if (tempScore >= cost) { tempScore -= cost; tempPrestige++; levelsToGain++; } 
                 else { return { gain: levelsToGain, remaining: tempScore, nextCost: cost, percent: Math.min((tempScore / cost) * 100, 100) }; }
             }
@@ -1020,7 +1090,7 @@
         window.openPrestigeModal = () => {
             const pData = getPrestigeData();
             if (pData.gain === 0) return;
-            window.showAlert("Ascend to the Heavens?", `You are about to gain <span class="text-purple-400 font-bold">${pData.gain} Fatflap(s)</span>.<br><br>Each Fatflap gives a <b>50% permanent boost</b>.<br><br>Ascending will <b>RESET</b> all your Vrajs and standard Upgrades.`, () => handlePrestige(), true);
+            window.showAlert("Ascend to the Heavens?", `You are about to gain <span class="text-purple-400 font-bold">${pData.gain} Fatflap(s)</span>.<br><br>Each Ascension gives a <b>50% permanent boost</b>.<br><br>Ascending will <b>RESET</b> all your Vrajs and standard Upgrades.`, () => handlePrestige(), true);
         };
 
         window.handlePrestige = () => {
@@ -1249,6 +1319,9 @@
 
         function checkAchievements() {
             let changed = false;
+            // Get current CPS for achievement check
+            const currentCPS = clickTimestamps.length;
+
             achievements.forEach(ach => {
                 if (ach.unlocked) return;
                 let meets = false;
@@ -1260,6 +1333,9 @@
                 if (ach.type === 'chat' && chatsSent >= ach.target) meets = true;
                 if (ach.type === 'prestige' && prestigeCount >= ach.target) meets = true;
                 if (ach.type === 'crit' && totalCrits >= ach.target) meets = true;
+                // UPDATED: Check CPS
+                if (ach.type === 'cps' && currentCPS >= ach.target) meets = true;
+
                 if (ach.type === 'petMax' && petsState[ach.target] && petsState[ach.target].level >= (ach.target==='pet3'?1:10)) meets = true;
                 if (ach.type === 'petAllMax') {
                     const allPets = ['pet1','pet2','pet3','pet4','pet5','pet6','pet7'];
@@ -1377,7 +1453,7 @@
         function activateMultiplier() { 
             let mult = 2; if(hasTree('g2')) mult = 3; if(hasTree('g_coin')) mult += 1; if(hasTree('g_bar')) mult += 2; if(hasTree('g_greed')) mult += 5; if(hasTree('g_midas2')) mult += 10;
             let duration = 180; if(hasTree('g3')) duration += 5; if(hasTree('g_vault')) duration += 5; if(hasTree('g_time')) duration += 10; if(hasTree('pet7')) duration += (30 + ((petsState['pet7']?.level||1)-1)*2); 
-            goldenMultiplier = mult; multTimeRemaining = duration; 
+            goldenMultiplier = mult; multTimeRemaining = duration; document.getElementById('multiplier-value').innerText = mult + 'x'; 
             document.getElementById('multiplier-display').classList.remove('hidden'); updateUI(); 
         }
 
@@ -1403,11 +1479,15 @@
         let currentVisibleLimit = 0; 
         function updateUI() {
             const cached = getCachedElements(); const totalMult = getTotalMultiplier();
-            cached.score.innerText = formatNumber(Math.floor(score));
+            // UPDATED: Added " Vrajs" string
+            cached.score.innerText = formatNumber(Math.floor(score)) + " Vrajs";
             let currentVps = vps * totalMult; if(hasTree('p2a')) currentVps += (currentVps * (upgradesBoughtCount * 0.01)); 
-            cached.vpsDisplay.innerText = formatNumber(currentVps) + " VPS"; cached.ppcDisplay.innerText = formatNumber(ppc * totalMult) + " Points Per Click"; cached.iconMultDisplay.innerText = totalMult.toFixed(1) + "x";
+            cached.vpsDisplay.innerText = formatNumber(currentVps) + " VPS"; 
+            // UPDATED: Changed text to "Vrajs Per Click"
+            cached.ppcDisplay.innerText = formatNumber(ppc * totalMult) + " Vrajs Per Click"; 
+            cached.iconMultDisplay.innerText = totalMult.toFixed(1) + "x";
             if (fatflaps > 0 || prestigeCount > 0) { cached.fatflapDisplay.classList.remove('hidden'); cached.fatflapCount.innerText = fatflaps.toLocaleString(); }
-            if(totalVrajs >= 1000000 || ascensionUnlocked) { ascensionUnlocked = true; cached.tabPrestige.classList.remove('locked'); }
+            if(totalVrajs >= 5000000 || ascensionUnlocked) { ascensionUnlocked = true; cached.tabPrestige.classList.remove('locked'); }
 
             const filtered = upgrades.filter(u => currentShopTab === 'clicker' ? u.isClickUpgrade : !u.isClickUpgrade);
             let showLimit = 0;
@@ -1432,7 +1512,7 @@
             }).join('');
         }
 
-        setInterval(() => { if (vps > 0) { score += (vps * getTotalMultiplier()) / 10; totalVrajs += (vps * getTotalMultiplier()) / 10; const cached = getCachedElements(); cached.score.innerText = formatNumber(Math.floor(score)); } }, 100);
+        setInterval(() => { if (vps > 0) { score += (vps * getTotalMultiplier() * goldenMultiplier) / 10; totalVrajs += (vps * getTotalMultiplier() * goldenMultiplier) / 10; const cached = getCachedElements(); cached.score.innerText = formatNumber(Math.floor(score)) + " Vrajs"; } }, 100);
         setInterval(() => { if (vps > 0 || score > 0) { updateUI(); } }, 500);
 
         window.switchTab = (t) => { document.getElementById('login-form').classList.toggle('hidden', t !== 'login'); document.getElementById('signup-form').classList.toggle('hidden', t !== 'signup'); document.getElementById('tab-login').classList.toggle('bg-blue-600', t === 'login'); document.getElementById('tab-signup').classList.toggle('bg-blue-600', t === 'signup'); };
@@ -1452,9 +1532,9 @@
             achievements.forEach(a => a.unlocked = false);
             
             // IMMEDIATE UI RESET
-            document.getElementById('score').innerText = '0';
+            document.getElementById('score').innerText = '0 Vrajs';
             document.getElementById('vps-display').innerText = '0 VPS';
-            document.getElementById('ppc-display').innerText = '1 Points Per Click';
+            document.getElementById('ppc-display').innerText = '1 Vrajs Per Click';
             document.getElementById('fatflap-count').innerText = '0';
             document.getElementById('fatflap-display').classList.add('hidden');
             document.getElementById('shop-list').innerHTML = '';
