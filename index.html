@@ -147,16 +147,20 @@
         .bulk-btn.active, .shop-tab-btn.active, .style-tab-btn.active { background: var(--accent); color: white; }
         .float-text { position: absolute; color: var(--accent); font-weight: 800; font-size: 2rem; pointer-events: none; animation: floatUp 3s ease-out forwards; z-index: 100; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
-        /* Golden Vraj Update: Added pointer-events: auto !important and high z-index */
-        .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 3500; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; pointer-events: auto !important; }
+        /* Golden Vraj Update: High z-index, pointer-events auto */
+        .golden-vraj { position: absolute; width: 80px; height: 80px; cursor: pointer; z-index: 10000; filter: drop-shadow(0 0 15px gold) brightness(1.5); animation: goldenFly 10s linear forwards; pointer-events: auto !important; }
         @keyframes goldenFly { 0% { left: -100px; top: 20%; } 100% { left: 110vw; top: 60%; } }
+        .puff-effect { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,215,0,0) 70%); transform: translate(-50%, -50%) scale(0); animation: puffAnim 0.4s ease-out forwards; pointer-events: none; z-index: 10001; }
+        @keyframes puffAnim { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2); opacity: 0; } }
         .prestige-btn { background: linear-gradient(135deg, var(--accent), #7c3aed); border: 2px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
         .lb-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; }
         .lb-rank-1 { background: rgba(255, 215, 0, 0.2) !important; border-color: gold !important; }
         .lb-rank-2 { background: rgba(192, 192, 192, 0.2) !important; border-color: silver !important; }
         .lb-rank-3 { background: rgba(205, 127, 50, 0.2) !important; border-color: #cd7f32 !important; }
         #game-modal { z-index: 3000; position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); padding: 20px; }
-        #multiplier-display { position: fixed; bottom: 2rem; right: 400px; z-index: 100; pointer-events: none; }
+        
+        /* UPDATED: Multiplier Position - Bottom Right, Left of Chat (approx 370px) */
+        #multiplier-display { position: fixed; bottom: 20px; right: 380px; z-index: 4000; pointer-events: none; display: flex; }
         @media (max-width: 1024px) { #multiplier-display { bottom: auto; top: 20px; right: 20px; } }
         .dev-tag { background: linear-gradient(to right, #ef4444, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; margin-right: 5px; text-transform: uppercase; font-size: 0.7em; vertical-align: middle; }
         
@@ -341,7 +345,7 @@
         <div class="glass p-3 rounded-2xl border-yellow-500/50 border flex items-center gap-3 shadow-xl">
             <span class="text-2xl">🌟</span>
             <div>
-                <p class="text-[9px] font-bold text-yellow-400 tracking-tighter uppercase">2X MULTI ACTIVE</p>
+                <p class="text-[9px] font-bold text-yellow-400 tracking-tighter uppercase"><span id="multiplier-value">2x</span> MULTI ACTIVE</p>
                 <p id="mult-timer" class="text-md font-black">03:00</p>
             </div>
         </div>
@@ -445,6 +449,7 @@
                             <div class="stat-row"><span>Total Crits</span><span id="stat-total-crits" class="font-bold text-red-400">0</span></div>
                             <div class="stat-row"><span>Upgrades</span><span id="stat-upgrades-bought" class="font-bold">0</span></div>
                             <div class="stat-row"><span>Golden Caught</span><span id="stat-golden-caught" class="font-bold">0</span></div>
+                            <div class="stat-row"><span>Messages Sent</span><span id="stat-chats-sent" class="font-bold">0</span></div>
                             <div class="stat-row"><span>Ascensions</span><span id="stat-prestige-count" class="text-purple-400 font-bold">0</span></div>
                             <div class="p-2 border-b border-white/10"><p class="text-xs font-bold text-purple-400 uppercase tracking-widest">Multipliers</p></div>
                             <div class="stat-row"><span>Click Power %</span><span id="stat-mult-click" class="text-yellow-400 font-bold">100%</span></div>
@@ -603,12 +608,40 @@
             updateMusicUI();
         };
 
-        // Scientific Notation Formatter (>= 1e19 is 20 digits)
+        // --- UPDATED NUMBER FORMATTING ---
+        const suffixes = [
+            "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", 
+            "Ud", "Dd", "Td", "Qad", "Qid", "Sd", "Spd", "Od", "Nd", "Vg", 
+            "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Svg", "Spvg", "Ovg", "Nvg", "Tg",
+            "Utg", "Dtg", "Ttg", "Qatg", "Qitg", "Stg", "Sptg", "Otg", "Ntg", "Qg",
+            "Uqg", "Dqg", "Tqg", "Qaqg", "Qiqg", "Sqg", "Spqg", "Oqg", "Nqg"
+        ];
+
         function formatNumber(num) {
             if (num === undefined || num === null) return "0";
-            if (num >= 1e19) { return num.toExponential(2).replace('+', ''); }
-            if (num < 1000 && !Number.isInteger(num)) { return num.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
-            return Math.floor(num).toLocaleString();
+            if (num < 1000) { 
+                return Number.isInteger(num) ? num.toString() : num.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            }
+            
+            // Log10 of number to determine tier
+            const tier = Math.floor(Math.log10(num) / 3);
+            
+            if (tier === 0) return Math.floor(num).toLocaleString();
+            
+            // Get suffix
+            const suffix = suffixes[tier];
+            
+            // Scale the number
+            const scale = Math.pow(10, tier * 3);
+            const scaled = num / scale;
+            
+            // If suffix exists, return it
+            if (suffix !== undefined) {
+                return scaled.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " " + suffix;
+            } else {
+                // Fallback to Scientific for massive numbers > Nqg (1e153)
+                return num.toExponential(2).replace('+', '');
+            }
         }
 
         // --- GALAXY 3D ENGINE ---
@@ -649,11 +682,15 @@
         let totalVrajs = 0, totalClicks = 0, totalUpgrades = 0, settingsClicked = 0, goldenVrajsCaught = 0, chatsSent = 0, timePlayed = 0, totalCrits = 0;
         let goldenMultiplier = 1, multTimeRemaining = 0;
         let prestigeCount = 0, fatflaps = 0, ownedPrestigeUpgrades = [], ascensionUnlocked = false;
+        // UPDATED: Added variable to track spent total Vrajs for Ascension logic
+        let prestigeCostDeduction = 0; 
+        
         let currentUser = null, currentUsername = "Guest", activeTheme = 'classic', activeNametag = 'classic';
         let clickIntervals = [], lastClickTime = Date.now(), hasWarned = false;
         let savedTime = 0, sessionStartTime = Date.now(), isDev = false; 
         let equippedStyles = new Set();
         let isTop10 = false;
+        let leaderboardRank = 9999;
         let achievementPercent = 0;
         let clickTimestamps = []; // New tracker for CPS achievements
 
@@ -757,7 +794,6 @@
         let cachedElements = null;
         function getCachedElements() { if (!cachedElements) { cachedElements = { score: document.getElementById('score'), vpsDisplay: document.getElementById('vps-display'), ppcDisplay: document.getElementById('ppc-display'), iconMultDisplay: document.getElementById('icon-mult-display'), fatflapDisplay: document.getElementById('fatflap-display'), fatflapCount: document.getElementById('fatflap-count'), tabPrestige: document.getElementById('tab-prestige') }; } return cachedElements; }
 
-        // UPDATED: All passive upgrades (Indices 1, 3, 5, etc.) prices halved
         const upgradeData = [
             { name: "Vraj Finger", baseCost: 50, basePower: 0.2, emoji: "☝️" }, 
             { name: "Vraj Sprout", baseCost: 150, basePower: 1, emoji: "🌱" }, // 300 -> 150
@@ -823,7 +859,7 @@
         addNode('u_tax', 'Tax Evasion', 20000, 'Shop Prices -5%', '🏃', 'u1', 'synergy', 0, 'disc_5_2'); addNode('u_lobby', 'Lobbying', 100000, 'Shop Prices -5%', '🤝', 'u_tax', 'synergy', 0, 'disc_5_3'); addNode('u_monopoly', 'Monopoly', 500000, 'Shop Prices -10%', '🎩', 'u_lobby', 'synergy', 0, 'disc_10_2'); addNode('syn_fat1', 'Fatflap Power', 10000, 'Global Multiplier +10%', '🥞', 'syn3', 'synergy', 0.1); addNode('syn_fat2', 'Fatflap Mastery', 50000, 'Global Multiplier +20%', '👨‍🍳', 'syn_fat1', 'synergy', 0.2); addNode('syn_asc1', 'Ascension Power', 250000, 'Global Multiplier +25%', '🆙', 'syn_fat2', 'synergy', 0.25); addNode('syn_pure', 'Pure Energy', 750000, 'Global Multiplier +50%', '✨', 'syn_asc1', 'synergy', 0.5); addNode('syn_void', 'Void Energy', 2500000, 'Global Multiplier +100%', '⚫', 'syn_pure', 'synergy', 1.0); addNode('u_bulk2', 'Wholesale', 10000000, 'Shop Prices -5%', '📦', 'u_monopoly', 'synergy', 0, 'disc_5_4');
         addNode('el_fire', 'Fire Essence', 150000, 'Click Power +50%', '🔥', 'c_hyper', 'click', 0.5); addNode('el_water', 'Water Essence', 150000, 'Passive Gen +50%', '💧', 'p_fusion', 'passive', 0.5); addNode('el_earth', 'Earth Essence', 150000, 'Shop Prices -5%', '🪨', 'u_lobby', 'synergy', 0, 'disc_5_5'); addNode('el_air', 'Air Essence', 150000, 'Crit Chance +5%', '💨', 'crit_bounty', 'click', 0, 'crit_chance_3'); addNode('el_light', 'Light Essence', 150000, 'Golden Spawn +10%', '🕯️', 'g_charm', 'golden', 0, 'spawn_10_2'); addNode('el_dark', 'Dark Essence', 375000, 'Global Multiplier +20%', '🌑', 'syn_asc1', 'synergy', 0.2); addNode('spec_one', 'The One', 50000000, 'Global Multiplier +200%', '🕶️', 'syn_void', 'synergy', 2.0); addNode('spec_neo', 'Matrix Code', 125000000, 'Passive Gen +300%', '🟩', 'p_printing', 'passive', 3.0); addNode('spec_trinity', 'Holy Trinity', 125000000, 'Click Power +300%', '✝️', 'c_godhand', 'click', 3.0); addNode('spec_omega', 'Omega Point', 500000000, 'Global Multiplier +500%', 'Ω', 'spec_one', 'synergy', 5.0);
 
-        // --- UNIQUE ACHIEVEMENT GENERATION ---
+        // --- UPDATED ACHIEVEMENT GENERATION ---
         const achievements = [];
         const createAch = (id, title, desc, type, target, extra = {}) => achievements.push({ id, title, desc, type, target, unlocked: false, ...extra });
 
@@ -835,7 +871,14 @@
             "Keyboard Destroyer", "Mouse Obliterator", "Clicking Legend", "Mythical Tapper", "Cosmic Clicker",
             "Universal Prodder", "Multiversal Touch", "Omnipotent Finger", "The Final Click", "Infinity Tapper"
         ];
-        let cAcc = 10; for(let i=0; i<25; i++) { createAch(`click-${cAcc}`, clickTitles[i] || `Click God ${i+1}`, `Click ${formatNumber(cAcc)} times.`, 'clicks', cAcc, {cat: 'click'}); cAcc *= 5; }
+        // Updated Clicks Curve: Max 400k
+        let cAcc = 100; 
+        for(let i=0; i<30; i++) { 
+            let target = Math.min(400000, Math.floor(cAcc));
+            createAch(`click-${i}`, clickTitles[i] || `Click God ${i+1}`, `Click ${formatNumber(target)} times.`, 'clicks', target, {cat: 'click'}); 
+            cAcc *= 1.8;
+            if(target >= 400000) break; 
+        }
 
         const vrajTitles = [
             "Pocket Change", "Piggy Bank", "Allowance", "Payday", "Wallet Full",
@@ -849,7 +892,15 @@
             "Matter Owner", "Energy Owner", "Time Owner", "Space Owner", "Concept Owner",
             "Void Filler", "Abyss Owner", "Existence Buyer", "The Vraj Singularity", "Vraj God"
         ];
-        let vAcc = 100; for(let i=0; i<30; i++) { createAch(`total-${vAcc}`, vrajTitles[i] || `Vraj Lord ${i+1}`, `Earn ${formatNumber(vAcc)} Total Vrajs.`, 'totalVrajs', vAcc, {cat: 'eco'}); vAcc *= 5; }
+        // Updated Vraj Curve: Max 5e50
+        let vAcc = 1000; 
+        for(let i=0; i<50; i++) { 
+             let target = vAcc;
+             if (target > 5e50) target = 5e50;
+             createAch(`total-${i}`, vrajTitles[i] || `Vraj Lord ${i+1}`, `Earn ${formatNumber(target)} Total Vrajs.`, 'totalVrajs', target, {cat: 'eco'}); 
+             vAcc *= 10;
+             if(target >= 5e50) break;
+        }
 
         const vpsTitles = [
             "Trickle", "Flow", "Stream", "River", "Waterfall",
@@ -859,27 +910,60 @@
             "Infinite Power", "Unstoppable", "Overwhelming", "Catastrophic Production", "Apocalyptic Yield",
             "Divine Creation", "Cosmic Fabrication", "Universal Assembly", "Multiversal Factory", "The Source"
         ];
-        let vpsAcc = 50; for(let i=0; i<25; i++) { createAch(`vps-${vpsAcc}`, vpsTitles[i] || `Generator ${i+1}`, `Reach ${formatNumber(vpsAcc)} VPS.`, 'vps', vpsAcc, {cat: 'eco'}); vpsAcc *= 6; }
+        // Updated VPS Curve: Max 1e30
+        let vpsAcc = 100;
+        for(let i=0; i<30; i++) {
+            let target = vpsAcc;
+            if (target > 1e30) target = 1e30;
+            createAch(`vps-${i}`, vpsTitles[i] || `Generator ${i+1}`, `Reach ${formatNumber(target)} VPS.`, 'vps', target, {cat: 'eco'});
+            vpsAcc *= 15;
+            if(target >= 1e30) break;
+        }
 
         const playTitles = ["Newbie", "Casual", "Regular", "Dedicated", "Addict", "No Life", "Time Lord", "Chronos", "Eternal", "Timeless"];
         [5, 15, 30, 60, 120, 240, 360, 480, 600, 900].forEach((m, i) => createAch(`play-${m}`, playTitles[i] || `Player ${i+1}`, `Play for ${m} minutes.`, 'timePlayed', m, {cat: 'misc'}));
 
         const goldTitles = ["Lucky", "Clover Finder", "Leprechaun", "Pot of Gold", "Midas Touch", "Golden Goose", "Treasure Hunter", "Gold Rush", "El Dorado", "King Solomon", "Dragon Hoard", "Golden God", "Aurum Rex", "Shiny Master", "The Alchemist"];
-        let gAcc = 5; for(let i=0; i<12; i++) { createAch(`gold-${gAcc}`, goldTitles[i], `Catch ${gAcc} Golden Vrajs.`, 'golden', gAcc, {cat: 'eco'}); gAcc *= 4; }
+        // Updated Golden Curve: Max 1000
+        let gAcc = 5; 
+        for(let i=0; i<15; i++) { 
+            let target = Math.min(1000, Math.floor(gAcc));
+            createAch(`gold-${i}`, goldTitles[i] || `Lucky ${i}`, `Catch ${target} Golden Vrajs.`, 'golden', target, {cat: 'eco'}); 
+            gAcc *= 2;
+            if(target >= 1000) break;
+        }
 
         const chatTitles = ["Hello World", "Talkative", "Spammer", "Town Crier", "Orator", "Bard", "Voice of Reason", "Shoutmaster", "Megaphone", "Telepath"];
-        [1, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000].forEach((c, i) => createAch(`chat-${c}`, chatTitles[i], `Send ${c} chat messages.`, 'chat', c, {cat: 'misc'}));
+        // Updated Chat Curve: Max 1000
+        [1, 10, 25, 50, 100, 200, 300, 500, 750, 1000].forEach((c, i) => createAch(`chat-${c}`, chatTitles[i], `Send ${c} chat messages.`, 'chat', c, {cat: 'misc'}));
 
         const ascTitles = ["Reborn", "Awakened", "Enlightened", "Ascended", "Phoenix", "Celestial", "Divine", "Transcendent", "Omniscient", "Higher Being", "Dimensional Walker", "Plane Shifter", "Reality Weaver", "Time Traveler", "The Alpha"];
-        let pAcc = 1; for(let i=0; i<15; i++) { createAch(`asc-${pAcc}`, ascTitles[i], `Ascend ${pAcc} times.`, 'prestige', pAcc, {cat: 'asc'}); pAcc = Math.ceil(pAcc * 2.5); }
+        // Updated Ascension Curve: Max 5,000,000
+        let pAcc = 1; 
+        for(let i=0; i<15; i++) { 
+            let target = Math.min(5000000, Math.floor(pAcc));
+            createAch(`asc-${i}`, ascTitles[i], `Ascend ${target.toLocaleString()} times.`, 'prestige', target, {cat: 'asc'}); 
+            pAcc *= 5; 
+            if(target >= 5000000) break;
+        }
 
         const critTitles = ["Ouch!", "Critical Hit", "Bullseye", "Deadshot", "Sniper", "Assassin", "Executioner", "Devastator", "Annihilator", "One Hit Kill"];
-        [10, 100, 500, 2000, 10000, 50000, 200000, 1000000].forEach((c, i) => createAch(`crit-${c}`, critTitles[i] || `Critter ${i+1}`, `Land ${c} Critical Hits.`, 'crit', c, {cat: 'click'}));
+        // Updated Crit Curve: Max 100,000
+        let critAcc = 10;
+        for(let i=0; i<10; i++) {
+             let target = Math.min(100000, Math.floor(critAcc));
+             createAch(`crit-${i}`, critTitles[i] || `Critter ${i+1}`, `Land ${target.toLocaleString()} Critical Hits.`, 'crit', target, {cat: 'click'});
+             critAcc *= 4;
+             if(target >= 100000) break;
+        }
 
-        // UPDATED: Added new CPS Achievements
         createAch('cps-7', 'Fast Fingers', 'Reach 7 clicks per second.', 'cps', 7, {cat: 'click'});
         createAch('cps-10', 'Blurry Fingers', 'Reach 10 clicks per second.', 'cps', 10, {cat: 'click'});
         createAch('cps-12', 'Light Speed', 'Reach 12 clicks per second.', 'cps', 12, {cat: 'click'});
+
+        createAch('lb-top-5', 'Climbing High', 'Reach Rank 5 on the Leaderboard.', 'lbTop5', 1, {cat: 'misc'});
+        createAch('lb-top-3', 'Podium Finish', 'Reach Rank 3 on the Leaderboard.', 'lbTop3', 1, {cat: 'misc'});
+        createAch('lb-top-1', 'The Very Best', 'Reach Rank 1 on the Leaderboard.', 'lbTop1', 1, {cat: 'misc'});
 
         ['pet1','pet2','pet3','pet4','pet5','pet6','pet7'].forEach(pid => { 
             const pName = prestigeTreeData.find(n=>n.id===pid).name;
@@ -1022,9 +1106,8 @@
 
             const now = Date.now();
             
-            // UPDATED: CPS Calculation
+            // CPS Calculation
             clickTimestamps.push(now);
-            // Filter clicks older than 1 second
             clickTimestamps = clickTimestamps.filter(t => now - t < 1000);
 
             lastClickTime = now; totalClicks++;
@@ -1045,58 +1128,68 @@
             document.body.appendChild(text); setTimeout(() => text.remove(), 3000); 
         };
 
-        // Attach listeners for hold time tracking
         const clickerContainer = document.getElementById('clicker-container');
         clickerContainer.addEventListener('mousedown', window.clickVraj);
-        // UPDATED: Removed double firing loop. The 'mouseup' listener here was firing window.clickVraj
-        // AND the html attribute onclick="clickVraj" was firing it. 
-        // We removed onclick from HTML? No, easier to remove this specific listener's call logic.
-        clickerContainer.addEventListener('mouseup', (e) => {
-             // Logic handled in clickVraj via event type check from onclick attribute
-             // We only want to track hold time here if needed, but clickVraj handles it.
-             // window.clickVraj(e); <--- REMOVED TO FIX DOUBLE CLICK
-        });
-
+        clickerContainer.addEventListener('mouseup', (e) => {});
 
         function getPrestigeData() {
-            // UPDATED: Use totalVrajs instead of score so spending doesn't hurt progress
-            let tempScore = totalVrajs; 
-            let tempPrestige = prestigeCount; let levelsToGain = 0;
-            while (true) {
-                let linear = 1000000 * (tempPrestige + 1); // 1 Million per level
-                // Dynamic exponential scaling
-                let exponential;
-                if (tempPrestige < 20000) {
-                    exponential = Math.pow(1.0005, tempPrestige);
-                } else if (tempPrestige < 180000) {
-                    // After 20k, much gentler scaling
-                    const base20k = Math.pow(1.0005, 20000);
-                    const additional = tempPrestige - 20000;
-                    exponential = base20k * Math.pow(1.00015, additional);
-                } else {
-                    // UPDATED: After 180k, even gentler scaling (1.000025)
-                    const base20k = Math.pow(1.0005, 20000);
-                    const base180k = base20k * Math.pow(1.00015, 160000); // 180k - 20k = 160k steps
-                    const additional = tempPrestige - 180000;
-                    exponential = base180k * Math.pow(1.000025, additional);
+            // UPDATED: Use totalVrajs minus already spent value to prevent infinite prestige loops
+            let tempScore = totalVrajs - prestigeCostDeduction;
+            if (tempScore < 0) tempScore = 0;
+
+            let tempPrestige = prestigeCount; 
+            let levelsToGain = 0;
+            let totalCostSpent = 0;
+            
+            // Updated: Removed the loop cap as requested.
+            // This loop calculates gain based on lifetime Vrajs minus previously spent Vrajs.
+            while(true) {
+                let linear = 1000000 * (tempPrestige + 1); 
+                let expBase = 1.005; // Base < 20k
+                
+                if (tempPrestige >= 550000) {
+                    expBase = 1.00002;
+                } else if (tempPrestige >= 150000) {
+                    expBase = 1.00002;
+                } else if (tempPrestige >= 20000) {
+                    expBase = 1.0005;
                 }
+
+                let exponential = Math.pow(expBase, tempPrestige);
                 let cost = linear * exponential;
-                // Note: We don't deduct totalVrajs from the player, just from the calculation variable
-                if (tempScore >= cost) { tempScore -= cost; tempPrestige++; levelsToGain++; } 
-                else { return { gain: levelsToGain, remaining: tempScore, nextCost: cost, percent: Math.min((tempScore / cost) * 100, 100) }; }
+                
+                if (tempScore >= cost) { 
+                    tempScore -= cost; 
+                    totalCostSpent += cost;
+                    tempPrestige++; 
+                    levelsToGain++; 
+                } 
+                else { 
+                    return { 
+                        gain: levelsToGain, 
+                        nextCost: cost, 
+                        percent: Math.min((tempScore / cost) * 100, 100), 
+                        spent: totalCostSpent 
+                    }; 
+                }
             }
         }
 
         window.openPrestigeModal = () => {
             const pData = getPrestigeData();
             if (pData.gain === 0) return;
-            window.showAlert("Ascend to the Heavens?", `You are about to gain <span class="text-purple-400 font-bold">${pData.gain} Fatflap(s)</span>.<br><br>Each Ascension gives a <b>50% permanent boost</b>.<br><br>Ascending will <b>RESET</b> all your Vrajs and standard Upgrades.`, () => handlePrestige(), true);
+            window.showAlert("Ascend to the Heavens?", `You are about to gain <span class="text-purple-400 font-bold">${pData.gain.toLocaleString()} Fatflap(s)</span>.<br><br>Each Ascension gives a <b>50% permanent boost</b>.<br><br>Ascending will <b>RESET</b> all your Vrajs and standard Upgrades.`, () => handlePrestige(), true);
         };
 
         window.handlePrestige = () => {
             const pData = getPrestigeData();
             if (pData.gain > 0) {
-                fatflaps += pData.gain; prestigeCount += pData.gain;
+                fatflaps += pData.gain; 
+                prestigeCount += pData.gain;
+                
+                // UPDATED: Track spent Vrajs so you can't re-spend them
+                prestigeCostDeduction += pData.spent;
+
                 score = 0; vps = 0; ppc = 1;
                 upgrades.forEach((u, i) => {
                     u.owned = 0; u.cost = u.baseCost;
@@ -1333,8 +1426,13 @@
                 if (ach.type === 'chat' && chatsSent >= ach.target) meets = true;
                 if (ach.type === 'prestige' && prestigeCount >= ach.target) meets = true;
                 if (ach.type === 'crit' && totalCrits >= ach.target) meets = true;
-                // UPDATED: Check CPS
                 if (ach.type === 'cps' && currentCPS >= ach.target) meets = true;
+
+                // Check Leaderboard Rank
+                if (ach.type === 'lbTop10' && leaderboardRank <= 10) meets = true;
+                if (ach.type === 'lbTop5' && leaderboardRank <= 5) meets = true;
+                if (ach.type === 'lbTop3' && leaderboardRank <= 3) meets = true;
+                if (ach.type === 'lbTop1' && leaderboardRank <= 1) meets = true;
 
                 if (ach.type === 'petMax' && petsState[ach.target] && petsState[ach.target].level >= (ach.target==='pet3'?1:10)) meets = true;
                 if (ach.type === 'petAllMax') {
@@ -1350,7 +1448,6 @@
                      if(Object.values(petsState).some(p => p.level >= ach.target)) meets = true;
                 }
                 if (ach.type === 'styleAll' && equippedStyles.size >= ach.target) meets = true;
-                if (ach.type === 'lbTop10' && isTop10) meets = true;
                 if (ach.type === 'treeCount' && ownedPrestigeUpgrades.length >= ach.target) meets = true;
                 if (ach.type === 'treeAll' && ownedPrestigeUpgrades.length >= prestigeTreeData.length) meets = true;
                 if (ach.type === 'upgradeCount' && upgrades[ach.upgIdx].owned >= ach.target) meets = true;
@@ -1405,6 +1502,7 @@
             const d = Math.floor(totalMs / 86400000); const h = Math.floor((totalMs % 86400000) / 3600000); const m = Math.floor((totalMs % 3600000) / 60000); const s = Math.floor((totalMs % 60000) / 1000);
             let timeStr = ''; if(d > 0) timeStr += `${d}d `; timeStr += `${h}h ${m}m ${s}s`;
             document.getElementById('stat-time-played').innerText = timeStr;
+            document.getElementById('stat-chats-sent').innerText = chatsSent.toLocaleString();
         }
 
         function renderAchievements() {
@@ -1441,19 +1539,46 @@
             list.innerHTML = html;
         }
 
+        function createPuff(x, y) {
+            const puff = document.createElement('div');
+            puff.className = 'puff-effect';
+            puff.style.left = x + 'px';
+            puff.style.top = y + 'px';
+            document.body.appendChild(puff);
+            setTimeout(() => puff.remove(), 400);
+        }
+
         function spawnGoldenVraj() {
             if (document.querySelector('.golden-vraj')) return;
             const golden = document.createElement('img'); golden.src = 'image_0.png'; golden.className = 'golden-vraj';
-            const caught = () => { goldenVrajsCaught++; activateMultiplier(); golden.remove(); checkAchievements(); };
+            const caught = () => { 
+                // Visual Effect
+                const rect = golden.getBoundingClientRect();
+                createPuff(rect.left + rect.width/2, rect.top + rect.height/2);
+                
+                goldenVrajsCaught++; 
+                activateMultiplier(); 
+                golden.remove(); 
+                checkAchievements(); 
+            };
+            // UPDATED: Standard click handler
             golden.onclick = (e) => { e.stopPropagation(); caught(); };
+            
+            // UPDATED: Pet Logic calls caught() which includes Puff now
             if(hasTree('pet3')) { setTimeout(() => { if(golden.parentNode) caught(); }, 1000); }
             document.body.appendChild(golden); setTimeout(() => { if(golden.parentNode) golden.remove(); }, 10000);
         }
 
         function activateMultiplier() { 
-            let mult = 2; if(hasTree('g2')) mult = 3; if(hasTree('g_coin')) mult += 1; if(hasTree('g_bar')) mult += 2; if(hasTree('g_greed')) mult += 5; if(hasTree('g_midas2')) mult += 10;
-            let duration = 180; if(hasTree('g3')) duration += 5; if(hasTree('g_vault')) duration += 5; if(hasTree('g_time')) duration += 10; if(hasTree('pet7')) duration += (30 + ((petsState['pet7']?.level||1)-1)*2); 
-            goldenMultiplier = mult; multTimeRemaining = duration; document.getElementById('multiplier-value').innerText = mult + 'x'; 
+            let mult = 2; // Default 2x from clicking it
+            if(hasTree('g2')) mult += 1; if(hasTree('g_coin')) mult += 1; if(hasTree('g_bar')) mult += 2; if(hasTree('g_greed')) mult += 5; if(hasTree('g_midas2')) mult += 10;
+            
+            // UPDATED: Fixed Duration 3 mins, stacking with upgrades
+            let duration = 180; 
+            if(hasTree('g3')) duration += 5; if(hasTree('g_vault')) duration += 5; if(hasTree('g_time')) duration += 10; if(hasTree('pet7')) duration += (30 + ((petsState['pet7']?.level||1)-1)*2); 
+            
+            goldenMultiplier = mult; multTimeRemaining = duration; 
+            document.getElementById('multiplier-value').innerText = mult + 'x'; 
             document.getElementById('multiplier-display').classList.remove('hidden'); updateUI(); 
         }
 
@@ -1470,8 +1595,8 @@
             const pData = getPrestigeData(); const bar = document.getElementById('prestige-bar');
             if(bar) {
                 bar.style.width = pData.percent + '%'; document.getElementById('prestige-percent').innerText = Math.floor(pData.percent) + '%';
-                document.getElementById('prestige-gain-display').innerText = `(+${pData.gain} Fatflaps)`; document.getElementById('prestige-btn').disabled = pData.gain === 0;
-                document.getElementById('next-prestige-cost').innerText = Math.floor(pData.nextCost).toLocaleString();
+                document.getElementById('prestige-gain-display').innerText = `(+${pData.gain.toLocaleString()} Fatflaps)`; document.getElementById('prestige-btn').disabled = pData.gain === 0;
+                document.getElementById('next-prestige-cost').innerText = formatNumber(pData.nextCost);
             }
             checkAchievements(); // Frequent check for time-based/passive achievements
         }, 1000);
@@ -1479,11 +1604,9 @@
         let currentVisibleLimit = 0; 
         function updateUI() {
             const cached = getCachedElements(); const totalMult = getTotalMultiplier();
-            // UPDATED: Added " Vrajs" string
             cached.score.innerText = formatNumber(Math.floor(score)) + " Vrajs";
             let currentVps = vps * totalMult; if(hasTree('p2a')) currentVps += (currentVps * (upgradesBoughtCount * 0.01)); 
             cached.vpsDisplay.innerText = formatNumber(currentVps) + " VPS"; 
-            // UPDATED: Changed text to "Vrajs Per Click"
             cached.ppcDisplay.innerText = formatNumber(ppc * totalMult) + " Vrajs Per Click"; 
             cached.iconMultDisplay.innerText = totalMult.toFixed(1) + "x";
             if (fatflaps > 0 || prestigeCount > 0) { cached.fatflapDisplay.classList.remove('hidden'); cached.fatflapCount.innerText = fatflaps.toLocaleString(); }
@@ -1526,6 +1649,9 @@
             score = 0; vps = 0; ppc = 1; totalVrajs = 0; totalClicks = 0; totalUpgrades = 0; goldenVrajsCaught = 0; 
             chatsSent = 0; timePlayed = 0; totalCrits = 0; prestigeCount = 0; fatflaps = 0;
             ownedPrestigeUpgrades = []; ascensionUnlocked = false; 
+            // Reset Prestige Cost Tracker
+            prestigeCostDeduction = 0;
+            
             activeTheme = 'classic'; activeNametag = 'classic';
             petsState = {}; equippedStyles = new Set();
             upgrades.forEach(u => { u.owned = 0; u.cost = u.baseCost; });
@@ -1563,6 +1689,9 @@
                             const d = save.data(); score = d.score || 0; vps = d.vps || 0; ppc = d.ppc || 1; totalVrajs = d.totalVrajs || 0; totalClicks = d.totalClicks || 0; totalUpgrades = d.totalUpgrades || 0; goldenVrajsCaught = d.goldenVrajsCaught || 0; 
                             savedTime = d.timePlayed || 0; totalCrits = d.totalCrits || 0; chatsSent = d.chatsSent || 0;
                             prestigeCount = d.prestigeCount || 0; fatflaps = d.fatflaps || 0; ownedPrestigeUpgrades = d.ownedPrestigeUpgrades || [];
+                            // Load Prestige Cost Tracker
+                            prestigeCostDeduction = d.prestigeCostDeduction || 0;
+
                             ascensionUnlocked = d.ascensionUnlocked || false; activeNametag = d.activeNametag || 'classic';
                             if(d.upgStates) d.upgStates.forEach((s, i) => { if(upgrades[i]) { upgrades[i].owned = s.owned; upgrades[i].cost = s.cost; } });
                             if(d.achStates) achievements.forEach((a, i) => { if(d.achStates[i]) a.unlocked = d.achStates[i]; });
@@ -1575,12 +1704,14 @@
                     
                     setInterval(() => { if(currentUser && !currentUser.isAnonymous) {
                         const currentSession = Date.now() - sessionStartTime;
-                        setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, totalVrajs, totalClicks, totalCrits, chatsSent, totalUpgrades, goldenVrajsCaught, timePlayed: savedTime + currentSession, username: currentUsername, upgStates: upgrades.map(u => ({ owned: u.owned, cost: u.cost })), achStates: achievements.map(a => a.unlocked), prestigeCount, fatflaps, ownedPrestigeUpgrades, activeTheme, activeNametag, ascensionUnlocked, petsState, equippedStyles: Array.from(equippedStyles) }, { merge: true }); 
+                        setDoc(doc(db, "leaderboard", currentUser.uid), { score, vps, ppc, totalVrajs, totalClicks, totalCrits, chatsSent, totalUpgrades, goldenVrajsCaught, timePlayed: savedTime + currentSession, username: currentUsername, upgStates: upgrades.map(u => ({ owned: u.owned, cost: u.cost })), achStates: achievements.map(a => a.unlocked), prestigeCount, fatflaps, ownedPrestigeUpgrades, activeTheme, activeNametag, ascensionUnlocked, petsState, equippedStyles: Array.from(equippedStyles), prestigeCostDeduction }, { merge: true }); 
                     }}, 10000);
                     onSnapshot(query(collection(db, "leaderboard"), orderBy("totalVrajs", "desc"), limit(10)), (s) => {
                         let inTop = false;
                         document.getElementById('leaderboard-list').innerHTML = s.docs.map((d, i) => {
-                            const dData = d.data(); if(d.id === currentUser.uid) inTop = true;
+                            const dData = d.data(); 
+                            if(d.id === currentUser.uid) { inTop = true; leaderboardRank = i + 1; }
+                            
                             let rankClass = ""; let medal = ""; if (i === 0) { rankClass = "lb-rank-1"; medal = "🥇"; } else if (i === 1) { rankClass = "lb-rank-2"; medal = "🥈"; } else if (i === 2) { rankClass = "lb-rank-3"; medal = "🥉"; }
                             let lbNameDisplay = dData.username; const tagData = nameTagsData.find(n => n.id === dData.activeNametag); if(tagData && dData.activeNametag !== 'classic') { lbNameDisplay = `<span class="${tagData.class}">${dData.username}</span>`; }
                             return `<div class="lb-card p-3 flex items-center justify-between mb-2 ${rankClass}"><div class="flex items-center gap-3"><span class="text-xs font-black">#${i+1} ${medal}</span><div><p class="text-xs font-bold">${lbNameDisplay}</p><p class="text-[9px] opacity-60 font-bold">${(dData.prestigeCount || 0)} Ascensions</p></div></div><div class="text-right"><p class="text-xs font-black text-blue-400">${formatNumber(Math.floor(dData.totalVrajs || 0))}</p></div></div>`;
