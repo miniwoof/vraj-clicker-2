@@ -1149,14 +1149,14 @@
             // This loop calculates gain based on lifetime Vrajs minus previously spent Vrajs.
             while(true) {
                 let linear = 1000000 * (tempPrestige + 1); 
-                let expBase = 1.005; // Base < 20k
+                let expBase = 1.0002; // Base < 20k
                 
                 if (tempPrestige >= 550000) {
-                    expBase = 1.00002;
+                    expBase = 1.000008;
                 } else if (tempPrestige >= 150000) {
-                    expBase = 1.00002;
+                    expBase = 1.00005;
                 } else if (tempPrestige >= 20000) {
-                    expBase = 1.0005;
+                    expBase = 1.00008;
                 }
 
                 let exponential = Math.pow(expBase, tempPrestige);
