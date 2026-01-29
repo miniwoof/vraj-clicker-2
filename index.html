@@ -372,7 +372,10 @@
             </div>
             <div id="verify-notice" class="hidden py-6">
                 <h2 class="text-xl font-bold text-yellow-400">Check Email</h2>
+                <p class="text-xs opacity-70 mt-2">Please check your inbox and <b>spam folder</b>.</p>
                 <button onclick="location.reload()" class="bg-blue-600 p-3 rounded-xl font-bold w-full mt-4">I've Verified</button>
+                <button onclick="resendVerification()" class="bg-white/10 p-3 rounded-xl font-bold w-full mt-2 text-sm hover:bg-white/20">Resend Email</button>
+                <p id="resend-msg" class="text-[10px] text-green-400 mt-2 hidden">Sent!</p>
             </div>
         </div>
     </div>
@@ -678,6 +681,19 @@
             document.getElementById('modal-confirm').onclick = () => { if(isReset) { if(document.getElementById('modal-text-input').value === currentUsername) { modal.classList.add('hidden'); if(onConfirm) onConfirm(); } else { alert("Incorrect."); } } else { modal.classList.add('hidden'); if(onConfirm) onConfirm(); } };
         };
 
+        window.resendVerification = async () => {
+            if (auth.currentUser) {
+                try {
+                    await sendEmailVerification(auth.currentUser);
+                    const msg = document.getElementById('resend-msg');
+                    msg.innerText = "Email Resent! Check Spam.";
+                    msg.classList.remove('hidden');
+                } catch (e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        };
+
         let score = 0, vps = 0, ppc = 1, bulkAmount = 1, currentShopTab = 'clicker', currentStyleTab = 'themes';
         let totalVrajs = 0, totalClicks = 0, totalUpgrades = 0, settingsClicked = 0, goldenVrajsCaught = 0, chatsSent = 0, timePlayed = 0, totalCrits = 0;
         let goldenMultiplier = 1, multTimeRemaining = 0;
@@ -836,8 +852,8 @@
             { name: "Vraj Interface", baseCost: 3.6e+29, basePower: 9e22, emoji: "🧩" }, 
             { name: "Vraj Genome", baseCost: 1.05e+30, basePower: 4e23, emoji: "🧬" }, // 2.1e30 -> 1.05e30
             { name: "Vraj Roast", baseCost: 1.1e+31, basePower: 1.8e24, emoji: "🌰" }, 
-            { name: "Vraj Forge", baseCost: 3.15e+32, basePower: 8e24, emoji: "🗜️" }, // 6.3e31 -> 3.15e31
-            { name: "Vraj Datasphere", baseCost: 1.5e32, basePower: 3.5e25, emoji: "🌐" }
+            { name: "Vraj Forge", baseCost: 3.15e+31, basePower: 8e24, emoji: "🗜️" }, // 6.3e31 -> 3.15e31
+            { name: "Vraj Datasphere", baseCost: 1.5e30, basePower: 3.5e25, emoji: "🌐" }
         ];
 
         const prestigeTreeData = [];
@@ -1133,7 +1149,6 @@
         clickerContainer.addEventListener('mouseup', (e) => {});
 
         function getPrestigeData() {
-            // UPDATED: Use totalVrajs minus already spent value to prevent infinite prestige loops
             let tempScore = totalVrajs - prestigeCostDeduction;
             if (tempScore < 0) tempScore = 0;
 
@@ -1141,17 +1156,13 @@
             let levelsToGain = 0;
             let totalCostSpent = 0;
             
-            // Updated: Removed the loop cap as requested.
-            // This loop calculates gain based on lifetime Vrajs minus previously spent Vrajs.
             while(true) {
                 let linear = 1000000 * (tempPrestige + 1); 
-                let expBase = 1.005; // Base < 20k
+                let expBase = 1.005; // Base < 150k
                 
                 if (tempPrestige >= 550000) {
                     expBase = 1.00002;
                 } else if (tempPrestige >= 150000) {
-                    expBase = 1.00002;
-                } else if (tempPrestige >= 20000) {
                     expBase = 1.0005;
                 }
 
@@ -1165,10 +1176,14 @@
                     levelsToGain++; 
                 } 
                 else { 
+                    let percent = (tempScore / cost) * 100;
+                    if(percent > 100) percent = 100;
+                    if(percent < 0) percent = 0;
+                    
                     return { 
                         gain: levelsToGain, 
                         nextCost: cost, 
-                        percent: Math.min((tempScore / cost) * 100, 100), 
+                        percent: percent, 
                         spent: totalCostSpent 
                     }; 
                 }
@@ -1757,4 +1772,3 @@
     </script>
 </body>
 </html>
-
