@@ -1433,26 +1433,26 @@
                     await updateDoc(userRef, { forceKick: Date.now() });
                     alert(`Kicked ${targetName}`);
                 } else if(action === 'reset_progress') {
-                    if(confirm(`Are you SURE you want to RESET PROGRESS for ${targetName}? They will lose all Vrajs/Stats but keep their account.`)) {
+                    // UPDATED: More Prominent Confirmation
+                    if(confirm("⚠ WARNING: ACCOUNT RESET INITIATED ⚠\n\nThis will completely wipe ALL Vrajs, Fatflaps, and Upgrades for " + targetName.toUpperCase() + ".\n\nARE YOU ABSOLUTELY SURE?")) {
                         await updateDoc(userRef, {
                             score: 0, vps: 0, ppc: 1, totalVrajs: 0, totalClicks: 0,
                             totalUpgrades: 0, goldenVrajsCaught: 0, prestigeCount: 0,
                             fatflaps: 0, ownedPrestigeUpgrades: [], 
                             upgStates: [], achStates: [], petsState: {}, equippedStyles: [],
-                            forceRefresh: Date.now() // Force a refresh so they see it
+                            forceRefresh: Date.now() 
                         });
-                        alert(`Reset progress for ${targetName}`);
+                        alert(`Successfully Reset ${targetName}`);
                     }
                 } else if(action === 'rename') {
                     const newName = document.getElementById('admin-new-username').value;
                     if(!newName) { alert("Enter a new username"); return; }
                     await updateDoc(userRef, { username: newName });
-                    // Also update the 'users' collection for consistency
                     await updateDoc(doc(db, "users", uid), { username: newName });
                     alert(`Renamed to ${newName}`);
                 }
             } catch(e) {
-                alert("Error: " + e.message + "\n\n(Ensure Firestore Rules allow writes!)");
+                alert("PERMISSION DENIED: Ensure your UID in the Firestore Rules exactly matches your current account UID.");
             }
         };
 
@@ -1484,14 +1484,13 @@
                  await updateDoc(doc(db, "leaderboard", uid), { [statType]: val });
                  alert(`Set ${statType} to ${val} for ${targetName}`);
              } catch(e) {
-                 alert("Error: " + e.message + "\n\n(Ensure Firestore Rules allow writes!)");
+                 alert("PERMISSION DENIED: Ensure your UID in the Firestore Rules exactly matches your current account UID.");
              }
         };
 
         window.adminGlobalRefresh = async () => {
              if(!isDev) return;
              if(confirm("Are you sure you want to refresh EVERYONE'S browser tab?")) {
-                 // We use a global system document for this
                  await setDoc(doc(db, "system", "global"), { forceRefreshAll: Date.now() }, { merge: true });
                  alert("Global refresh signal sent.");
              }
