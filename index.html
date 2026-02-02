@@ -771,70 +771,23 @@
             clickHistory.push({ t: now, x: x, y: y });
             if (clickHistory.length > HISTORY_SIZE) clickHistory.shift();
             
-            // Need full buffer to analyze trends
-            if (clickHistory.length < HISTORY_SIZE) return false;
+            // Need decent buffer to analyze trends and avoid lag spikes triggering it
+            if (clickHistory.length < 20) return false;
 
-            // Extract Intervals
-            const intervals = [];
-            for (let i = 1; i < clickHistory.length; i++) {
-                intervals.push(clickHistory[i].t - clickHistory[i-1].t);
-            }
-
-            // --- LAYER 1: BASIC STATISTICS ---
-            const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-            const cps = 1000 / avgInterval;
+            // Calculate CPS over the history window
+            // Time difference between newest and oldest in buffer
+            const timeDelta = clickHistory[clickHistory.length - 1].t - clickHistory[0].t;
             
-            // Safety: Humans can click slowly without triggering anything.
-            if (cps < 6) return false; 
-            
-            // Hard Cap (Machine Gun): > 30 CPS sustained
-            if (cps > 30) return true;
+            // Avoid division by zero
+            if (timeDelta === 0) return false;
 
-            // Standard Deviation (Consistency)
-            const variance = intervals.reduce((a, b) => a + Math.pow(b - avgInterval, 2), 0) / intervals.length;
-            const stdDev = Math.sqrt(variance);
+            // CPS = (Clicks / Time in Seconds)
+            // TimeDelta is ms, so /1000
+            const cps = (clickHistory.length / timeDelta) * 1000;
 
-            // --- LAYER 2: ROBOTIC CONSISTENCY ---
-            // Humans typically have >15ms jitter even when trying to be consistent.
-            // Macro recorders (even with small delays) often have <5ms jitter or exactly 0.
-            if (stdDev < 5) return true;
-
-            // --- LAYER 3: HESITATION DETECTION ---
-            // Humans pause or stutter. The gap between the fastest and slowest click is significant.
-            // Bots often have a "flat" distribution.
-            const minInt = Math.min(...intervals);
-            const maxInt = Math.max(...intervals);
-            
-            // "Flat" Distribution Check:
-            // If the difference between slowest and fastest click is tiny (<20ms) at high speeds
-            if (cps > 10 && (maxInt - minInt) < 20) return true;
-
-            // --- LAYER 4: LONG-TERM VARIANCE & FATIGUE ---
-            // Humans drift. They speed up and slow down (Fatigue).
-            // Split history in two halves.
-            const mid = Math.floor(intervals.length / 2);
-            const firstHalfAvg = intervals.slice(0, mid).reduce((a,b)=>a+b,0) / mid;
-            const secondHalfAvg = intervals.slice(mid).reduce((a,b)=>a+b,0) / (intervals.length - mid);
-            
-            const drift = Math.abs(firstHalfAvg - secondHalfAvg);
-            
-            // If clicking fast (>12 CPS) and average speed drifted less than 0.5ms over ~60 clicks
-            // That is statistically impossible for a human finger.
-            // Note: We check stdDev > 10 to ensure we catch "random offset" bots that are artificially high variance
-            // but average out perfectly over time.
-            if (cps > 12 && drift < 0.5 && stdDev > 10) return true;
-
-            // --- LAYER 5: CURSOR CORRELATION (Entropy Check) ---
-            // Check if cursor moves. Laptop users might be still, but rarely PIXEL perfect for 64 clicks.
-            // However, we only flag if they are ALSO clicking suspiciously fast/consistent.
-            let spatialDist = 0;
-            for(let i=1; i<clickHistory.length; i++) {
-                spatialDist += Math.abs(clickHistory[i].x - clickHistory[i-1].x) + Math.abs(clickHistory[i].y - clickHistory[i-1].y);
-            }
-            
-            // If perfectly still (0 movement) AND extremely consistent (stdDev < 12)
-            // (Standard human consistent is ~20-30ms. <12ms is pro/bot territory. Still mouse + <12ms = Bot)
-            if (spatialDist === 0 && stdDev < 12) return true;
+            // User Requirement: "make the auto clicker detection go off when they click at 25+ cps"
+            // We use 25 as the hard limit.
+            if (cps >= 25) return true;
 
             return false;
         }
@@ -1452,7 +1405,7 @@
                     alert(`Renamed to ${newName}`);
                 }
             } catch(e) {
-                alert("PERMISSION DENIED: Ensure your UID in the Firestore Rules exactly matches your current account UID.");
+                alert("Error: " + e.message + "\n\n(Ensure Firestore Rules allow writes!)");
             }
         };
 
